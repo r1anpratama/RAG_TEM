@@ -1,0 +1,7 @@
+# Minimal dependencies for RAG_TEM
+# Adheres to Ponytail ladder: use stdlib first, add libraries strictly when required.
+
+pandas>=2.0.0
+openpyxl>=3.1.0
+pypdf>=4.0.0
+pytest>=8.0.0

@@ -1,0 +1,37 @@
+# Obsidian App State & Workspace Caches
+.obsidian/
+
+# Python Bytecode & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# IDE & OS Specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Scratch, Temporary & Draft Files
+scratch/
+temp/
+*.tmp
+*.tmp.md
+*.draft.md
+*.bak
+*.swp
+*.log
+
+# Large binary / generated artifacts
+data/processed/*.bin
+data/processed/*.pkl
+data/processed/*.parquet
