@@ -37,7 +37,13 @@ tags:
    - Formulated comprehensive PRD for **SeismoAgent-TW: Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency Triage** based on assets in `data/raw/` (TT-SAM Chen et al. 2026, TEM PSHA2025 draft, fault parameters, fault alignments).
    - Saved PRD to `docs/PRD_SeismoAgent_TW.md` and mirrored to Obsidian vault `02_Architecture/PRD_SeismoAgent_TW.md`.
    - Linked PRD in `Dashboard.md` and `System_Design.md`.
+7. **Phase 1: Domain Modeling & Seismic Triage Implementation**:
+   - Implemented `src/domain/fault.py` (`FaultParameter`, `FaultAlignment`, `FaultCatalog`, and Haversine nearest-fault distance calculator).
+   - Implemented `src/domain/seismic.py` (CWA seismic intensity classification, pre-1999 vs post-1999 building vulnerability evaluation, and automated SCADA cutoff directives).
+   - Implemented `src/pipelines/ingestion.py` (structure-aware chunking for `TEM PSHA2025-draft.pdf`).
+   - Created test suites in `tests/test_fault_catalog.py`, `tests/test_seismic_triage.py`, `tests/test_ingestion.py` (5/5 tests passing).
+   - Generated `03_Literature_and_Domain/Fault_Catalog_38.md` compiling all 38 active seismogenic structures.
 
 ## 📌 Next Steps
-- Verify domain data schemas for Taiwan fault parameters and alignments.
-- Implement fault parameter structured loader and query parser in `src/domain/`.
+- Implement vector embedding and hybrid search indexing (cuVS / FAISS / sparse BM25).
+- Build streaming UDP/JSON listener for simulated TT-SAM early warning alert packets.

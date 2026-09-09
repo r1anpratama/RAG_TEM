@@ -28,7 +28,8 @@ Welcome to the central intelligence hub for the **RAG_TEM** project (Retrieval-A
 - High-level design of the RAG pipeline, chunking strategies, vector index, and retriever.
 - Component breakdown: Domain, Ingestion, Retrieval, Generation.
 
-### 4. [[Domain_Context|03. Literature & Domain Knowledge]]
+### 4. [[Domain_Context|03. Literature & Domain Knowledge]] & [[Fault_Catalog_38|Active Fault Catalog]]
+- **[[Fault_Catalog_38|Taiwan Active Fault Catalog (38 Seismogenic Structures)]]**: Definitive parameters and alignments database.
 - Notes on Taiwan Earthquake Model (TEM PSHA 2025).
 - Fault parameters, fault alignments, and seismic hazard methodologies.
 - Relevant research papers (e.g., Chen et al., 2026).
