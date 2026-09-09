@@ -33,8 +33,11 @@ tags:
    - Initialized git repository on branch `main` and set remote to `https://github.com/r1anpratama/RAG_TEM.git`.
    - Committed initial setup (`feat: initialize RAG_TEM foundation, second brain structure, and ponytail guidelines`).
    - Pushed `main` branch to remote (`git push -u origin main`). Repository is now live.
+6. **Product Requirements Document (PRD v1.0.0)**:
+   - Formulated comprehensive PRD for **SeismoAgent-TW: Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency Triage** based on assets in `data/raw/` (TT-SAM Chen et al. 2026, TEM PSHA2025 draft, fault parameters, fault alignments).
+   - Saved PRD to `docs/PRD_SeismoAgent_TW.md` and mirrored to Obsidian vault `02_Architecture/PRD_SeismoAgent_TW.md`.
+   - Linked PRD in `Dashboard.md` and `System_Design.md`.
 
 ## 📌 Next Steps
 - Verify domain data schemas for Taiwan fault parameters and alignments.
-- Define RAG document parser and chunking strategy for TEM PSHA reports.
-- Formulate evaluation benchmark for earthquake model retrieval.
+- Implement fault parameter structured loader and query parser in `src/domain/`.

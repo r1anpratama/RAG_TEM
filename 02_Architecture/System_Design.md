@@ -12,7 +12,10 @@ tags:
 # RAG_TEM System Design
 
 ## 1. System Objective
-**RAG_TEM** is a specialized Retrieval-Augmented Generation system designed for the **Taiwan Earthquake Model (TEM)** and **Probabilistic Seismic Hazard Assessment (PSHA)** domain. It enables researchers and engineers to query seismic reports, fault alignment models, and ground motion prediction studies with high factual precision and grounded citations.
+**RAG_TEM** (branded as **SeismoAgent-TW**) is a specialized Multimodal Agentic Retrieval-Augmented Generation system designed for the **Taiwan Earthquake Model (TEM)** and **Probabilistic Seismic Hazard Assessment (PSHA)** domain, with real-time early warning triage powered by TT-SAM and the NVIDIA AI Enterprise stack.
+
+> [!IMPORTANT]
+> The authoritative Product Requirements Document is documented in **[[PRD_SeismoAgent_TW|PRD: SeismoAgent-TW v1.0.0]]**.
 
 ---
 
