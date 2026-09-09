@@ -28,9 +28,11 @@ tags:
 4. **Project Directory Hierarchy**:
    - Created `src/` (`domain`, `pipelines`, `utils`), `data/` (`raw`, `processed`), and `tests/`.
    - Migrated raw assets (fault spreadsheets and TEM PSHA papers) into `data/raw/`.
-5. **Git Configuration**:
+5. **Git Configuration & Initial Push**:
    - Designed `.gitignore` excluding `.obsidian/` application state, bytecode, and virtual environments.
-   - Initialized git and configured remote to `https://github.com/r1anpratama/RAG_TEM.git`.
+   - Initialized git repository on branch `main` and set remote to `https://github.com/r1anpratama/RAG_TEM.git`.
+   - Committed initial setup (`feat: initialize RAG_TEM foundation, second brain structure, and ponytail guidelines`).
+   - Pushed `main` branch to remote (`git push -u origin main`). Repository is now live.
 
 ## 📌 Next Steps
 - Verify domain data schemas for Taiwan fault parameters and alignments.

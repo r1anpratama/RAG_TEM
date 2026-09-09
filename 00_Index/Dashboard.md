@@ -38,7 +38,7 @@ Welcome to the central intelligence hub for the **RAG_TEM** project (Retrieval-A
 ---
 
 ## 🎯 Current Project Status
-- **Phase**: Project Initialization & Foundation
-- **Active Task**: Setting up Obsidian Second Brain, Ponytail Clean Code framework, and GitHub repository integration.
+- **Phase**: Foundation Complete (Ready for Data Ingestion & RAG Pipeline)
+- **Status**: Live on GitHub (`main` branch tracking `origin/main`)
 - **Target Repository**: [r1anpratama/RAG_TEM](https://github.com/r1anpratama/RAG_TEM.git)
 - **Primary Data**: Taiwan fault alignment data, fault parameters, TEM PSHA 2025 draft, deep learning ground motion papers.
