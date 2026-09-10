@@ -3,8 +3,12 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.app.main import app
-from backend.app.core.config import settings
+try:
+    from website.backend.app.main import app, _request_counts
+    from website.backend.app.core.config import settings
+except ImportError:
+    from app.main import app, _request_counts
+    from app.core.config import settings
 
 client = TestClient(app)
 
@@ -64,7 +68,6 @@ def test_documents_list_endpoint() -> None:
 
 
 def test_rate_limiting_enforcement(monkeypatch) -> None:
-    from backend.app.main import _request_counts
     _request_counts.clear()
 
     # Temporarily set rate limit threshold to 3 requests

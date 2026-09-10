@@ -6,8 +6,16 @@ import logging
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 
-from backend.app.rag.engine import RAGEngine
-from backend.app.schemas.chat import ChatRequest
+try:
+    from ...rag.engine import RAGEngine
+    from ...schemas.chat import ChatRequest
+except (ImportError, ValueError):
+    try:
+        from app.rag.engine import RAGEngine
+        from app.schemas.chat import ChatRequest
+    except ImportError:
+        from website.backend.app.rag.engine import RAGEngine
+        from website.backend.app.schemas.chat import ChatRequest
 
 logger = logging.getLogger(__name__)
 

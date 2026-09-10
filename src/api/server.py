@@ -83,7 +83,8 @@ def get_copilot() -> GeotechnicalCopilot:
 
 
 # Website static directory setup
-app.mount("/website", StaticFiles(directory=str(WEBSITE_DIR)), name="website")
+_static_dir = WEBSITE_DIR / "classic" if (WEBSITE_DIR / "classic").exists() else WEBSITE_DIR
+app.mount("/website", StaticFiles(directory=str(_static_dir)), name="website")
 
 
 # Pydantic Schemas
@@ -108,7 +109,7 @@ class ChatRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard() -> HTMLResponse:
     """Serve the interactive single-page dashboard from website directory."""
-    index_path = WEBSITE_DIR / "index.html"
+    index_path = _static_dir / "index.html"
     if not index_path.exists():
         return HTMLResponse("<h3>Dashboard file not found in website directory.</h3>", status_code=404)
     with open(index_path, "r", encoding="utf-8") as f:

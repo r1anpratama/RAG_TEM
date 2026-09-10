@@ -8,9 +8,19 @@ from typing import Any, Dict, List
 import pypdf
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
-from backend.app.core.config import settings
-from backend.app.rag.vector_store import DocumentChunk, get_vector_store
-from backend.app.schemas.document import UploadResponse
+try:
+    from ...core.config import settings
+    from ...rag.vector_store import DocumentChunk, get_vector_store
+    from ...schemas.document import UploadResponse
+except (ImportError, ValueError):
+    try:
+        from app.core.config import settings
+        from app.rag.vector_store import DocumentChunk, get_vector_store
+        from app.schemas.document import UploadResponse
+    except ImportError:
+        from website.backend.app.core.config import settings
+        from website.backend.app.rag.vector_store import DocumentChunk, get_vector_store
+        from website.backend.app.schemas.document import UploadResponse
 
 router = APIRouter(prefix="/api", tags=["Documents"])
 

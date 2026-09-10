@@ -1,8 +1,8 @@
 # Decoupled RAG Architecture (FastAPI Backend + Next.js App Router Frontend)
 
 - **Date:** 2026-09-10
-- **Status:** Implemented & Verified
-- **Components:** `backend/` (FastAPI + Pydantic + In-Memory Vector DB / Pluggable Chroma/Qdrant) and `frontend/` (Next.js 14 App Router + Tailwind CSS + Lucide + Zod)
+- **Status:** Implemented, Consolidated into `website/` & Verified
+- **Components:** `website/backend/` (FastAPI + Pydantic + In-Memory Vector DB / Pluggable Chroma/Qdrant), `website/frontend/` (Next.js 14 App Router + Tailwind CSS + Lucide + Zod), and `website/classic/` (Geospatial & GeoGraph dashboard)
 - **Author:** Antigravity / SeismoAgent-TW Team
 
 ---
@@ -13,14 +13,14 @@ To guarantee enterprise scalability, publication-grade security, and an ergonomi
 
 ```mermaid
 graph LR
-    subgraph Client ["Frontend (Next.js 14 App Router)"]
+    subgraph Client ["Frontend (website/frontend/ - Next.js 14 App Router)"]
         UI["ChatGPT-style UI<br/>(Message Bubble, Input, Sidebar)"]
         StreamHook["useRagStream Hook<br/>(TextDecoder SSE Reader)"]
         XSS["react-markdown + rehype-sanitize"]
         ZodVal["Client Zod Schema Validation"]
     end
 
-    subgraph Server ["Backend (FastAPI Python)"]
+    subgraph Server ["Backend (website/backend/ - FastAPI Python)"]
         CORS["CORS Middleware<br/>(Restricted to localhost:3000)"]
         RateLimiter["Sliding Window Rate Limiter<br/>(IP-based, 429 Too Many Requests)"]
         ChatRouter["/api/chat<br/>StreamingResponse(text/event-stream)"]
@@ -38,11 +38,11 @@ graph LR
 
 ---
 
-## 2. Backend Specification (`backend/`)
+## 2. Backend Specification (`website/backend/`)
 
 ### 2.1 File & Directory Layout
 ```
-backend/
+website/backend/
 ├── app/
 │   ├── api/
 │   │   ├── routers/
@@ -82,11 +82,11 @@ backend/
 
 ---
 
-## 3. Frontend Specification (`frontend/`)
+## 3. Frontend Specification (`website/frontend/`)
 
 ### 3.1 File & Directory Layout
 ```
-frontend/
+website/frontend/
 ├── src/
 │   ├── app/
 │   │   ├── globals.css         # Dark theme Shadcn/Tailwind design tokens

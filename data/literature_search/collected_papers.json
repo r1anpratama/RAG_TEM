@@ -1,0 +1,361 @@
+[
+  {
+    "id": "2607.14046v1",
+    "title": "Earthquaker-AI: A Retrieval-Augmented Generation Framework with Rubric-Based Assessment for Primary School Earthquake Education",
+    "pdf_url": "https://arxiv.org/pdf/2607.14046v1",
+    "summary": "This paper presents Earthquaker-AI, a hybrid educational framework building upon a previously implemented educational robotics project by integrating a conversational AI assistant based on Retrieval-Augmented Generation. It aims to enhance earthquake preparedness and conscious action among primary-school students. The system extends the award-winning STEM project Earthquaker moving from mechanical simulation with Lego WeDo2 to cognitive and metacognitive processing. The robotics component uses Lego WeDo2 automation to simulate seismic response, letting students interact with sensors and actuators as tangible representations of protective actions. The assistant operates as a guided learning mechanism aligning student responses with safety guidelines, while providing rubric-based verbal feedback that supports self-regulated learning and calmness under emergency conditions. Earthquaker-AI follows a progressive learning trajectory aligned with cognitive development. In early grades, the focus is on basic recognition of safety actions through multiple-choice questions, assessed via a two-dimensional rubric. In middle grades, students identify correct action sequences through multiple-choice questions, evaluated via a three-axis rubric. In upper grades, the approach shifts to verbal production, requiring short written responses assessed via a four-dimensional rubric that includes clarity of expression. The dialogic module uses RAG to match student queries semantically with official guidelines, generating safe, accurate responses. Experimental evaluation shows high groundedness and accuracy, with a low hallucination rate. Overall, Earthquaker-AI combines hands-on engagement, information processing, and reflective practice. Combining robotics, rubrics, and AI promotes technological literacy, self-regulation, and responsible use of digital systems, contributing to early crisis-management skills.",
+    "published": "2026-07-15T17:15:16Z",
+    "comment": "17 pages, 4 figures",
+    "primary_category": "cs.AI",
+    "doi": "10.26234/heal.ihu.365",
+    "authors": [
+      "Xanthi Kokkinou",
+      "Chaido Mizeli",
+      "Nafsika Koulaxidou",
+      "Marina Delianidi",
+      "Konstantinos Diamantaras"
+    ]
+  },
+  {
+    "id": "1810.09515v1",
+    "title": "Post-earthquake modelling of transportation networks using an agent-based model",
+    "pdf_url": "https://arxiv.org/pdf/1810.09515v1",
+    "summary": "Surface transportation systems are an essential part of urban transportation infrastructure and are susceptible to damage from earthquakes. This damage, along with the lack of prior warning of earthquake events, may lead to severe and unexpected disruption of normal traffic patterns, which may seriously impair post-disaster response. Accordingly, it is important to understand and model the performance of urban transportation systems immediately following an earthquake, to evaluate its capability to support emergency response, e.g., the movement of firefighters, search and rescue teams and medical personnel, and the transportation of injured people to emergency treatment facilities. For this purpose, a scenario-based methodology is developed to model the performance of a transportation network immediately following an earthquake using an agent-based model. This methodology accounts for the abrupt changes in destination, irrational behavior of drivers, unavailability of traffic information and the impairment to traffic capacity due to bridge damage and building debris. An illustration using the road network of Tangshan City, China shows that the method can capture the traffic flow characteristics immediately after an earthquake and can determine the capability of the transportation network to transfer injured people to hospitals considering the above factors. Thus, it can provide rational support for evaluating the performance of the surface transportation system under immediate post-disaster emergency conditions.",
+    "published": "2018-10-22T19:44:50Z",
+    "primary_category": "physics.soc-ph",
+    "authors": [
+      "Kairui Feng",
+      "Quanwang Li",
+      "Bruce R. Ellingwood"
+    ]
+  },
+  {
+    "id": "2607.24984v1",
+    "title": "Automatic Knowledge Graph Construction and Query for Earthquake Catalogs",
+    "pdf_url": "https://arxiv.org/pdf/2607.24984v1",
+    "summary": "In recent years, the number of events in earthquake catalogs has significantly increased due to the utilization of more effective deep learning based detectors and phase pickers but answering open ended questions such as what characterizes this sequence? remains constrained by rigid spatiotemporal windowing and subjective expert interpretation. We present the first systematic application of graph based retrieval augmented generation GraphRAG directly to raw, tabular catalog records across three independently featured catalogs, a reservoir adjacent swarm, the 2019 Ridgecrest tectonic sequence, and the 2021 Maduo Mw7.4 aftershock sequence. Without the need for manual data structuring, the pipeline builds structurally complete, queryable knowledge graphs for all three. Rigorous evaluation individually verified against catalog derived ground truth and a rule based reference graph exposes failure modes, and four seismology informed prompt fixes eliminate all targeted fabrications while sharply improving mechanism reasoning. A vector RAG baseline demonstrates the graph layers distinctive value, catalog wide summarization and temporal stage comparison. In addition, we have identified two main pitfalls that need attention. GraphRAG thus offers a practical, transferable, near zero cost query interface for earthquake catalogs, where careful prompting ensures the results are consistently accurate and trustworthy.",
+    "published": "2026-07-27T18:39:05Z",
+    "primary_category": "physics.geo-ph",
+    "authors": [
+      "Yuxin Zhou",
+      "Huai Zhang",
+      "S. Mostafa Mousavi"
+    ]
+  },
+  {
+    "id": "1312.5941v1",
+    "title": "Developing a model of evacuation after an earthquake in Lebanon",
+    "pdf_url": "https://arxiv.org/pdf/1312.5941v1",
+    "summary": "This article describes the development of an agent-based model (AMEL, Agent-based Model for Earthquake evacuation in Lebanon) that aims at simulating the movement of pedestrians shortly after an earthquake. The GAMA platform was chosen to implement the model. AMEL is applied to a real case study, a district of the city of Beirut, Lebanon, which potentially could be stricken by a M7 earthquake. The objective of the model is to reproduce real life mobility behaviours that have been gathered through a survey in Beirut and to test different future scenarios, which may help the local authorities to target information campaigns.",
+    "published": "2013-12-20T13:51:11Z",
+    "comment": "8 pages, 11 figures, ISCRAM Vietnam Conference, November 2013",
+    "primary_category": "cs.MA",
+    "authors": [
+      "Hong Van Truong",
+      "Elise Beck",
+      "Julie Dugdale",
+      "Carole Adam"
+    ]
+  },
+  {
+    "id": "2309.02812v1",
+    "title": "Agent-based simulation of pedestrians' earthquake evacuation; application to Beirut, Lebanon",
+    "pdf_url": "https://arxiv.org/pdf/2309.02812v1",
+    "summary": "Most seismic risk assessment methods focus on estimating the damages to the built environment and the consequent socioeconomic losses without fully taking into account the social aspect of risk. Yet, human behaviour is a key element in predicting the human impact of an earthquake, therefore, it is important to include it in quantitative risk assessment studies. In this study, an interdisciplinary approach simulating pedestrians' evacuation during earthquakes at the city scale is developed using an agent-based model. The model integrates the seismic hazard, the physical vulnerability as well as individuals' behaviours and mobility. The simulator is applied to the case of Beirut, Lebanon. Lebanon is at the heart of the Levant fault system that has generated several Mw>7 earthquakes, the latest being in 1759. It is one of the countries with the highest seismic risk in the Mediterranean region. This is due to the high seismic vulnerability of the buildings due to the absence of mandatory seismic regulation until 2012, the high level of urbanization, and the lack of adequate spatial planning and risk prevention policies. Beirut as the main residential, economic and institutional hub of Lebanon is densely populated. To accommodate the growing need for urban development, constructions have almost taken over all of the green areas of the city; squares and gardens are disappearing to give place to skyscrapers. However, open spaces are safe places to shelter, away from debris, and therefore play an essential role in earthquake evacuation. Despite the massive urbanization, there are a few open spaces but locked gates and other types of anthropogenic barriers often limit their access. To simulate this complex context, pedestrians' evacuation simulations are run in a highly realistic spatial environment implemented in GAMA [1]. Previous data concerning soil and buildings in Beirut [2, 3] are complemented by new geographic data extracted from high-resolution Pleiades satellite images. The seismic loading is defined as a peak ground acceleration of 0.3g, as stated in Lebanese seismic regulations. Building damages are estimated using an artificial neural network trained to predict the mean damage [4] based on the seismic loading as well as the soil and building vibrational properties [5]. Moreover, the quantity and the footprint of the generated debris around each building are also estimated and included in the model. We simulate how topography, buildings, debris, and access to open spaces, affect individuals' mobility. Two city configurations are implemented: 1. Open spaces are accessible without any barriers; 2. Access to some open spaces is blocked. The first simulation results show that while 52% of the population is able to arrive to an open space within 5 minutes after an earthquake, this number is reduced to 39% when one of the open spaces is locked. These results show that the presence of accessible open spaces in a city and their proximity to the residential buildings is a crucial factor for ensuring people's safety when an earthquake occurs.",
+    "published": "2023-09-06T08:00:17Z",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Rouba Iskandar",
+      "Kamel Allaw",
+      "Julie Dugdale",
+      "Elise Beck",
+      "Jocelyne Adjizian-G\u00e9rard",
+      "C\u00e9cile Cornou",
+      "Jacques Harb",
+      "Pascal Lacroix",
+      "Nada Badaro-Saliba",
+      "St\u00e9phane Cartier",
+      "Rita Zaarour"
+    ]
+  },
+  {
+    "id": "1801.09604v2",
+    "title": "Performance Evaluation of Pedestrian Navigation Algorithms for City Evacuation Modeling",
+    "pdf_url": "https://arxiv.org/pdf/1801.09604v2",
+    "summary": "Simulation is a powerful tool to study the behavior of physical, environmental, and social systems under different conditions. Evacuation simulation can be used to estimate the required time for people to exit a building or evacuate disaster exposed regions. While building evacuation simulation has seen significant study, city evacuation simulation is less developed. For evacuation simulations using Agent-Based Models, the characteristics of the underlying navigation algorithms are important in the overall efficiency of the simulation. In some disasters, e.g. earthquakes, evacuation takes place after the main event. This means evacuating and navigating in an environment with damaged and collapsed buildings and bridges and obstructed roads and paths. Furthermore, possible aftershocks or induced phenomena, such as landslide and liquefaction, can render a more dynamic situation for evacuees where the physical environment changes through time. Evacuees, modeled as agents, require a reliable algorithm for their navigation in these complex dynamic environments. A reliable navigation algorithm should be capable of handling obstacles with different physical properties and performing through dynamic environments. In this study, a framework is introduced to evaluate the relative performance of agent navigation algorithms. The main indices of this framework are Convergence, Optimality, Precision, and Efficiency (COPE). The COPE framework is applied on a set of robot navigation algorithms (the Bug Family) to assess their suitability to be used as pedestrian navigation algorithms.",
+    "published": "2018-01-29T16:24:13Z",
+    "comment": "11th National Conference in Earthquake Engineering, Earthquake Engineering Research Institute, Los Angeles, CA. 2018",
+    "primary_category": "physics.soc-ph",
+    "authors": [
+      "Fardad Haghpanah",
+      "Judith Mitrani-Reiser",
+      "Benjamin W. Schafer"
+    ]
+  },
+  {
+    "id": "2501.06932v2",
+    "title": "Harnessing Large Language Models for Disaster Management: A Survey",
+    "pdf_url": "https://arxiv.org/pdf/2501.06932v2",
+    "summary": "Large language models (LLMs) have revolutionized scientific research with their exceptional capabilities and transformed various fields. Among their practical applications, LLMs have been playing a crucial role in mitigating threats to human life, infrastructure, and the environment. Despite growing research in disaster LLMs, there remains a lack of systematic review and in-depth analysis of LLMs for natural disaster management. To address the gap, this paper presents a comprehensive survey of existing LLMs in natural disaster management, along with a taxonomy that categorizes existing works based on disaster phases and application scenarios. By collecting public datasets and identifying key challenges and opportunities, this study aims to guide the professional community in developing advanced LLMs for disaster management to enhance the resilience against natural disasters.",
+    "published": "2025-01-12T21:00:50Z",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Zhenyu Lei",
+      "Yushun Dong",
+      "Weiyu Li",
+      "Rong Ding",
+      "Qi Wang",
+      "Jundong Li"
+    ]
+  },
+  {
+    "id": "2411.14476v1",
+    "title": "StreetviewLLM: Extracting Geographic Information Using a Chain-of-Thought Multimodal Large Language Model",
+    "pdf_url": "https://arxiv.org/pdf/2411.14476v1",
+    "summary": "Geospatial predictions are crucial for diverse fields such as disaster management, urban planning, and public health. Traditional machine learning methods often face limitations when handling unstructured or multi-modal data like street view imagery. To address these challenges, we propose StreetViewLLM, a novel framework that integrates a large language model with the chain-of-thought reasoning and multimodal data sources. By combining street view imagery with geographic coordinates and textual data, StreetViewLLM improves the precision and granularity of geospatial predictions. Using retrieval-augmented generation techniques, our approach enhances geographic information extraction, enabling a detailed analysis of urban environments. The model has been applied to seven global cities, including Hong Kong, Tokyo, Singapore, Los Angeles, New York, London, and Paris, demonstrating superior performance in predicting urban indicators, including population density, accessibility to healthcare, normalized difference vegetation index, building height, and impervious surface. The results show that StreetViewLLM consistently outperforms baseline models, offering improved predictive accuracy and deeper insights into the built environment. This research opens new opportunities for integrating the large language model into urban analytics, decision-making in urban planning, infrastructure management, and environmental monitoring.",
+    "published": "2024-11-19T05:15:19Z",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Zongrong Li",
+      "Junhao Xu",
+      "Siqin Wang",
+      "Yifan Wu",
+      "Haiyang Li"
+    ]
+  },
+  {
+    "id": "2406.15477v3",
+    "title": "CrisisSense-LLM: Instruction Fine-Tuned Large Language Model for Multi-label Social Media Text Classification in Disaster Informatics",
+    "pdf_url": "https://arxiv.org/pdf/2406.15477v3",
+    "summary": "In the field of crisis/disaster informatics, social media is increasingly being used for improving situational awareness to inform response and relief efforts. Efficient and accurate text classification tools have been a focal area of investigation in crisis informatics. However, current methods mostly rely on single-label text classification models, which fails to capture different insights embedded in dynamic and multifaceted disaster-related social media data. This study introduces a novel approach to disaster text classification by enhancing a pre-trained Large Language Model (LLM) through instruction fine-tuning targeted for multi-label classification of disaster-related tweets. Our methodology involves creating a comprehensive instruction dataset from disaster-related tweets, which is then used to fine-tune an open-source LLM, thereby embedding it with disaster-specific knowledge. This fine-tuned model can classify multiple aspects of disaster-related information simultaneously, such as the type of event, informativeness, and involvement of human aid, significantly improving the utility of social media data for situational awareness in disasters. The results demonstrate that this approach enhances the categorization of critical information from social media posts, thereby facilitating a more effective deployment for situational awareness during emergencies. This research paves the way for more advanced, adaptable, and robust disaster management tools, leveraging the capabilities of LLMs to improve real-time situational awareness and response strategies in disaster scenarios.",
+    "published": "2024-06-16T23:01:10Z",
+    "comment": "Relevant source code and data is available: https://github.com/KaiYin97/CrsisLLM",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Kai Yin",
+      "Bo Li",
+      "Chengkai Liu",
+      "Ali Mostafavi",
+      "Xia Hu"
+    ]
+  },
+  {
+    "id": "2504.09644v1",
+    "title": "SegEarth-R1: Geospatial Pixel Reasoning via Large Language Model",
+    "pdf_url": "https://arxiv.org/pdf/2504.09644v1",
+    "summary": "Remote sensing has become critical for understanding environmental dynamics, urban planning, and disaster management. However, traditional remote sensing workflows often rely on explicit segmentation or detection methods, which struggle to handle complex, implicit queries that require reasoning over spatial context, domain knowledge, and implicit user intent. Motivated by this, we introduce a new task, \\ie, geospatial pixel reasoning, which allows implicit querying and reasoning and generates the mask of the target region. To advance this task, we construct and release the first large-scale benchmark dataset called EarthReason, which comprises 5,434 manually annotated image masks with over 30,000 implicit question-answer pairs. Moreover, we propose SegEarth-R1, a simple yet effective language-guided segmentation baseline that integrates a hierarchical visual encoder, a large language model (LLM) for instruction parsing, and a tailored mask generator for spatial correlation. The design of SegEarth-R1 incorporates domain-specific adaptations, including aggressive visual token compression to handle ultra-high-resolution remote sensing images, a description projection module to fuse language and multi-scale features, and a streamlined mask prediction pipeline that directly queries description embeddings. Extensive experiments demonstrate that SegEarth-R1 achieves state-of-the-art performance on both reasoning and referring segmentation tasks, significantly outperforming traditional and LLM-based segmentation methods. Our data and code will be released at https://github.com/earth-insights/SegEarth-R1.",
+    "published": "2025-04-13T16:36:47Z",
+    "primary_category": "cs.CV",
+    "authors": [
+      "Kaiyu Li",
+      "Zepeng Xin",
+      "Li Pang",
+      "Chao Pang",
+      "Yupeng Deng",
+      "Jing Yao",
+      "Guisong Xia",
+      "Deyu Meng",
+      "Zhi Wang",
+      "Xiangyong Cao"
+    ]
+  },
+  {
+    "id": "2402.16142v1",
+    "title": "From Text to Transformation: A Comprehensive Review of Large Language Models' Versatility",
+    "pdf_url": "https://arxiv.org/pdf/2402.16142v1",
+    "summary": "This groundbreaking study explores the expanse of Large Language Models (LLMs), such as Generative Pre-Trained Transformer (GPT) and Bidirectional Encoder Representations from Transformers (BERT) across varied domains ranging from technology, finance, healthcare to education. Despite their established prowess in Natural Language Processing (NLP), these LLMs have not been systematically examined for their impact on domains such as fitness, and holistic well-being, urban planning, climate modelling as well as disaster management. This review paper, in addition to furnishing a comprehensive analysis of the vast expanse and extent of LLMs' utility in diverse domains, recognizes the research gaps and realms where the potential of LLMs is yet to be harnessed. This study uncovers innovative ways in which LLMs can leave a mark in the fields like fitness and wellbeing, urban planning, climate modelling and disaster response which could inspire future researches and applications in the said avenues.",
+    "published": "2024-02-25T16:47:59Z",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Pravneet Kaur",
+      "Gautam Siddharth Kashyap",
+      "Ankit Kumar",
+      "Md Tabrez Nafis",
+      "Sandeep Kumar",
+      "Vikrant Shokeen"
+    ]
+  },
+  {
+    "id": "2310.11392v1",
+    "title": "Towards Automatic Satellite Images Captions Generation Using Large Language Models",
+    "pdf_url": "https://arxiv.org/pdf/2310.11392v1",
+    "summary": "Automatic image captioning is a promising technique for conveying visual information using natural language. It can benefit various tasks in satellite remote sensing, such as environmental monitoring, resource management, disaster management, etc. However, one of the main challenges in this domain is the lack of large-scale image-caption datasets, as they require a lot of human expertise and effort to create. Recent research on large language models (LLMs) has demonstrated their impressive performance in natural language understanding and generation tasks. Nonetheless, most of them cannot handle images (GPT-3.5, Falcon, Claude, etc.), while conventional captioning models pre-trained on general ground-view images often fail to produce detailed and accurate captions for aerial images (BLIP, GIT, CM3, CM3Leon, etc.). To address this problem, we propose a novel approach: Automatic Remote Sensing Image Captioning (ARSIC) to automatically collect captions for remote sensing images by guiding LLMs to describe their object annotations. We also present a benchmark model that adapts the pre-trained generative image2text model (GIT) to generate high-quality captions for remote-sensing images. Our evaluation demonstrates the effectiveness of our approach for collecting captions for remote sensing images.",
+    "published": "2023-10-17T16:45:47Z",
+    "primary_category": "cs.CV",
+    "authors": [
+      "Yingxu He",
+      "Qiqi Sun"
+    ]
+  },
+  {
+    "id": "2608.24921v3",
+    "title": "post-graph-rag: A PostgreSQL-Native Bi-Temporal Graph RAG Engine with Temporal Grounding at Synthesis",
+    "pdf_url": "https://arxiv.org/pdf/2608.24921v3",
+    "summary": "Graph RAG connects facts no single passage states, but implementations pay three times: in infrastructure, keeping vector store, graph database and document store in sync; in quality, because a pipeline that never refuses extractor output stores edges asserting nothing; and over time, because a graph that only accumulates treats superseded and current facts alike.   post-graph-rag is an open-source engine addressing all three. Chunks with embeddings, a canonical entity graph and community summaries live in one PostgreSQL database, with pgvector for search and edge tables for traversal. Extraction output is validated before writing: vague predicates, pronominal names and bare quantities are rejected, predicates normalise onto an optional vocabulary, and entities resolve to one vertex per canonical name. A bi-temporal layer records when a relation held and when the system believed it, superseding incompatible earlier assertions from document order.   Against LightRAG on three corpora with extraction and embedding models fixed, it builds a denser and more queryable graph, and supersedes relationships where a baseline with no temporal model supersedes none.   On LongMemEval, 500 questions of long-horizon chat memory, it scores 94.0 percent with gemini-3.6-flash against 71.2 for Zep's gpt-4o and 60.2 for full context, leading on all six question types. The largest single contribution is temporal grounding in the prompt: carrying each relation's validity period through to synthesis moves temporal reasoning from 0.496 to 0.881, ablated paired on one graph per instance. On ECT-QA, earnings-call transcripts restating every metric each quarter, it scores 0.807 under that benchmark's own protocol against 0.599, 0.406 and 0.405 published for TG-RAG, LightRAG and GraphRAG.   Code: post-graph-rag https://github.com/crajah/post-graph-rag; post-graph https://github.com/crajah/post-graph",
+    "published": "2026-08-14T22:06:39Z",
+    "comment": "35 pages, 8 figures, 15 tables",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Chandan Rajah"
+    ]
+  },
+  {
+    "id": "2608.25952v2",
+    "title": "Spatial-Knowledge-Graph-Grounded LLM Agents for Neighborhood Livability Evaluation",
+    "pdf_url": "https://arxiv.org/pdf/2608.25952v2",
+    "summary": "Neighborhood livability is commonly assessed with static built-environment indicators, such as facility proximity, street connectivity, and access to public space. These measures describe available opportunities but do not directly represent how residents with different mobility capacities, household roles, schedules, and care responsibilities experience the neighborhood. This paper presents a prototype framework that uses a spatial knowledge graph (KG) and large language models (LLMs) to generate and revise household schedules, followed by rule-based feasibility checking and GIS-based network materialization. The spatial KG integrates residents, residences, facilities, neighborhood context, and sampled road hubs; Graph-RAG retrieves each household's nearby spatial context, including candidate POIs and approximate walking times, for the scheduling LLM. The LLM produces structured household schedules, while rules are used for lightweight repairs and auditable feasibility checks. The LLM then revises schedules in response to identified feasibility issues. A routing module derives the actual travel paths, travel times, modes, and event histories from the road network. The resulting events support synthetic resident-agent interviews about daily convenience, travel burden, activity feasibility, and household coordination. A prototype demonstration in a Shenzhen neighborhood shows that nominal facility availability does not necessarily imply convenient access: residents with limited mobility and households with care responsibilities experience greater travel and coordination burdens. The framework offers an auditable way to connect spatial opportunity, household activity constraints, and resident-specific livability interpretation, while keeping simulated experience distinct from observed perception.",
+    "published": "2026-08-26T16:05:57Z",
+    "comment": "31 pages, 4 figures, prototype framework",
+    "primary_category": "cs.CY",
+    "authors": [
+      "Haiyan Hao"
+    ]
+  },
+  {
+    "id": "2512.14792v1",
+    "title": "IaC Generation with LLMs: An Error Taxonomy and A Study on Configuration Knowledge Injection",
+    "pdf_url": "https://arxiv.org/pdf/2512.14792v1",
+    "summary": "Large Language Models (LLMs) currently exhibit low success rates in generating correct and intent-aligned Infrastructure as Code (IaC). This research investigated methods to improve LLM-based IaC generation, specifically for Terraform, by systematically injecting structured configuration knowledge. To facilitate this, an existing IaC-Eval benchmark was significantly enhanced with cloud emulation and automated error analysis. Additionally, a novel error taxonomy for LLM-assisted IaC code generation was developed. A series of knowledge injection techniques was implemented and evaluated, progressing from Naive Retrieval-Augmented Generation (RAG) to more sophisticated Graph RAG approaches. These included semantic enrichment of graph components and modeling inter-resource dependencies. Experimental results demonstrated that while baseline LLM performance was poor (27.1% overall success), injecting structured configuration knowledge increased technical validation success to 75.3% and overall success to 62.6%. Despite these gains in technical correctness, intent alignment plateaued, revealing a \"Correctness-Congruence Gap\" where LLMs can become proficient \"coders\" but remain limited \"architects\" in fulfilling nuanced user intent.",
+    "published": "2025-12-16T14:58:00Z",
+    "comment": "Submitted to ACM",
+    "primary_category": "cs.AI",
+    "doi": "10.1145/3817608",
+    "authors": [
+      "Roman Nekrasov",
+      "Stefano Fossati",
+      "Indika Kumara",
+      "Damian Andrew Tamburri",
+      "Willem-Jan van den Heuvel"
+    ]
+  },
+  {
+    "id": "2112.04744v5",
+    "title": "Superpixel-Based Building Damage Detection from Post-earthquake Imagery Using Deep Neural Networks",
+    "pdf_url": "https://arxiv.org/pdf/2112.04744v5",
+    "summary": "Building damage detection after natural disasters like earthquakes is crucial for initiating effective emergency response actions. Remotely sensed very high spatial resolution (VHR) imagery can provide vital information due to their ability to map the affected buildings with high geometric precision. However, we suffer from suboptimal performances in detecting damaged buildings due to earthquakes. This paper presents a novel superpixel based approach incorporates Deep Neural Networks (DNN) with a modified segmentation method, for more precise building damage detection from VHR imagery. Firstly, a modified Fast Scanning and Adaptive Merging method is extended to create initial over-segmentation. Secondly, the segments are properly merged based on the Region Adjacent Graph (RAG). Thirdly, a pre-trained DNN using Stacked Denoising Auto-Encoders (SDAE-DNN) is presented, to exploit the rich semantic features for building damage detection. Experimental results on a WorldView-2 imagery from Nepal Earthquake of 2015 demonstrate the feasibility and effectiveness of our method, which could boost detection accuracy through learning more intrinsic and discriminative features, which outperforms other methods using alternative classifiers.",
+    "published": "2021-12-09T08:05:02Z",
+    "primary_category": "cs.CV",
+    "authors": [
+      "Jun Wang"
+    ]
+  },
+  {
+    "id": "2303.14322v2",
+    "title": "Spatio-Temporal driven Attention Graph Neural Network with Block Adjacency matrix (STAG-NN-BA) for Remote Land-use Change Detection",
+    "pdf_url": "https://arxiv.org/pdf/2303.14322v2",
+    "summary": "Land-use monitoring is fundamental for spatial planning, particularly in view of compound impacts of growing global populations and climate change. Despite existing applications of deep learning in land use monitoring, standard convolutional kernels in deep neural networks limit the applications of these networks to the Euclidean domain only. Considering the geodesic nature of the measurement of the earth's surface, remote sensing is one such area that can benefit from non-Euclidean and spherical domains. For this purpose, we designed a novel Graph Neural Network architecture for spatial and spatio-temporal classification using satellite imagery to acquire insights into socio-economic indicators. We propose a hybrid attention method to learn the relative importance of irregular neighbors in remote sensing data. Instead of classifying each pixel, we propose a method based on Simple Linear Iterative Clustering (SLIC) image segmentation and Graph Attention Network. The superpixels obtained from SLIC become the nodes of our Graph Convolution Network (GCN). A region adjacency graph (RAG) is then constructed where each superpixel is connected to every other adjacent superpixel in the image, enabling information to propagate globally. Finally, we propose a Spatially driven Attention Graph Neural Network (SAG-NN) to classify each RAG. We also propose an extension to our SAG-NN for spatio-temporal data. Unlike regular grids of pixels in images, superpixels are irregular in nature and cannot be used to create spatio-temporal graphs. We introduce temporal bias by combining unconnected RAGs from each image into one supergraph. This is achieved by introducing block adjacency matrices resulting in novel Spatio-Temporal driven Attention Graph Neural Network with Block Adjacency matrix (STAG-NN-BA). SAG-NN and STAG-NN-BA outperform graph and non-graph baselines on Asia14 and C2D2 datasets efficiently.",
+    "published": "2023-03-25T01:26:50Z",
+    "primary_category": "cs.CV",
+    "journal_ref": "AAAI Symposium 2023",
+    "authors": [
+      "Usman Nazir",
+      "Wadood Islam",
+      "Sara Khalid",
+      "Murtaza Taj"
+    ]
+  },
+  {
+    "id": "2305.19787v2",
+    "title": "DeepMerge: Deep-Learning-Based Region-Merging for Image Segmentation",
+    "pdf_url": "https://arxiv.org/pdf/2305.19787v2",
+    "summary": "Image segmentation aims to partition an image according to the objects in the scene and is a fundamental step in analysing very high spatial-resolution (VHR) remote sensing imagery. Current methods struggle to effectively consider land objects with diverse shapes and sizes. Additionally, the determination of segmentation scale parameters frequently adheres to a static and empirical doctrine, posing limitations on the segmentation of large-scale remote sensing images and yielding algorithms with limited interpretability. To address the above challenges, we propose a deep-learning-based region merging method dubbed DeepMerge to handle the segmentation of complete objects in large VHR images by integrating deep learning and region adjacency graph (RAG). This is the first method to use deep learning to learn the similarity and merge similar adjacent super-pixels in RAG. We propose a modified binary tree sampling method to generate shift-scale data, serving as inputs for transformer-based deep learning networks, a shift-scale attention with 3-Dimension relative position embedding to learn features across scales, and an embedding to fuse learned features with hand-crafted features. DeepMerge can achieve high segmentation accuracy in a supervised manner from large-scale remotely sensed images and provides an interpretable optimal scale parameter, which is validated using a remote sensing image of 0.55 m resolution covering an area of 5,660 km^2. The experimental results show that DeepMerge achieves the highest F value (0.9550) and the lowest total error TE (0.0895), correctly segmenting objects of different sizes and outperforming all competing segmentation methods.",
+    "published": "2023-05-31T12:27:58Z",
+    "primary_category": "cs.CV",
+    "authors": [
+      "Xianwei Lv",
+      "Claudio Persello",
+      "Wangbin Li",
+      "Xiao Huang",
+      "Dongping Ming",
+      "Alfred Stein"
+    ]
+  },
+  {
+    "id": "1912.05531v2",
+    "title": "Deep learning for magnitude prediction in earthquake early warning",
+    "pdf_url": "https://arxiv.org/pdf/1912.05531v2",
+    "summary": "Fast and accurate magnitude prediction is the key to the success of earthquake early warning. We have proposed a new approach based on deep learning for P-wave magnitude prediction (EEWNet), which takes time series data as input instead of feature parameters. The architecture of EEWNet is adaptively adjusted according to the length of the input, thus eliminates the need of complicated tuning of hyperparameters for deep learning. Only the unfiltered accelerograms of vertical components are used. EEWNet is trained on a moderate number of data set (10,000s of records), but it achieves excellent results in magnitude prediction compared with approaches using parameters \u03c4log, \u03c4c and Pd.",
+    "published": "2019-12-02T09:30:34Z",
+    "comment": "6 pages, 4 figures",
+    "primary_category": "physics.geo-ph",
+    "authors": [
+      "Yanwei Wang",
+      "Zifa Wang",
+      "Zhenzhong Cao",
+      "Jingyan Lan"
+    ]
+  },
+  {
+    "id": "2006.01332v1",
+    "title": "Real-time Earthquake Early Warning with Deep Learning: Application to the 2016 Central Apennines, Italy Earthquake Sequence",
+    "pdf_url": "https://arxiv.org/pdf/2006.01332v1",
+    "summary": "Earthquake early warning systems are required to report earthquake locations and magnitudes as quickly as possible before the damaging S wave arrival to mitigate seismic hazards. Deep learning techniques provide potential for extracting earthquake source information from full seismic waveforms instead of seismic phase picks. We developed a novel deep learning earthquake early warning system that utilizes fully convolutional networks to simultaneously detect earthquakes and estimate their source parameters from continuous seismic waveform streams. The system determines earthquake location and magnitude as soon as one station receives earthquake signals and evolutionarily improves the solutions by receiving continuous data. We apply the system to the 2016 Mw 6.0 earthquake in Central Apennines, Italy and its subsequent sequence. Earthquake locations and magnitudes can be reliably determined as early as four seconds after the earliest P phase, with mean error ranges of 6.8-3.7 km and 0.31-0.23, respectively.",
+    "published": "2020-06-02T01:27:25Z",
+    "comment": "18 pages, 11 figures",
+    "primary_category": "physics.geo-ph",
+    "journal_ref": "Geophysical Research Letters 48 e2020GL089394 (2021)",
+    "doi": "10.1029/2020GL089394",
+    "authors": [
+      "Xiong Zhang",
+      "Miao Zhang",
+      "Xiao Tian"
+    ]
+  },
+  {
+    "id": "2412.18099v1",
+    "title": "An Attention-based Framework with Multistation Information for Earthquake Early Warnings",
+    "pdf_url": "https://arxiv.org/pdf/2412.18099v1",
+    "summary": "Earthquake early warning systems play crucial roles in reducing the risk of seismic disasters. Previously, the dominant modeling system was the single-station models. Such models digest signal data received at a given station and predict earth-quake parameters, such as the p-phase arrival time, intensity, and magnitude at that location. Various methods have demonstrated adequate performance. However, most of these methods present the challenges of the difficulty of speeding up the alarm time, providing early warning for distant areas, and considering global information to enhance performance. Recently, deep learning has significantly impacted many fields, including seismology. Thus, this paper proposes a deep learning-based framework, called SENSE, for the intensity prediction task of earthquake early warning systems. To explicitly consider global information from a regional or national perspective, the input to SENSE comprises statistics from a set of stations in a given region or country. The SENSE model is designed to learn the relationships among the set of input stations and the locality-specific characteristics of each station. Thus, SENSE is not only expected to provide more reliable forecasts by considering multistation data but also has the ability to provide early warnings to distant areas that have not yet received signals. This study conducted extensive experiments on datasets from Taiwan and Japan. The results revealed that SENSE can deliver competitive or even better performances compared with other state-of-the-art methods.",
+    "published": "2024-12-24T02:18:17Z",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Yu-Ming Huang",
+      "Kuan-Yu Chen",
+      "Wen-Wei Lin",
+      "Da-Yi Chen"
+    ]
+  },
+  {
+    "id": "2312.15218v1",
+    "title": "Generalized Neural Networks for Real-Time Earthquake Early Warning",
+    "pdf_url": "https://arxiv.org/pdf/2312.15218v1",
+    "summary": "Deep learning enhances earthquake monitoring capabilities by mining seismic waveforms directly. However, current neural networks, trained within specific areas, face challenges in generalizing to diverse regions. Here, we employ a data recombination method to create generalized earthquakes occurring at any location with arbitrary station distributions for neural network training. The trained models can then be applied to various regions with different monitoring setups for earthquake detection and parameter evaluation from continuous seismic waveform streams. This allows real-time Earthquake Early Warning (EEW) to be initiated at the very early stages of an occurring earthquake. When applied to substantial earthquake sequences across Japan and California (US), our models reliably report earthquake locations and magnitudes within 4 seconds after the first triggered station, with mean errors of 2.6-6.3 km and 0.05-0.17, respectively. These generalized neural networks facilitate global applications of real-time EEW, eliminating complex empirical configurations typically required by traditional methods.",
+    "published": "2023-12-23T10:45:21Z",
+    "primary_category": "physics.geo-ph",
+    "journal_ref": "Communications Earth & Environment, 5, no. 1, 528",
+    "doi": "10.1038/s43247-024-01718-8",
+    "authors": [
+      "Xiong Zhang",
+      "Miao Zhang"
+    ]
+  },
+  {
+    "id": "2608.24561v1",
+    "title": "SeisMamba: Low-Latency Single-Station Seismic Magnitude Estimation for Spatially Distributed Earthquake Early Warning",
+    "pdf_url": "https://arxiv.org/pdf/2608.24561v1",
+    "summary": "Rapid earthquake magnitude estimation is central to earthquake early warning, yet many operational systems depend on dense regional seismic networks and region-specific calibration. This creates a spatial coverage barrier for high-risk areas with sparse sensing infrastructure. Single-station learning offers a lower-cost alternative, but existing models often face an accuracy--latency trade-off and may degrade under regional distribution shift. We present SeisMamba, a lightweight Mamba-based architecture for low-latency magnitude estimation from minimally processed three-component seismic waveforms recorded at a single station. SeisMamba combines hierarchical convolutional encoding, sparse selective state-space modelling, multi-scale feature fusion, and an auxiliary temporal prediction head to support efficient long-sequence waveform analysis. On the STEAD benchmark, SeisMamba achieves the best MSE, RMSE, and $R^2$ among tested baselines while requiring only 0.55 ms for a batch of 32 waveforms on an NVIDIA T4 GPU, making it about three times faster than transformer-based baselines. We further conduct a Chile--Taiwan regional hold-out experiment as a diagnostic test of cross-region deployment, where SeisMamba retains useful performance on geographically unseen seismic regions. These results suggest that selective state-space waveform modelling provides a promising accuracy--latency backbone for spatially distributed, low-cost earthquake early warning.",
+    "published": "2026-08-25T13:44:42Z",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Quenton Yeo",
+      "Zhaoge Bi",
+      "Linghan Huang",
+      "Luke Stephen Higgins",
+      "Flora Salim",
+      "Huaming Chen"
+    ]
+  },
+  {
+    "id": "2101.06517v1",
+    "title": "A Novel Approach for Earthquake Early Warning System Design using Deep Learning Techniques",
+    "pdf_url": "https://arxiv.org/pdf/2101.06517v1",
+    "summary": "Earthquake signals are non-stationary in nature and thus in real-time, it is difficult to identify and classify events based on classical approaches like peak ground displacement, peak ground velocity. Even the popular algorithm of STA/LTA requires extensive research to determine basic thresholding parameters so as to trigger an alarm. Also, many times due to human error or other unavoidable natural factors such as thunder strikes or landslides, the algorithm may end up raising a false alarm. This work focuses on detecting earthquakes by converting seismograph recorded data into corresponding audio signals for better perception and then uses popular Speech Recognition techniques of Filter bank coefficients and Mel Frequency Cepstral Coefficients (MFCC) to extract the features. These features were then used to train a Convolutional Neural Network(CNN) and a Long Short Term Memory(LSTM) network. The proposed method can overcome the above-mentioned problems and help in detecting earthquakes automatically from the waveforms without much human intervention. For the 1000Hz audio data set the CNN model showed a testing accuracy of 91.1% for 0.2-second sample window length while the LSTM model showed 93.99% for the same. A total of 610 sounds consisting of 310 earthquake sounds and 300 non-earthquake sounds were used to train the models. While testing, the total time required for generating the alarm was approximately 2 seconds which included individual times for data collection, processing, and prediction taking into consideration the processing and prediction delays. This shows the effectiveness of the proposed method for Earthquake Early Warning (EEW) applications. Since the input of the method is only the waveform, it is suitable for real-time processing, thus the models can also be used as an onsite EEW system requiring a minimum amount of preparation time and workload.",
+    "published": "2021-01-16T20:35:34Z",
+    "primary_category": "eess.SP",
+    "authors": [
+      "Tonumoy Mukherjee",
+      "Chandrani Singh",
+      "Prabir Kumar Biswas"
+    ]
+  }
+]

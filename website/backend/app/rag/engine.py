@@ -8,9 +8,19 @@ import logging
 from typing import AsyncGenerator, Dict, List, Optional
 import requests
 
-from backend.app.core.config import settings
-from backend.app.rag.vector_store import BaseVectorStore, SearchHit, get_vector_store
-from backend.app.schemas.chat import ChatMessage, SourceCitation, StreamChunk
+try:
+    from ..core.config import settings
+    from .vector_store import BaseVectorStore, SearchHit, get_vector_store
+    from ..schemas.chat import ChatMessage, SourceCitation, StreamChunk
+except (ImportError, ValueError):
+    try:
+        from app.core.config import settings
+        from app.rag.vector_store import BaseVectorStore, SearchHit, get_vector_store
+        from app.schemas.chat import ChatMessage, SourceCitation, StreamChunk
+    except ImportError:
+        from website.backend.app.core.config import settings
+        from website.backend.app.rag.vector_store import BaseVectorStore, SearchHit, get_vector_store
+        from website.backend.app.schemas.chat import ChatMessage, SourceCitation, StreamChunk
 
 logger = logging.getLogger(__name__)
 

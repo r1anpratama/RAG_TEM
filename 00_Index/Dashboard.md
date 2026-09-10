@@ -47,9 +47,10 @@ Welcome to the central intelligence hub for the **RAG_TEM** project (Retrieval-A
 ---
 
 ## 🎯 Current Project Status
-- **Phase**: Decoupled RAG Architecture Implemented — Backend (FastAPI + SSE + Ingestion) & Frontend (Next.js App Router + Tailwind + XSS Sanitization)
-- **Backend Service**: `cd backend && uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
-- **Frontend Service**: `cd frontend && npm run dev` (Runs on `http://localhost:3000`)
+- **Phase**: Decoupled RAG Architecture Implemented — Backend (`website/backend/`), Frontend (`website/frontend/`), & Classic GIS (`website/classic/`)
+- **Backend Service**: `cd website/backend && uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload` (or `python -m uvicorn website.backend.app.main:app`)
+- **Frontend Service**: `cd website/frontend && npm run dev` (Runs on `http://localhost:3000`)
+- **Classic Map**: `cd website/classic && python run.py` (Runs on `http://localhost:8080`)
 - **Key Capabilities**: SSE token-by-token streaming, rate limiting, PDF/TXT upload validation (10 MB limit), XSS-sanitized markdown with `react-markdown` + `rehype-sanitize`, client-side Zod validation, zero exposed AI keys on frontend.
 - **Test Suite**: 26/26 tests passing (20 core tests + 6 backend API tests).
 - **Status**: Live on GitHub (`main` branch tracking `origin/main`)

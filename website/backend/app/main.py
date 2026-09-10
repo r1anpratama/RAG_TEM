@@ -9,8 +9,16 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.app.core.config import settings
-from backend.app.api.routers import chat_router, document_router, health_router
+try:
+    from .core.config import settings
+    from .api.routers import chat_router, document_router, health_router
+except (ImportError, ValueError):
+    try:
+        from app.core.config import settings
+        from app.api.routers import chat_router, document_router, health_router
+    except ImportError:
+        from website.backend.app.core.config import settings
+        from website.backend.app.api.routers import chat_router, document_router, health_router
 
 app = FastAPI(
     title="RAG Platform API",
@@ -77,4 +85,4 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
     print(f"\nStarting RAG Backend Server on http://{settings.host}:{settings.port} ...\n")
-    uvicorn.run("backend.app.main:app", host=settings.host, port=settings.port, reload=False)
+    uvicorn.run(app, host=settings.host, port=settings.port)

@@ -1,7 +1,7 @@
-"""RAG pipeline exports."""
+"""RAG engine and Vector Store package."""
 
-from backend.app.rag.engine import RAGEngine
-from backend.app.rag.vector_store import (
+from .engine import RAGEngine
+from .vector_store import (
     BaseVectorStore,
     DocumentChunk,
     InMemoryVectorStore,
@@ -12,8 +12,8 @@ from backend.app.rag.vector_store import (
 __all__ = [
     "RAGEngine",
     "BaseVectorStore",
-    "InMemoryVectorStore",
     "DocumentChunk",
+    "InMemoryVectorStore",
     "SearchHit",
     "get_vector_store",
 ]

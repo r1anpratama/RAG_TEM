@@ -6,7 +6,13 @@ import time
 from typing import Any, Dict
 from fastapi import APIRouter
 
-from backend.app.rag.vector_store import get_vector_store
+try:
+    from ...rag.vector_store import get_vector_store
+except (ImportError, ValueError):
+    try:
+        from app.rag.vector_store import get_vector_store
+    except ImportError:
+        from website.backend.app.rag.vector_store import get_vector_store
 
 router = APIRouter(prefix="/api", tags=["Health"])
 

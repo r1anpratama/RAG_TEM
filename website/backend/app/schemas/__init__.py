@@ -1,13 +1,13 @@
-"""Schemas package exports."""
+"""Pydantic schemas package."""
 
-from backend.app.schemas.chat import (
+from .chat import (
     ChatMessage,
     ChatRequest,
     ChatResponse,
     SourceCitation,
     StreamChunk,
 )
-from backend.app.schemas.document import DocumentMetadata, UploadResponse
+from .document import DocumentMetadata, UploadResponse
 
 __all__ = [
     "ChatMessage",
@@ -15,6 +15,6 @@ __all__ = [
     "ChatResponse",
     "SourceCitation",
     "StreamChunk",
-    "UploadResponse",
     "DocumentMetadata",
+    "UploadResponse",
 ]

@@ -1,0 +1,264 @@
+[
+  {
+    "id": "2609.08887v1",
+    "title": "Q2D-Web: A Large-Scale Benchmark for Retrieval in Agentic RAG Systems",
+    "pdf_url": "https://arxiv.org/pdf/2609.08887v1",
+    "summary": "Evaluating first-stage retrievers in large-scale production RAG requires a benchmark that pairs a large-scale corpus with a large set of agent-reformulated search queries based on real user queries and their conversation threads, and that labels many relevant documents per query. No existing public benchmark evaluates this setting: large-scale collections typically provide only a small number of evaluation queries, whereas benchmarks with many queries generally contain only millions of documents. Moreover, most benchmarks assess human-written queries, while the first-stage retrievers in agentic RAG pipelines serve machine-written reformulations whose distribution differs from human search behavior. To overcome these evaluation gaps, we introduce Q2D-Web (Query2Doc-Web), a large-scale agentic retrieval benchmark consisting of a 190M-document web corpus and 70k agentic search queries in ten languages, reformulated from real-world user queries in production systems. Q2D-Web provides three sets of fixed relevance judgments: agent citations, production rankings, and a combined set that unions both signals and adds LLM-based judgments of unlabeled pooled documents to reduce false negatives. We benchmark 13 retrievers including lexical, dense, and late-interaction models and find that their relative ordering is largely insensitive to the choice of judgment set, while diverging substantially across topical domains, query languages, and query types. To enable fast evaluation, we also study subcorpus sampling as an approximation to full-corpus evaluations. Retaining a third of the corpus, selected by reciprocal rank fusion over pooled retriever runs, preserves the full-corpus model ranking under the combined judgments while raising absolute Recall@1000 only by 3 to 7 points. The public leaderboard is accessible under: https://huggingface.co/spaces/perplexity-ai/q2d-web-leaderboard",
+    "published": "2026-09-08T15:26:05Z",
+    "primary_category": "cs.IR",
+    "authors": [
+      "Maximilian Schall",
+      "Sedigheh Eslami",
+      "Markus Krimmel",
+      "Antoine Chaffin",
+      "Louis Milliken",
+      "Bo Wang",
+      "Denis Bykov"
+    ]
+  },
+  {
+    "id": "2609.06391v1",
+    "title": "Building Trustworthy Graph-Agentic RAG for Social Good: Architectures, Failure Propagation, and Assurance by Construction",
+    "pdf_url": "https://arxiv.org/pdf/2609.06391v1",
+    "summary": "Graph-agentic retrieval-augmented generation combines structured evidence with adaptive controllers that can plan retrieval, traverse relations, verify intermediate claims, delegate subtasks, and use tools. This combination is useful when answers depend on relations across documents, entities, time, or institutions, but it also creates coupled failure paths: a defect in graph construction can become retrieved evidence, alter later control decisions, and propagate toward a consequential outcome. We examine how such systems should be designed and evaluated for social-good settings in which freshness, authorization, traceability, oversight, and recourse matter alongside answer quality. We organize the literature by graph substrate, graph lifecycle, agent function, coordination pattern, and authority boundary, and distinguish graph-based retrieval from observation-dependent graph control. We then synthesize reported risks as an evidence-to-action failure chain and propose an assurance-by-construction blueprint comprising five interface contracts for evidence, retrieval, reasoning, capability and delegation, and outcome. These contracts make provenance, temporal validity, authorization, uncertainty, and recoverability explicit at system boundaries. An illustrative public-benefit information design shows how the framework constrains graph structure, permissions, abstention, and operating authority. Finally, we derive an evaluation agenda spanning graph assertions, trajectories, claims, coordination, and outcomes.",
+    "published": "2026-09-06T05:04:06Z",
+    "comment": "12 pages, 2 figures",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Vijay Bommireddy",
+      "Raviteja Bommireddy"
+    ]
+  },
+  {
+    "id": "2609.00427v1",
+    "title": "SpecMind: Enabling Spectrum Intelligence via Multi-Agent Hybrid Retrieval-Augmented Generation",
+    "pdf_url": "https://arxiv.org/pdf/2609.00427v1",
+    "summary": "The exponential growth of wireless devices is driving unprecedented spectrum demand, pushing spectrum management toward more fine-grained decisions across space, time, and device constraints. As a result, spectrum policymakers and engineers must process large volumes of data that come from diverse sources and take many different forms, such as text and tables. These data sources are often disaggregated and require significant time and effort to integrate, search, and interpret. Furthermore, most of this information is formatted for human understanding and is not readily accessible to automated systems. To address this challenge, we propose SpecMind, a novel Multi-Agent Retrieval-Augmented Generation (RAG) system for spectrum intelligence that performs reasoning over heterogeneous data sources. This system enables autonomous agents to coordinate specialized sub-agents that retrieve and synthesize knowledge across policy proceedings, legal regulations, and license databases. We develop SpecBench, a question and answer (Q&A) dataset based on real-world license records and policy proceedings, addressing the lack of evaluation resources for RAG systems in the spectrum domain. Experimental results demonstrate that SpecMind outperforms traditional, general-purpose RAG systems across spectrum-related tasks, achieving over 80% win rate against strong baselines. The agent-based design enables more accurate retrieval, better contextual reasoning, and improved task completion across diverse query types.",
+    "published": "2026-08-31T22:04:59Z",
+    "comment": "Accepted to IEEE GLOBECOM 2026. Project website: https://specmindrag.github.io",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Songwei Dong",
+      "Bingyan Lu",
+      "Makayla Kienlen",
+      "J. Nicholas Laneman",
+      "Cong Shen"
+    ]
+  },
+  {
+    "id": "2609.01663v1",
+    "title": "Context Inference Attacks Without Jailbreaks",
+    "pdf_url": "https://arxiv.org/pdf/2609.01663v1",
+    "summary": "Agentic AI systems are increasingly deployed to process sensitive data at inference time, such as healthcare records or financial documents assembled into a hidden \\emph{context} before the system answers. Prior work has studied privacy risks primarily through \\emph{jailbreaking} attacks that induce models to directly disclose sensitive content, but has largely overlooked the agentic setting where the context is assembled by the agent's own tool calls. We show that the agents we evaluate remain vulnerable to hidden-context leakage despite the controls we test against them, namely an instruction not to disclose the context, logit suppression, and context dilution. For instance, a web-browsing agent answering benign user queries still carries exploitable signals about records silently loaded into its context. We introduce and formalize \\emph{context-inference attacks} through a security game and evaluate three settings under decreasing attacker knowledge and increasingly indirect delivery of the context: a known context, an unknown context, and a context the agent retrieves through its own tool calls. We distinguish a grey-box setting, in which the target model is used to score observations, from black-box settings in which the attacker scores with a surrogate it controls. We further characterize how leakage varies with query budget, context size, and target-model size. A single attack carries through all three settings without modification, reaching $100\\%$ ASR on small candidate sets and $63\\%$ at $1024$ candidates against a known context, $78.9$ AUROC when the template and surrounding records are unknown, $92.5$ AUROC when a 14B surrogate scores a 32B target, and $81.8$ AUROC when the records arrive as an agent's retrieval returns, against chance rates of $1/|\\mathcal{Z}|$ and $50$ respectively.",
+    "published": "2026-08-31T21:53:52Z",
+    "primary_category": "cs.CR",
+    "authors": [
+      "Prince Jha",
+      "Samuele Poppi",
+      "Nils Lukas"
+    ]
+  },
+  {
+    "id": "2608.30676v1",
+    "title": "MedAgent-R1: Faithfulness-Aware Reinforcement Learning for Evidence-Grounded Medical Reasoning",
+    "pdf_url": "https://arxiv.org/pdf/2608.30676v1",
+    "summary": "When medical AI systems hallucinate clinical reasoning, the consequences extend beyond incorrect answers: fabricated justifications that superficially reference retrieved evidence can mislead clinicians into unsafe treatment decisions. Medical reasoning agents must therefore produce not only correct answers but also faithful justifications that clinicians can verify against cited evidence. We identify a systematic failure mode in RL-trained retrieval agents: outcome-only rewards improve accuracy while degrading faithfulness, a phenomenon we term confident hallucination. The agent learns to answer from parametric memory and backfill plausible but unsupported justifications; citation fabrication rates rise from 16.5% to 31.8% even as accuracy improves by 5 points over the supervised baseline. We address this with a faithfulness-gated reward design: accuracy credit is conditioned on evidence grounding via a hard gate, complemented by retrieval validity and conciseness signals that close exploitation paths unique to agentic retrieval. The resulting system, MedAgent-R1, reduces citation fabrication from 31.8% to 4.7% and raises evidence completeness from 58.7 to 82.6 while maintaining 75.1% accuracy, with 13.2-point gains on HealthBench Safety. Under the same agentic retrieval setup, MedAgent-R1 outscores GPT-4o on faithfulness-specific dimensions (Factual Support 4.55 vs. 4.25; Overclaiming 4.40 vs. 4.15) while remaining below GPT-4o in overall accuracy, suggesting that explicit faithfulness training yields evidence-grounding gains not achieved by scaling alone.",
+    "published": "2026-08-31T12:19:41Z",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Jiangwang Chen",
+      "Chenghao Zhang",
+      "Hengxing Cai"
+    ]
+  },
+  {
+    "id": "2608.25986v1",
+    "title": "Multi-Granularity Context-Enhanced RAG over Multimodal Knowledge Graphs",
+    "pdf_url": "https://arxiv.org/pdf/2608.25986v1",
+    "summary": "Retrieval-augmented generation (RAG) is widely used to mitigate hallucination issues in large language models (LLMs) and multimodal large language models (MLLMs). In particular, knowledge graph (KG)-based RAG leverages structured knowledge to provide (M)LLMs with high-quality external information. Building on these works, recent studies have explored multimodal knowledge graphs (MMKGs) as knowledge bases for GraphRAG. This enables Graph RAG to integrate knowledge across multiple modalities, thereby further enhancing its performance. However, existing MMKG-based RAG methods generally follow a common pipeline in which different modalities are largely processed independently before being fusion. As a result, textual context is only used to a limited extent during visual information extraction and subsequent multimodal knowledge fusion. This brings a semantic gap between images and text which limits the multimodal GraphRAG performance. To address this issue, we propose a novel framework for constructing a Context-Enhanced MMKG (CEMMKG) to better support multimodal GraphRAG. The proposed CEMMKG enriches each image with complementary textual context at both local and global scopes. Local context goes beyond the surrounding text by incorporating sentences that are semantically related to the image, while global context provides a summary of the entire passage. We further introduce a multi-granularity design for the local context, allowing it to capture semantically relevant information at different levels of detail. Extensive experiments on the selected vision-centric dataset validate that CEMMKG is effective in leveraging contextual information to improve MMKG-based RAG performance. Moreover, its effectiveness across different MMKG-based RAG methods demonstrates its broad applicability.",
+    "published": "2026-08-26T16:38:02Z",
+    "comment": "Preprint",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Zongyu Wu",
+      "Yilong Wang",
+      "Xiaochen Wang",
+      "Minhua Lin",
+      "Zhichao Xu",
+      "Fenglong Ma",
+      "Xiang Zhang",
+      "Suhang Wang"
+    ]
+  },
+  {
+    "id": "2608.25960v1",
+    "title": "LivingRAG: Augmenting Graph RAG with Experience",
+    "pdf_url": "https://arxiv.org/pdf/2608.25960v1",
+    "summary": "Graph-based RAG improves multi-hop question answering by organizing evidence as a knowledge graph. However, most existing RAG systems process each query in isolation and discard useful reasoning from the LLM's response after inference. As a result, later related queries need to retrieve evidence and reason from scratch. We propose LivingRAG, a Graph RAG framework with writable and reusable reasoning experience. LivingRAG adds a writable experience store to a graph-based retrieval backbone, enabling verified experiences to be reused during inference in two ways. Stored graph signals help retrieval find entities and passages that were useful in earlier related queries. Stored summaries provide a reference reasoning pattern for answer generation. We analyze online QA streams and find reusable signals from shared entities, graph neighborhoods, and question templates. Experiments on multi-hop QA benchmarks show that LivingRAG improves accuracy over strong RAG baselines and reduces completion-token use when relevant prior experience is reused.",
+    "published": "2026-08-26T16:21:06Z",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Yuzhuo Cui",
+      "Zongye Zhang",
+      "Qingjie Liu"
+    ]
+  },
+  {
+    "id": "2608.25952v2",
+    "title": "Spatial-Knowledge-Graph-Grounded LLM Agents for Neighborhood Livability Evaluation",
+    "pdf_url": "https://arxiv.org/pdf/2608.25952v2",
+    "summary": "Neighborhood livability is commonly assessed with static built-environment indicators, such as facility proximity, street connectivity, and access to public space. These measures describe available opportunities but do not directly represent how residents with different mobility capacities, household roles, schedules, and care responsibilities experience the neighborhood. This paper presents a prototype framework that uses a spatial knowledge graph (KG) and large language models (LLMs) to generate and revise household schedules, followed by rule-based feasibility checking and GIS-based network materialization. The spatial KG integrates residents, residences, facilities, neighborhood context, and sampled road hubs; Graph-RAG retrieves each household's nearby spatial context, including candidate POIs and approximate walking times, for the scheduling LLM. The LLM produces structured household schedules, while rules are used for lightweight repairs and auditable feasibility checks. The LLM then revises schedules in response to identified feasibility issues. A routing module derives the actual travel paths, travel times, modes, and event histories from the road network. The resulting events support synthetic resident-agent interviews about daily convenience, travel burden, activity feasibility, and household coordination. A prototype demonstration in a Shenzhen neighborhood shows that nominal facility availability does not necessarily imply convenient access: residents with limited mobility and households with care responsibilities experience greater travel and coordination burdens. The framework offers an auditable way to connect spatial opportunity, household activity constraints, and resident-specific livability interpretation, while keeping simulated experience distinct from observed perception.",
+    "published": "2026-08-26T16:05:57Z",
+    "comment": "31 pages, 4 figures, prototype framework",
+    "primary_category": "cs.CY",
+    "authors": [
+      "Haiyan Hao"
+    ]
+  },
+  {
+    "id": "2608.15919v1",
+    "title": "Noesis: Bidirectional Graph-RAG with Adaptive Parallelism and Cross-Knowledge-Base Semantic Discovery",
+    "pdf_url": "https://arxiv.org/pdf/2608.15919v1",
+    "summary": "Retrieval-Augmented Generation over knowledge graphs (Graph-RAG) has emerged as a powerful paradigm for grounding large language models in domain-specific corpora. However, existing systems face persistent limitations: (1) static chunking fragments long documents, losing cross-section semantic connections; (2) ingestion pipelines do not scale adaptively; and (3) multi-domain deployments require either a monolithic knowledge base that dilutes retrieval precision or manual user routing. We present Noesis, a decoupled Graph-RAG architecture addressing these limitations through four algorithms: (a) Bidirectional Graph Traversal with a Graph-Feedback Context Resolver simulating human reading with degrading memory; (b) an AIMD Concurrency Controller adapted from TCP congestion control, achieving 23x speedup with zero OOM events; (c) Moesis, domain-aware selective quantization for MoE models achieving 6.3x speedup on 12 GB consumer GPUs; and (d) Mesh, cross-KB semantic routing with runtime structural discovery enabling small on-premises models to perform multi-hop cross-domain reasoning. On HotpotQA (1,000 questions), Noesis achieves 59.5 EM / 74.7 F1, surpassing GraphRAG by +27.8 EM while using a 35B on-premises model for graph construction rather than GPT-4o. Source text verification on a 193-page document confirms 90% precision on long-range causal edges inaccessible to chunk-independent extraction.",
+    "published": "2026-08-16T20:23:35Z",
+    "comment": "14 pages, 6 figures, 4 tables. Patent pending",
+    "primary_category": "cs.IR",
+    "doi": "10.5281/zenodo.21874580",
+    "authors": [
+      "Nicola Cogotti"
+    ]
+  },
+  {
+    "id": "2608.15056v1",
+    "title": "GraphLoom: Reliability-Calibrated Graph Evidence Routing for Multimodal KG-RAG",
+    "pdf_url": "https://arxiv.org/pdf/2608.15056v1",
+    "summary": "Multimodal retrieval-augmented generation (RAG) systems often rely on long unstructured contexts or aggressively expanded evidence graphs, which can introduce noisy evidence, weaken multi-hop reasoning, and increase unsupported generation. We present GraphLoom, a reliability-calibrated multimodal knowledge-graph RAG framework for compact and faithful evidence routing. Given a question and its associated multimodal input, GraphLoom constructs an instance-level multimodal knowledge graph from grounded scene descriptions, extracted relational triples, and external commonsense knowledge. Instead of injecting all retrieved evidence into the generator, GraphLoom performs reliability-aware subgraph retrieval with bounded expansion and selectively routes high-utility evidence through hierarchical graph memory slots and joint graph-sequence attention in a frozen language model. To improve robustness in complex reasoning settings, GraphLoom further combines interleaved retrieval with budgeted corrective retrieval, enabling adaptive multi-hop evidence refinement under noisy retrieval conditions. We evaluate GraphLoom on ScienceQA, MultiModalQA, and OK-VQA, including large distractor evidence pools that approximate noisy external knowledge retrieval. Experimental results show consistent gains in answer quality and evidence faithfulness over strong multimodal RAG, graph-retrieval, and open-source vision-language baselines, with improved retrieval quality on MultiModalQA and stable performance under noisy evidence pools. Additional analyses using MiniCheck-based verification, human evaluation, and latency profiling show that reliability-calibrated graph evidence routing provides an effective alternative to long-context multimodal evidence injection.",
+    "published": "2026-08-15T06:02:23Z",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Zafar Ali",
+      "Asad Khan",
+      "Aalia Malik",
+      "Pavlos Kefalas"
+    ]
+  },
+  {
+    "id": "2601.15519v2",
+    "title": "TransportAgents: a multi-agents LLM framework for traffic accident severity prediction",
+    "pdf_url": "https://arxiv.org/pdf/2601.15519v2",
+    "summary": "Accurate prediction of traffic crash severity is critical for improving emergency response and public safety planning. Although recent large language models (LLMs) exhibit strong reasoning capabilities, their single-agent architectures often struggle with heterogeneous, domain-specific crash data and tend to generate biased or unstable predictions. To address these limitations, this paper proposes TransportAgents, a hybrid multi-agent framework that integrates category-specific LLM reasoning with a multilayer perceptron (MLP) integration module. Each specialized agent focuses on a particular subset of traffic information, such as demographics, environmental context, or incident details, to produce intermediate severity assessments that are subsequently fused into a unified prediction. Extensive experiments on two complementary U.S. datasets, the Consumer Product Safety Risk Management System (CPSRMS) and the National Electronic Injury Surveillance System (NEISS), demonstrate that TransportAgents consistently outperforms both traditional machine learning and advanced LLM-based baselines. Across three representative backbones, including closed-source models such as GPT-3.5 and GPT-4o, as well as open-source models such as LLaMA-3.3, the framework exhibits strong robustness, scalability, and cross-dataset generalizability. A supplementary distributional analysis further shows that TransportAgents produces more balanced and well-calibrated severity predictions than standard single-agent LLM approaches, highlighting its interpretability and reliability for safety-critical decision support applications.",
+    "published": "2026-01-21T23:14:05Z",
+    "primary_category": "cs.AI",
+    "authors": [
+      "Zhichao Yang",
+      "Jiashu He",
+      "Jinxuan Fan",
+      "Cirillo Cinzia"
+    ]
+  },
+  {
+    "id": "2511.17664v1",
+    "title": "CubeletWorld: A New Abstraction for Scalable 3D Modeling",
+    "pdf_url": "https://arxiv.org/pdf/2511.17664v1",
+    "summary": "Modern cities produce vast streams of heterogeneous data, from infrastructure maps to mobility logs and satellite imagery. However, integrating these sources into coherent spatial models for planning and prediction remains a major challenge. Existing agent-centric methods often rely on direct environmental sensing, limiting scalability and raising privacy concerns. This paper introduces CubeletWorld, a novel framework for representing and analyzing urban environments through a discretized 3D grid of spatial units called cubelets. This abstraction enables privacy-preserving modeling by embedding diverse data signals, such as infrastructure, movement, or environmental indicators, into localized cubelet states. CubeletWorld supports downstream tasks such as planning, navigation, and occupancy prediction without requiring agent-driven sensing. To evaluate this paradigm, we propose the CubeletWorld State Prediction task, which involves predicting the cubelet state using a realistic dataset containing various urban elements like streets and buildings through this discretized representation. We explore a range of modified core models suitable for our setting and analyze challenges posed by increasing spatial granularity, specifically the issue of sparsity in representation and scalability of baselines. In contrast to existing 3D occupancy prediction models, our cubelet-centric approach focuses on inferring state at the spatial unit level, enabling greater generalizability across regions and improved privacy compliance. Our results demonstrate that CubeletWorld offers a flexible and extensible framework for learning from complex urban data, and it opens up new possibilities for scalable simulation and decision support in domains such as socio-demographic modeling, environmental monitoring, and emergency response. The code and datasets can be downloaded from here.",
+    "published": "2025-11-21T00:19:02Z",
+    "comment": "10 pages, 5 figures",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Azlaan Mustafa Samad",
+      "Hoang H. Nguyen",
+      "Lukas Berg",
+      "Henrik M\u00fcller",
+      "Yuan Xue",
+      "Daniel Kudenko",
+      "Zahra Ahmadi"
+    ]
+  },
+  {
+    "id": "2510.21228v1",
+    "title": "DispatchMAS: Fusing taxonomy and artificial intelligence agents for emergency medical services",
+    "pdf_url": "https://arxiv.org/pdf/2510.21228v1",
+    "summary": "Objective: Emergency medical dispatch (EMD) is a high-stakes process challenged by caller distress, ambiguity, and cognitive load. Large Language Models (LLMs) and Multi-Agent Systems (MAS) offer opportunities to augment dispatchers. This study aimed to develop and evaluate a taxonomy-grounded, LLM-powered multi-agent system for simulating realistic EMD scenarios. Methods: We constructed a clinical taxonomy (32 chief complaints, 6 caller identities from MIMIC-III) and a six-phase call protocol. Using this framework, we developed an AutoGen-based MAS with Caller and Dispatcher Agents. The system grounds interactions in a fact commons to ensure clinical plausibility and mitigate misinformation. We used a hybrid evaluation framework: four physicians assessed 100 simulated cases for \"Guidance Efficacy\" and \"Dispatch Effectiveness,\" supplemented by automated linguistic analysis (sentiment, readability, politeness). Results: Human evaluation, with substantial inter-rater agreement (Gwe's AC1 > 0.70), confirmed the system's high performance. It demonstrated excellent Dispatch Effectiveness (e.g., 94 % contacting the correct potential other agents) and Guidance Efficacy (advice provided in 91 % of cases), both rated highly by physicians. Algorithmic metrics corroborated these findings, indicating a predominantly neutral affective profile (73.7 % neutral sentiment; 90.4 % neutral emotion), high readability (Flesch 80.9), and a consistently polite style (60.0 % polite; 0 % impolite). Conclusion: Our taxonomy-grounded MAS simulates diverse, clinically plausible dispatch scenarios with high fidelity. Findings support its use for dispatcher training, protocol evaluation, and as a foundation for real-time decision support. This work outlines a pathway for safely integrating advanced AI agents into emergency response workflows.",
+    "published": "2025-10-24T08:01:21Z",
+    "comment": "27 pages, 7 figures, 3 tables",
+    "primary_category": "cs.CL",
+    "authors": [
+      "Xiang Li",
+      "Huizi Yu",
+      "Wenkong Wang",
+      "Yiran Wu",
+      "Jiayan Zhou",
+      "Wenyue Hua",
+      "Xinxin Lin",
+      "Wenjia Tan",
+      "Lexuan Zhu",
+      "Bingyi Chen",
+      "Guang Chen",
+      "Ming-Li Chen",
+      "Yang Zhou",
+      "Zhao Li",
+      "Themistocles L. Assimes",
+      "Yongfeng Zhang",
+      "Qingyun Wu",
+      "Xin Ma",
+      "Lingyao Li",
+      "Lizhou Fan"
+    ]
+  },
+  {
+    "id": "2509.08756v1",
+    "title": "Using AI to Optimize Patient Transfer and Resource Utilization During Mass-Casualty Incidents: A Simulation Platform",
+    "pdf_url": "https://arxiv.org/pdf/2509.08756v1",
+    "summary": "Mass casualty incidents (MCIs) overwhelm healthcare systems and demand rapid, accurate patient-hospital allocation decisions under extreme pressure. Here, we developed and validated a deep reinforcement learning-based decision-support AI agent to optimize patient transfer decisions during simulated MCIs by balancing patient acuity levels, specialized care requirements, hospital capacities, and transport logistics. To integrate this AI agent, we developed MasTER, a web-accessible command dashboard for MCI management simulations. Through a controlled user study with 30 participants (6 trauma experts and 24 non-experts), we evaluated three interaction approaches with the AI agent (human-only, human-AI collaboration, and AI-only) across 20- and 60-patient MCI scenarios in the Greater Toronto Area. Results demonstrate that increasing AI involvement significantly improves decision quality and consistency. The AI agent outperforms trauma surgeons (p < 0.001) and enables non-experts to achieve expert-level performance when assisted, contrasting sharply with their significantly inferior unassisted performance (p < 0.001). These findings establish the potential for our AI-driven decision support to enhance both MCI preparedness training and real-world emergency response management.",
+    "published": "2025-09-10T16:46:54Z",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Zhaoxun \"Lorenz\" Liu",
+      "Wagner H. Souza",
+      "Jay Han",
+      "Amin Madani"
+    ]
+  },
+  {
+    "id": "2506.17929v1",
+    "title": "ASTER: Adaptive Spatio-Temporal Early Decision Model for Dynamic Resource Allocation",
+    "pdf_url": "https://arxiv.org/pdf/2506.17929v1",
+    "summary": "Supporting decision-making has long been a central vision in the field of spatio-temporal intelligence. While prior work has improved the timeliness and accuracy of spatio-temporal forecasting, converting these forecasts into actionable strategies remains a key challenge. A main limitation is the decoupling of the prediction and the downstream decision phases, which can significantly degrade the downstream efficiency. For example, in emergency response, the priority is successful resource allocation and intervention, not just incident prediction. To this end, it is essential to propose an Adaptive Spatio-Temporal Early Decision model (ASTER) that reforms the forecasting paradigm from event anticipation to actionable decision support. This framework ensures that information is directly used for decision-making, thereby maximizing overall effectiveness. Specifically, ASTER introduces a new Resource-aware Spatio-Temporal interaction module (RaST) that adaptively captures long- and short-term dependencies under dynamic resource conditions, producing context-aware spatiotemporal representations. To directly generate actionable decisions, we further design a Preference-oriented decision agent (Poda) based on multi-objective reinforcement learning, which transforms predictive signals into resource-efficient intervention strategies by deriving optimal actions under specific preferences and dynamic constraints. Experimental results on four benchmark datasets demonstrate the state-of-the-art performance of ASTER in improving both early prediction accuracy and resource allocation outcomes across six downstream metrics.",
+    "published": "2025-06-22T07:49:37Z",
+    "comment": "ASTER: Adaptive Spatio-Temporal Early Decision Model for Dynamic Resource Allocation",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Shulun Chen",
+      "Wei Shao",
+      "Flora D. Salim",
+      "Hao Xue"
+    ]
+  },
+  {
+    "id": "2512.14161v2",
+    "title": "Transfer Learning-Based Surrogate Modeling for Nonlinear Time-History Response Analysis of High-Fidelity Structural Models",
+    "pdf_url": "https://arxiv.org/pdf/2512.14161v2",
+    "summary": "In a performance based earthquake engineering (PBEE) framework, nonlinear time-history response analysis (NLTHA) for numerous ground motions are required to assess the seismic risk of buildings or civil engineering structures. However, such numerical simulations are computationally expensive, limiting the real-world practical application of the framework. To address this issue, previous studies have used machine learning to predict the structural responses to ground motions with low computational costs. These studies typically conduct NLTHAs for a few hundreds ground motions and use the results to train and validate surrogate models. However, most of the previous studies focused on computationally-inexpensive response analysis models such as single degree of freedom. Surrogate models of high-fidelity response analysis are required to enrich the quantity and diversity of information used for damage assessment in PBEE. Notably, the computational cost of creating training and validation datasets increases if the fidelity of response analysis model becomes higher. Therefore, methods that enable surrogate modeling of high-fidelity response analysis without a large number of training samples are needed. This study proposes a framework that uses transfer learning to construct the surrogate model of a high-fidelity response analysis model. This framework uses a surrogate model of low-fidelity response analysis as the pretrained model and transfers its knowledge to construct surrogate models for high-fidelity response analysis with substantially reduced computational cost. As a case study, surrogate models that predict responses of a 20-story steel moment frame were constructed with only 20 samples as the training dataset. The responses to the ground motions predicted by constructed surrogate model were consistent with a site-specific time-based hazard.",
+    "published": "2025-12-16T07:46:33Z",
+    "comment": "20 pages, 21 figures",
+    "primary_category": "cs.CE",
+    "authors": [
+      "Keiichi Ishikawa",
+      "Yuma Matsumoto",
+      "Taro Yaoyama",
+      "Sangwon Lee",
+      "Tatsuya Itoi"
+    ]
+  },
+  {
+    "id": "2405.09021v1",
+    "title": "Deep Learning in Earthquake Engineering: A Comprehensive Review",
+    "pdf_url": "https://arxiv.org/pdf/2405.09021v1",
+    "summary": "This article surveys the growing interest in utilizing Deep Learning (DL) as a powerful tool to address challenging problems in earthquake engineering. Despite decades of advancement in domain knowledge, issues such as uncertainty in earthquake occurrence, unpredictable seismic loads, nonlinear structural responses, and community engagement remain difficult to tackle using domain-specific methods. DL offers promising solutions by leveraging its data-driven capacity for nonlinear mapping, sequential data modeling, automatic feature extraction, dimensionality reduction, optimal decision-making, etc. However, the literature lacks a comprehensive review that systematically covers a consistent scope intersecting DL and earthquake engineering. To bridge the gap, the article first discusses methodological advances to elucidate various applicable DL techniques, such as multi-layer perceptron (MLP), convolutional neural network (CNN), recurrent neural network (RNN), generative adversarial network (GAN), autoencoder (AE), transfer learning (TL), reinforcement learning (RL), and graph neural network (GNN). A thorough research landscape is then disclosed by exploring various DL applications across different research topics, including vision-based seismic damage assessment and structural characterization, seismic demand and damage state prediction, seismic response history prediction, regional seismic risk assessment and community resilience, ground motion (GM) for engineering use, seismic response control, and the inverse problem of system/damage identification. Suitable DL techniques for each research topic are identified, emphasizing the preeminence of CNN for vision-based tasks, RNN for sequential data, RL for community resilience, and unsupervised learning for GM analysis. The article also discusses opportunities and challenges for leveraging DL in earthquake engineering research and practice.",
+    "published": "2024-05-15T01:22:30Z",
+    "primary_category": "cs.LG",
+    "authors": [
+      "Yazhou Xie"
+    ]
+  }
+]
