@@ -1,71 +1,100 @@
 # SeismoAgent-TW Web Platform (`website/`)
 
-This directory contains all web-facing interfaces and web services for the **SeismoAgent-TW** earthquake modeling and RAG platform.
+This directory contains the production web interfaces and web services for the **SeismoAgent-TW** earthquake modeling, multi-agent triage, and RAG platform.
+
+The architecture is fully decoupled into a **Next.js 15 App Router frontend** and a **FastAPI backend**.
 
 ---
 
 ## 📁 Directory Structure
 
-```
+```text
 website/
-├── frontend/               # Next.js 14 App Router, Tailwind CSS & Shadcn UI
+├── frontend/                       # Next.js 15 + React 19 Mission Control Interface
 │   ├── src/
-│   │   ├── app/            # App Router (page.tsx, layout.tsx, globals.css)
-│   │   ├── components/     # Chat, Sidebar, and Upload components
-│   │   ├── hooks/          # useRagStream hook (SSE streaming reader)
-│   │   ├── lib/            # Zod validation & API helpers
-│   │   └── types/          # Strong TypeScript interfaces
-│   ├── .env.example        # NEXT_PUBLIC_API_URL=http://localhost:8000
-│   └── package.json
+│   │   ├── app/                    # App Router (page.tsx, layout.tsx, globals.css)
+│   │   ├── components/mission-control/
+│   │   │   ├── control-header.tsx  # Scenario trigger, simulation status & triggers
+│   │   │   ├── alert-banner.tsx    # S-wave countdown clock & telemetry banner
+│   │   │   ├── gis-map.tsx         # Free Leaflet GIS basemaps with fault lines & wave fronts
+│   │   │   ├── digital-twins.tsx   # Facility structural drift & damage status cards
+│   │   │   ├── scada-panel.tsx     # Track A sub-millisecond machine interlocks
+│   │   │   ├── gmpe-curve.tsx      # Lin & Lee (2008) PGV attenuation chart
+│   │   │   ├── graph-preview.tsx   # Geo-GraphRAG multi-fault cascading ruptures
+│   │   │   └── copilot-drawer.tsx  # Slide-over SSE-streamed RAG copilot with citations
+│   │   ├── hooks/                  # useRagStream hook (SSE streaming reader)
+│   │   ├── lib/                    # Zod validation & API client helpers
+│   │   └── types/                  # TypeScript interfaces for triage, faults & twins
+│   ├── .env.example                # NEXT_PUBLIC_API_URL=http://localhost:8000
+│   ├── tailwind.config.ts          # Geotechnical palette tokens (ink_black, stormy_teal, etc.)
+│   └── package.json                # Next.js 15, React 19, Lucide, Leaflet, Tailwind
 │
-├── backend/                # FastAPI Application Server (SSE Streaming + RAG)
-│   ├── app/
-│   │   ├── api/routers/    # /api/chat (SSE stream), /api/upload, /api/health
-│   │   ├── core/           # Configuration loaded from .env
-│   │   ├── rag/            # Vector store and RAG async token engine
-│   │   └── schemas/        # Pydantic v2 schemas
-│   ├── tests/              # Pytest suite for endpoints and rate limiting
-│   ├── .env.example        # Server and LLM configurations
-│   └── requirements.txt
-│
-└── classic/                # Geospatial & Network Graph Dashboard
-    ├── css/                # Stylesheets (Tailwind & Leaflet styles)
-    ├── js/                 # Map & Geo-Graph rendering scripts
-    ├── index.html          # Interactive single-page dashboard
-    └── run.py              # Lightweight static HTTP server runner
+└── backend/                        # FastAPI Application Server (SSE Streaming + Multi-Agent Triage)
+    ├── app/
+    │   ├── api/routers/
+    │   │   ├── triage.py           # Multi-scenario trigger & simulation endpoints
+    │   │   ├── chat.py             # Server-Sent Events (SSE) RAG streaming endpoint
+    │   │   ├── upload.py           # Drag-and-drop document ingestion endpoint
+    │   │   └── health.py           # Healthcheck endpoint with indexed chunk counts
+    │   ├── core/                   # Server configuration loaded from .env
+    │   ├── rag/                    # In-memory vector store and RAG token streaming engine
+    │   └── schemas/                # Pydantic v2 validation schemas
+    ├── tests/                      # Pytest suite for API endpoints (8/8 passing)
+    ├── .env.example                # Server configuration & optional LLM keys
+    └── requirements.txt            # Minimal FastAPI dependencies
 ```
 
 ---
 
 ## 🚀 How to Run
 
-### 1. Decoupled Architecture (Recommended)
+### 1. Start the Backend (FastAPI)
 
-#### A. Start the Backend (FastAPI)
 ```bash
 cd website/backend
 pip install -r requirements.txt
 cp .env.example .env
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-```
-- API Docs (Swagger): `http://127.0.0.1:8000/docs`
-- Health Endpoint: `http://127.0.0.1:8000/api/health`
 
-#### B. Start the Frontend (Next.js)
+# Run FastAPI with Uvicorn
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+- **Interactive API Documentation (Swagger)**: `http://127.0.0.1:8000/docs`
+- **System Health Endpoint**: `http://127.0.0.1:8000/api/health`
+- **Scenarios List Endpoint**: `http://127.0.0.1:8000/api/triage/scenarios`
+
+### 2. Start the Frontend (Next.js 15)
+
 ```bash
 cd website/frontend
 npm install
 cp .env.example .env.local
+
+# Run development server
 npm run dev
+# Or run production build
+# npm run build && npm run start -p 3000
 ```
-- Web Application: `http://localhost:3000`
+
+- **Interactive Mission Control UI**: `http://localhost:3000`
 
 ---
 
-### 2. Classic GIS & Geo-Graph Dashboard
-If you wish to view the spatial Leaflet map with active fault lines and Vis.js graph topology:
+## 🎨 Geotechnical Color Palette
+
+The interface is styled using an enterprise geotechnical theme defined in `tailwind.config.ts`:
+
+- `ink_black`: `#001524` (Deep background & surfaces)
+- `stormy_teal`: `#15616d` (Telemetry borders & active navigation)
+- `papaya_whip`: `#ffecd1` (Light typography & highlighted readouts)
+- `vivid_tangerine`: `#ff7d00` (S-wave countdown & warning elements)
+- `brandy`: `#78290f` (Critical alerts & collapse risk badges)
+
+---
+
+## 🧪 Testing
+
 ```bash
-cd website/classic
-python run.py
+# Run backend test suite
+pytest website/backend/tests/
 ```
-- Classic Dashboard: `http://localhost:8080`
