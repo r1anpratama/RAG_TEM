@@ -18,7 +18,7 @@ const GisMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-black-500 text-prussian_blue-800 text-xs">
+      <div className="flex h-full w-full items-center justify-center bg-slate_obsidian-900 text-slate-400 text-xs">
         Initializing Taiwan Fault GIS Basemap...
       </div>
     ),
@@ -178,7 +178,7 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-black-500 text-alabaster_grey-500 antialiased font-sans">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate_obsidian-900 text-slate-100 antialiased font-sans">
       {/* 1. Sticky Control Header (z-[1200]) */}
       <ControlHeader
         scenarios={scenarios}
@@ -195,11 +195,11 @@ export default function MissionControlPage() {
       <AlertBanner scenario={selectedScenario} isSimulating={isSimulating} />
 
       {/* 3. Main Mission Control Operational Dashboard */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-black-500">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate_obsidian-900">
         {/* Top Split: Left = GIS Leaflet Map, Right = Physics GMPE & GeoGraph */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* GIS Map Panel (Cleanly separated header, zero menu overlap) */}
-          <div className="lg:col-span-7 h-[440px] rounded-xl border border-prussian_blue-600/40 overflow-hidden shadow-2xl bg-black-500 relative isolate z-0">
+          {/* GIS Map Panel */}
+          <div className="lg:col-span-7 h-[440px] rounded-xl border border-slate-800 overflow-hidden shadow-2xl bg-slate_obsidian-900 relative isolate z-0">
             <GisMap
               faults={faults}
               scenario={selectedScenario}

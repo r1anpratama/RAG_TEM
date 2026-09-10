@@ -80,15 +80,16 @@ npm run dev
 
 ---
 
-## 🎨 Geotechnical Color Palette
+## 🎨 Geotechnical Color Palette (Cyber Slate & Modern Mission Control)
 
-The interface is styled using a precision high-contrast geotechnical theme defined in `tailwind.config.ts`:
+The interface is styled using a modern ergonomic dark-mode palette engineered for extended monitoring comfort:
 
-- `black`: `#000000` (Deepest foundation background & ultra-dark card surfaces)
-- `prussian_blue`: `#14213d` (Structural panels, telemetry borders & data cards)
-- `orange`: `#fca311` (High-alert indicators, S-wave wavefronts & countdown clock)
-- `alabaster_grey`: `#e5e5e5` (High-readability light typography & technical readouts)
-- `white`: `#ffffff` (Pure white highlights, focal headers & numeric emphasis)
+- `slate_obsidian`: `#0b0f19` (Foundation background) & `#111c2e` (Elevated telemetry cards)
+- `cyber_cyan`: `#06b6d4` (Telemetry readouts, normal fault mechanics, AI Copilot aura)
+- `cyber_amber`: `#f59e0b` (Real-time S-wave countdown timer, active triggers)
+- `cyber_emerald`: `#10b981` (Safe building triage & verified SCADA interlocks)
+- `cyber_rose`: `#f43f5e` (Critical collapse risks & emergency alarms)
+- `ice_white`: `#f8fafc` (Headers) & `#94a3b8` (Muted labels for zero eye strain)
 
 ---
 

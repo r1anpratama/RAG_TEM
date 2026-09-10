@@ -81,17 +81,18 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
 
 ---
 
-## 🎨 Enterprise Palette Design System
+## 🎨 Enterprise Palette Design System (Cyber Slate & Modern Mission Control)
 
-The platform user interface is styled using a precision high-contrast geotechnical design system:
+The platform is designed with an **ergonomic, high-comfort dark mode design system** inspired by industry-leading command centers (Linear, Supabase, Datadog), specifically calibrated to eliminate eye fatigue during long-duration seismic monitoring:
 
-| Token | Base Hex | Key Shades | Purpose |
+| Token | Base Hex | Key Shades | Purpose & Ergonomic Rationale |
 | :--- | :--- | :--- | :--- |
-| `black` | `#000000` | `600: #333333`, `800: #999999` | Deepest foundation background & ultra-dark card contrast |
-| `prussian_blue` | `#14213d` | `400: #101b31`, `700: #3e67bf`, `800: #7e99d5` | Structural panels, telemetry borders & technical data cards |
-| `orange` | `#fca311` | `600: #fdb541`, `700: #fec871`, `900: #ffedd0` | High-alert indicators, S-wave wavefronts & countdown clock |
-| `alabaster_grey` | `#e5e5e5` | `100: #2e2e2e`, `700: #f0f0f0`, `900: #fafafa` | High-readability light typography & technical readouts |
-| `white` | `#ffffff` | `DEFAULT: #ffffff`, `400: #cccccc` | Pure white highlights, focal headers & numeric emphasis |
+| `slate_obsidian` | `#0b0f19` | `card: #111c2e`, `border: #1e293b` | Deep anti-glare foundation background. Eliminates contrast halation common with pitch-black screens. |
+| `cyber_cyan` | `#06b6d4` | `400: #22d3ee`, `700: #0e7490` | Primary high-tech accent, telemetry readouts, normal faults, and AI copilot interaction. |
+| `cyber_amber` | `#f59e0b` | `400: #fbbf24`, `600: #d97706` | High-urgency S-wave countdown clock, simulation triggers, and reverse fault lines. |
+| `cyber_emerald` | `#10b981` | `400: #34d399`, `700: #047857` | Verified structural safety badges (Green Safe) and operational SCADA interlocks. |
+| `cyber_rose` | `#f43f5e` | `400: #fb7185`, `600: #e11d48` | Critical emergency alarms and structural collapse warning indicators. |
+| `ice_white` | `#f8fafc` | `slate-400: #94a3b8` | Crisp ice-white headers and soft slate typography for maximum readability without eye strain. |
 
 ---
 
