@@ -1,39 +1,43 @@
 # Decoupled RAG Architecture (FastAPI Backend + Next.js App Router Frontend)
 
 - **Date:** 2026-09-10
-- **Status:** Implemented, Consolidated into `website/` & Verified
-- **Components:** `website/backend/` (FastAPI + Pydantic + In-Memory Vector DB / Pluggable Chroma/Qdrant), `website/frontend/` (Next.js 14 App Router + Tailwind CSS + Lucide + Zod), and `website/classic/` (Geospatial & GeoGraph dashboard)
+- **Status:** Unified Mission Control Implemented; `website/classic/` Purged
+- **Components:** `website/backend/` (FastAPI REST & SSE Streaming + Triage Bridge) and `website/frontend/` (Next.js 14 App Router + Leaflet GIS + Campus Digital Twins + SCADA Interlocks + GMPE Chart + RAG AI Copilot)
 - **Author:** Antigravity / SeismoAgent-TW Team
 
 ---
 
 ## 1. Architectural Philosophy & Decoupled Design
 
-To guarantee enterprise scalability, publication-grade security, and an ergonomic user experience, the RAG platform is divided into two autonomous layers:
+To guarantee enterprise scalability, publication-grade security, and an ergonomic user experience, the system unites real-world seismic engineering telemetry with generative AI into a unified modern Next.js 14 App Router + FastAPI platform:
 
 ```mermaid
-graph LR
-    subgraph Client ["Frontend (website/frontend/ - Next.js 14 App Router)"]
-        UI["ChatGPT-style UI<br/>(Message Bubble, Input, Sidebar)"]
-        StreamHook["useRagStream Hook<br/>(TextDecoder SSE Reader)"]
-        XSS["react-markdown + rehype-sanitize"]
-        ZodVal["Client Zod Schema Validation"]
+graph TD
+    subgraph Frontend ["Next.js 14 App Router (website/frontend/ - port 3000)"]
+        H["Control Header (Scenario Selector & Simulation Trigger)"]
+        Banner["Emergency S-Wave Alert Banner (Ticking Tenths-of-Sec Clock)"]
+        GIS["Leaflet GIS Map (38 Active Faults, NCU Marker, Expanding P/S Waves)"]
+        Twins["Campus Digital Twins (ASCE 41 Drift Ratio Gauges & Triage Badges)"]
+        SCADA["Track A Reflex SCADA Panel (<5ms Interlocks)"]
+        GMPE["Physics GMPE Attenuation Curve (Lin & Lee 2008 +-2sigma)"]
+        GraphUI["Geo-GraphRAG Cascading Ruptures (TEM Table 2)"]
+        Copilot["Docked RAG AI Copilot (SSE Streaming with Ground Truth Citations)"]
     end
 
-    subgraph Server ["Backend (website/backend/ - FastAPI Python)"]
-        CORS["CORS Middleware<br/>(Restricted to localhost:3000)"]
-        RateLimiter["Sliding Window Rate Limiter<br/>(IP-based, 429 Too Many Requests)"]
-        ChatRouter["/api/chat<br/>StreamingResponse(text/event-stream)"]
-        DocRouter["/api/upload<br/>PDF/TXT Validation & Chunking"]
-        RAGEngine["RAG Orchestrator<br/>(Semantic Retrieval & Citations)"]
-        VectorStore["Vector Store<br/>(InMemory / Chroma / Qdrant)"]
+    subgraph Backend ["FastAPI REST & SSE Engine (website/backend/ - port 8000)"]
+        API_Faults["GET /api/faults (38 Taiwan Fault Traces & Geometry)"]
+        API_Scenarios["GET /api/scenarios (Pre-configured Earthquake Events)"]
+        API_Triage["POST /api/triage (Dual-Track Reflex & Deliberative Dispatch)"]
+        API_GMPE["GET /api/gmpe (Taiwan Crustal GMPE Attenuation)"]
+        API_Chat["POST /api/chat (SSE Token Streaming with Citations)"]
+        API_Doc["POST /api/upload (Document Indexing)"]
+        API_Health["GET /api/health (System Diagnostics)"]
     end
 
-    UI --> ZodVal --> StreamHook
-    StreamHook -->|POST /api/chat (SSE Stream)| CORS
-    CORS --> RateLimiter --> ChatRouter --> RAGEngine --> VectorStore
-    RAGEngine -->|yield data: token| ChatRouter --> StreamHook --> XSS --> UI
-    UI -->|POST /api/upload| DocRouter --> VectorStore
+    H -->|POST /api/triage| API_Triage
+    GIS -->|GET /api/faults| API_Faults
+    GMPE -->|GET /api/gmpe| API_GMPE
+    Copilot -->|POST /api/chat| API_Chat
 ```
 
 ---
@@ -49,7 +53,8 @@ website/backend/
 │   │   │   ├── __init__.py
 │   │   │   ├── chat.py         # POST /api/chat (SSE token-by-token streaming)
 │   │   │   ├── document.py     # POST /api/upload (PDF/TXT extraction & indexing)
-│   │   │   └── health.py       # GET /api/health (service & vector status)
+│   │   │   ├── health.py       # GET /api/health (service & vector status)
+│   │   │   └── triage.py       # GET /api/faults, /api/scenarios, /api/gmpe, POST /api/triage
 │   │   └── __init__.py
 │   ├── core/
 │   │   ├── __init__.py

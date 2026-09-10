@@ -82,3 +82,32 @@ def test_rate_limiting_enforcement(monkeypatch) -> None:
     r_blocked = client.post("/api/chat", json={"query": "ping"})
     assert r_blocked.status_code == 429
     assert "Rate limit exceeded" in r_blocked.json()["detail"]
+
+
+def test_faults_and_nearest_endpoint() -> None:
+    resp = client.get("/api/faults?lat=24.968&lon=121.193")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["total_faults"] == 38
+    assert data["nearest_query"] is not None
+    assert data["nearest_query"]["nearest_fault_id"] == 2
+
+
+def test_triage_dispatch_endpoint() -> None:
+    payload = {
+        "event_id": "TEST-TRIAGE-001",
+        "elapsed_seconds": 8.0,
+        "magnitude": 6.91,
+        "depth_km": 8.0,
+        "epicenter_lat": 24.945,
+        "epicenter_lon": 121.185,
+        "predicted_pgv_nc_cm_s": 72.4,
+        "is_preliminary": True,
+    }
+    resp = client.post("/api/triage", json=payload)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "track_a_reflex" in data
+    assert "track_b_deliberative" in data
+    assert len(data["track_b_deliberative"]["facility_triage"]) >= 3
+

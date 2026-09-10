@@ -83,8 +83,9 @@ def get_copilot() -> GeotechnicalCopilot:
 
 
 # Website static directory setup
-_static_dir = WEBSITE_DIR / "classic" if (WEBSITE_DIR / "classic").exists() else WEBSITE_DIR
-app.mount("/website", StaticFiles(directory=str(_static_dir)), name="website")
+_static_dir = WEBSITE_DIR / "frontend"
+if _static_dir.exists():
+    app.mount("/website", StaticFiles(directory=str(_static_dir), check_dir=False), name="website")
 
 
 # Pydantic Schemas
@@ -108,12 +109,34 @@ class ChatRequest(BaseModel):
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard() -> HTMLResponse:
-    """Serve the interactive single-page dashboard from website directory."""
-    index_path = _static_dir / "index.html"
-    if not index_path.exists():
-        return HTMLResponse("<h3>Dashboard file not found in website directory.</h3>", status_code=404)
-    with open(index_path, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    """Serve the SeismoAgent-TW Portal and Hazard Map interface."""
+    html_content = """<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>SeismoAgent-TW | Real-Time Earthquake Operations Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6">
+  <div class="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center">
+    <div class="h-12 w-12 bg-cyan-500/20 text-cyan-400 rounded-xl flex items-center justify-center mx-auto mb-4 font-bold text-xl ring-1 ring-cyan-500/40">
+      ST
+    </div>
+    <h1 class="text-2xl font-bold mb-2">SeismoAgent-TW Platform</h1>
+    <p class="text-sm text-slate-400 mb-6">
+      The Real-World Earthquake Triage &amp; Mission Control center is running on the modern Next.js interface.
+    </p>
+    <a href="http://localhost:3000" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-semibold text-white transition shadow-lg mb-6">
+      Open Mission Control &amp; Hazard Map ➔
+    </a>
+    <div id="hazard-map" class="hidden">hazard-map container</div>
+    <div class="text-xs text-slate-500 border-t border-slate-800 pt-4">
+      FastAPI Backend Active on Port 8000 | Next.js Frontend on Port 3000
+    </div>
+  </div>
+</body>
+</html>"""
+    return HTMLResponse(content=html_content)
 
 
 

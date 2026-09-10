@@ -11,14 +11,14 @@ from fastapi.responses import JSONResponse
 
 try:
     from .core.config import settings
-    from .api.routers import chat_router, document_router, health_router
+    from .api.routers import chat_router, document_router, health_router, triage_router
 except (ImportError, ValueError):
     try:
         from app.core.config import settings
-        from app.api.routers import chat_router, document_router, health_router
+        from app.api.routers import chat_router, document_router, health_router, triage_router
     except ImportError:
         from website.backend.app.core.config import settings
-        from website.backend.app.api.routers import chat_router, document_router, health_router
+        from website.backend.app.api.routers import chat_router, document_router, health_router, triage_router
 
 app = FastAPI(
     title="RAG Platform API",
@@ -70,6 +70,7 @@ async def rate_limiting_middleware(request: Request, call_next):
 app.include_router(health_router)
 app.include_router(chat_router)
 app.include_router(document_router)
+app.include_router(triage_router)
 
 
 @app.get("/")

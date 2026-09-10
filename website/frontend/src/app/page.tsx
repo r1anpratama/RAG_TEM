@@ -1,71 +1,206 @@
 "use client";
 
-import React, { useState } from "react";
-import { Sidebar } from "@/components/sidebar/sidebar";
-import { ChatContainer } from "@/components/chat/chat-container";
-import { ChatInput } from "@/components/chat/chat-input";
+import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { ControlHeader } from "@/components/mission-control/control-header";
+import { AlertBanner } from "@/components/mission-control/alert-banner";
+import { DigitalTwins } from "@/components/mission-control/digital-twins";
+import { ScadaPanel } from "@/components/mission-control/scada-panel";
+import { GmpeCurve } from "@/components/mission-control/gmpe-curve";
+import { GraphPreview } from "@/components/mission-control/graph-preview";
+import { CopilotDrawer } from "@/components/mission-control/copilot-drawer";
 import { UploadModal } from "@/components/upload/upload-modal";
-import { useRagStream } from "@/hooks/use-rag-stream";
+import { Scenario, FaultTrace, TriageDispatchResponse } from "@/types/triage";
 
-export default function HomePage() {
+// Dynamically import GisMap to ensure SSR safety with Leaflet
+const GisMap = dynamic(
+  () =>
+    import("@/components/mission-control/gis-map").then((mod) => mod.GisMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-zinc-950 text-zinc-500 text-xs">
+        Loading GIS Spatial Fault Traces...
+      </div>
+    ),
+  }
+);
+
+export default function MissionControlPage() {
+  const [scenarios, setScenarios] = useState<Scenario[]>([]);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>("shuanglienpo_hukou_mw69");
+  const [faults, setFaults] = useState<FaultTrace[]>([]);
+  const [selectedFaultId, setSelectedFaultId] = useState<number | null>(null);
+  const [dispatch, setDispatch] = useState<TriageDispatchResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [triggerTime, setTriggerTime] = useState<number | null>(Date.now());
+  const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 
-  const {
-    messages,
-    isStreaming,
-    error,
-    sendMessage,
-    stopStreaming,
-    clearMessages,
-  } = useRagStream();
+  // 1. Fetch Scenarios on Mount
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/scenarios")
+      .then((res) => res.json())
+      .then((data) => {
+        setScenarios(data);
+        if (data.length > 0 && !selectedScenarioId) {
+          setSelectedScenarioId(data[0].id);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load scenarios:", err);
+        // Fallback realistic scenario
+        setScenarios([
+          {
+            id: "shuanglienpo_hukou_mw69",
+            title: "Shuanglienpo-Hukou Multi-Fault (Mw 6.91)",
+            description: "Near-source shallow crustal rupture 2.8 km from NCU campus.",
+            magnitude: 6.91,
+            depth_km: 8.0,
+            epicenter: { lat: 24.945, lon: 121.185 },
+            predicted_pgv_cm_s: 72.4,
+            target_facility: "NCU Campus & Taoyuan Corridor",
+            countdown_seconds: 3.8,
+          },
+        ]);
+      });
+  }, []);
 
-  const handleSendPrompt = (prompt: string) => {
-    sendMessage(prompt);
+  // 2. Fetch 38 Taiwan Seismogenic Structures
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/faults")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.faults) {
+          setFaults(data.faults);
+        }
+      })
+      .catch((err) => console.error("Failed to load faults:", err));
+  }, []);
+
+  // 3. Current active scenario
+  const currentScenario =
+    scenarios.find((s) => s.id === selectedScenarioId) || scenarios[0] || null;
+
+  // 4. Handle Simulation Trigger
+  const handleTriggerSimulation = async () => {
+    if (!currentScenario) return;
+    setIsLoading(true);
+
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/api/triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event_id: `SIM-${Date.now()}`,
+          elapsed_seconds: 8.0,
+          magnitude: currentScenario.magnitude,
+          depth_km: currentScenario.depth_km,
+          epicenter_lat: currentScenario.epicenter.lat,
+          epicenter_lon: currentScenario.epicenter.lon,
+          predicted_pgv_nc_cm_s: currentScenario.predicted_pgv_cm_s,
+          is_preliminary: true,
+        }),
+      });
+
+      if (resp.ok) {
+        const data: TriageDispatchResponse = await resp.json();
+        setDispatch(data);
+        setTriggerTime(Date.now());
+      }
+    } catch (err) {
+      console.error("Simulation dispatch failed:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleUploadSuccess = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
+  // Trigger default simulation once scenario is loaded
+  useEffect(() => {
+    if (scenarios.length > 0 && !dispatch) {
+      handleTriggerSimulation();
+    }
+  }, [scenarios]);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100">
-      {/* Left Sidebar */}
-      <Sidebar
-        onNewChat={clearMessages}
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-zinc-100 antialiased font-sans">
+      {/* 1. Header Bar */}
+      <ControlHeader
+        scenarios={scenarios}
+        selectedScenarioId={selectedScenarioId}
+        onSelectScenario={(id) => {
+          setSelectedScenarioId(id);
+          setTriggerTime(Date.now());
+        }}
+        onTriggerSimulation={handleTriggerSimulation}
+        isLoading={isLoading}
+        onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}
+        isCopilotOpen={isCopilotOpen}
         onOpenUpload={() => setIsUploadOpen(true)}
-        refreshTrigger={refreshTrigger}
       />
 
-      {/* Main Chat Workspace */}
-      <main className="relative flex flex-1 flex-col h-full overflow-hidden bg-zinc-900/20">
-        {/* Global Error Banner */}
-        {error && (
-          <div className="bg-red-950/80 border-b border-red-800/80 px-4 py-2 text-center text-xs text-red-200">
-            {error}
+      {/* 2. Real-Time Emergency S-Wave Alert Banner */}
+      <AlertBanner
+        scenario={currentScenario}
+        dispatch={dispatch}
+        triggerTime={triggerTime}
+      />
+
+      {/* 3. Main Mission Control Operational Dashboard */}
+      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Top Operational Section: GIS Map (Left 60%) + SCADA & GMPE/Graph (Right 40%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Interactive Leaflet GIS Map */}
+          <div className="lg:col-span-7 h-[380px] rounded-xl border border-zinc-800 overflow-hidden shadow-xl bg-zinc-950">
+            <GisMap
+              faults={faults}
+              scenario={currentScenario}
+              selectedFaultId={selectedFaultId}
+              onSelectFault={(f) => setSelectedFaultId(f.fault_id)}
+            />
           </div>
-        )}
 
-        {/* Scrollable Conversation Feed */}
-        <ChatContainer
-          messages={messages}
-          onSelectPrompt={handleSendPrompt}
-        />
+          {/* Right Operational Telemetry: SCADA + GMPE + GeoGraph */}
+          <div className="lg:col-span-5 flex flex-col space-y-3">
+            <ScadaPanel
+              actuators={dispatch?.track_a_reflex.actuators}
+              triggerStatus={dispatch?.track_a_reflex.trigger_level}
+              latencyMs={dispatch?.execution_summary.track_a_latency_ms}
+            />
 
-        {/* Floating Bottom Input Area */}
-        <ChatInput
-          onSend={handleSendPrompt}
-          onStop={stopStreaming}
-          onOpenUpload={() => setIsUploadOpen(true)}
-          isStreaming={isStreaming}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <GmpeCurve
+                magnitude={currentScenario?.magnitude}
+                observedPgv={currentScenario?.predicted_pgv_cm_s}
+                observedDistanceKm={2.8}
+              />
+              <GraphPreview
+                cascades={dispatch?.track_b_deliberative.geotech.cascading_ruptures}
+                primaryFaultName={dispatch?.track_b_deliberative.geotech.primary_fault_name}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section: Campus Digital Twins & Structural Triage */}
+        <DigitalTwins
+          facilities={dispatch?.track_b_deliberative.facility_triage || []}
+          isLoading={isLoading}
         />
       </main>
 
-      {/* Upload Document Modal */}
+      {/* 4. Docked / Slide-over RAG Copilot Chatbot */}
+      <CopilotDrawer
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+        onOpenUpload={() => setIsUploadOpen(true)}
+      />
+
+      {/* 5. Knowledge Base Document Upload Modal */}
       <UploadModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onSuccess={handleUploadSuccess}
+        onSuccess={() => {}}
       />
     </div>
   );
