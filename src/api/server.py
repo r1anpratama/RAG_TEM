@@ -145,6 +145,8 @@ async def list_faults(
 
     for p in catalog.list_all():
         scenarios = graph.get_cascading_ruptures(p.id)
+        align = catalog.get_alignment(p.id)
+        coords = [[lat, lon] for lon, lat in align.coordinates] if align and align.coordinates else []
         faults_data.append({
             "fault_id": p.id,
             "name": p.name,
@@ -153,7 +155,9 @@ async def list_faults(
             "slip_rate_mm_yr": p.slip_rate_mm_yr,
             "mw_max": p.mw_max,
             "cascading_scenarios": scenarios,
+            "coordinates": coords,
         })
+
 
     nearest_info = None
     if lat is not None and lon is not None:

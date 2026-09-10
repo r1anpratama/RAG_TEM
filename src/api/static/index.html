@@ -53,8 +53,18 @@
     #hazard-map {
       height: 520px;
       border-radius: 0.75rem;
-      background: #0f172a;
+      background-color: #1e293b;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 0);
+      background-size: 24px 24px;
     }
+    /* Technical grey monochromatic GIS theme for free OpenStreetMap tiles (Zero API key required) */
+    .leaflet-tile {
+      filter: grayscale(100%) brightness(0.65) contrast(1.15);
+    }
+    .leaflet-container {
+      background-color: #1e293b;
+    }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
     }
@@ -417,10 +427,10 @@
       // Centered on Northern Taiwan / Taoyuan NCU area
       map = L.map('hazard-map').setView([24.968, 121.193], 10);
 
-      // Dark basemap tiles
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB &copy; OpenStreetMap',
+      // Free OpenStreetMap tile server with grey technical styling (No API key required)
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
       }).addTo(map);
 
       faultLayerGroup = L.layerGroup().addTo(map);
@@ -428,44 +438,48 @@
       // Add NCU Campus Marker
       const ncuIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: "<div style='background-color:#06b6d4; width:16px; height:16px; border-radius:50%; border:3px solid #fff;'></div>",
+        html: "<div style='background-color:#06b6d4; width:16px; height:16px; border-radius:50%; border:3px solid #fff; box-shadow:0 0 10px #06b6d4;'></div>",
         iconSize: [16, 16],
       });
       L.marker([24.968, 121.193], { icon: ncuIcon }).addTo(map)
-        .bindPopup("<b>National Central University (NCU)</b><br>Target Digital Twin Campus<br>Lat: 24.968, Lon: 121.193");
+        .bindPopup("<b>National Central University (NCU)</b><br>Target Digital Twin Campus<br>Lat: 24.968°N, Lon: 121.193°E");
 
       loadFaultTraces();
     }
 
-    // 2. Fetch and Render Fault Traces
+    // 2. Fetch and Render All 38 Fault Traces Dynamically
     async function loadFaultTraces() {
       try {
         const resp = await fetch('/api/v1/faults');
         const data = await resp.json();
 
-        // Approximate key fault paths for visualization
-        const faultCoords = {
-          2: [[24.93, 121.16], [24.95, 121.19], [24.97, 121.22]], // Shuanglienpo
-          3: [[24.90, 121.12], [24.92, 121.15]], // Yangmei
-          4: [[24.85, 121.05], [24.89, 121.10]], // Hukou
-          16: [[23.75, 120.70], [24.05, 120.78], [24.30, 120.85]], // Chelungpu
-          13: [[24.45, 120.90], [24.60, 121.00]], // Shihtan
-        };
+        if (data.faults && data.faults.length > 0) {
+          data.faults.forEach(f => {
+            if (f.coordinates && f.coordinates.length > 1) {
+              const isAdjacentNCU = (f.fault_id === 2); // Shuanglienpo
+              const polyline = L.polyline(f.coordinates, {
+                color: isAdjacentNCU ? '#f43f5e' : '#ef4444',
+                weight: isAdjacentNCU ? 4 : 2.5,
+                opacity: isAdjacentNCU ? 0.95 : 0.8,
+                dashArray: isAdjacentNCU ? null : '3, 4'
+              }).addTo(faultLayerGroup);
 
-        for (const [id, coords] of Object.entries(faultCoords)) {
-          const polyline = L.polyline(coords, {
-            color: '#ef4444',
-            weight: 3,
-            opacity: 0.85,
-            dashArray: '4, 4'
-          }).addTo(faultLayerGroup);
-
-          polyline.bindPopup(`<b>Active Fault Structure ID ${id}</b><br>TEM Active Seismogenic Fault`);
+              polyline.bindPopup(
+                `<div style="color:#0f172a; font-family:sans-serif; font-size:12px;">` +
+                `<strong style="color:#dc2626;">Fault ID ${f.fault_id}: ${f.name}</strong><br>` +
+                `<b>Slip Rate:</b> ${f.slip_rate_mm_yr} mm/yr<br>` +
+                `<b>Max Magnitude:</b> Mw ${f.mw_max}<br>` +
+                `<b>Dip:</b> ${f.dip_deg}°, <b>Rake:</b> ${f.rake_deg}°` +
+                `</div>`
+              );
+            }
+          });
         }
       } catch (err) {
         console.error("Failed to load fault traces:", err);
       }
     }
+
 
     // 3. Initialize GMPE Attenuation Chart
     function initGMPEChart() {
