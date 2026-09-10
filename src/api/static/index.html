@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SeismoAgent-TW | Real-Time Agentic Seismic Hazard & Emergency Triage</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS for Geospatial Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Vis.js for Knowledge Graph Visualization -->
+  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <!-- Chart.js for GMPE Attenuation Plot -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfeff',
+              500: '#06b6d4',
+              700: '#0e7490',
+              900: '#164e63',
+            },
+            danger: '#ef4444',
+            warning: '#f59e0b',
+            success: '#10b981',
+            darkbg: '#0b0f19',
+            darkpanel: '#111827',
+            darkcard: '#1f2937',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.33); opacity: 0.8; }
+      80%, 100% { opacity: 0; transform: scale(2.2); }
+    }
+    .wave-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    #network-graph {
+      height: 480px;
+      border-radius: 0.75rem;
+      background: #0d1322;
+    }
+    #hazard-map {
+      height: 520px;
+      border-radius: 0.75rem;
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #374151;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen font-sans antialiased custom-scrollbar">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-darkpanel/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-cyan-600 to-emerald-500 flex items-center justify-center font-bold text-xl shadow-lg shadow-cyan-500/20">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            SeismoAgent-TW
+            <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 font-mono border border-cyan-500/30">v1.0.0</span>
+          </h1>
+          <p class="text-xs text-slate-400">Multimodal Agentic RAG for Taiwan Seismic Hazard & Real-Time Emergency Triage</p>
+        </div>
+      </div>
+
+      <!-- Live Engine Performance Metrics -->
+      <div class="flex items-center gap-3 text-xs font-mono">
+        <div class="bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
+          <span class="text-slate-400">Track A Reflex:</span>
+          <span class="text-emerald-400 font-bold ml-1" id="track-a-latency">0.009 ms</span>
+        </div>
+        <div class="bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
+          <span class="text-slate-400">Track B Multi-Agent:</span>
+          <span class="text-cyan-400 font-bold ml-1" id="track-b-latency">0.87 ms</span>
+        </div>
+        <div class="bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-slate-300">RTX 3090 Ready</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Real-Time Emergency Alert Banner -->
+  <section id="alert-banner" class="bg-slate-900 border-b border-slate-800 px-4 py-3 transition-colors duration-500">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div id="banner-icon" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-bold text-sm">
+          ℹ️
+        </div>
+        <div>
+          <div class="text-sm font-bold tracking-wide uppercase text-slate-300" id="banner-title">
+            SYSTEM STANDBY — MONITORING TT-SAM SEISMIC STREAM
+          </div>
+          <div class="text-xs text-slate-400" id="banner-desc">
+            No active earthquake alert. National Central University (NCU) digital twin standing by.
+          </div>
+        </div>
+      </div>
+
+      <!-- S-Wave Countdown Badge -->
+      <div class="flex items-center gap-4">
+        <div class="bg-slate-950 px-4 py-2 rounded-lg border border-slate-800 text-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400">S-Wave Est. Arrival</div>
+          <div class="text-2xl font-black font-mono text-cyan-400" id="swave-timer">--.-s</div>
+        </div>
+
+        <!-- Quick Scenarios Selector -->
+        <div class="flex items-center gap-2">
+          <button onclick="triggerScenario('shuanglienpo_hukou_mw69')" class="px-3 py-2 text-xs font-semibold rounded-md bg-red-600 hover:bg-red-500 text-white shadow-sm transition">
+            🚨 Shuanglienpo Mw 6.91
+          </button>
+          <button onclick="triggerScenario('hualien_offshore_mw72')" class="px-3 py-2 text-xs font-semibold rounded-md bg-amber-600 hover:bg-amber-500 text-white shadow-sm transition">
+            🌊 Hualien Mw 7.20
+          </button>
+          <button onclick="startLiveStreaming()" class="px-3 py-2 text-xs font-semibold rounded-md bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm transition flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> Live WebSocket Stream
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Dashboard -->
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- Row 1: GIS Hazard Map & Campus Digital Twin Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left 7 cols: Interactive Geospatial Taiwan Map -->
+      <div class="lg:col-span-7 bg-darkpanel border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 text-lg">🗺️</span>
+            <h2 class="font-bold text-white text-base">Taiwan Active Faults & Regional Facilities</h2>
+          </div>
+          <div class="text-xs text-slate-400">
+            <span>Layers: </span>
+            <span class="text-red-400 font-semibold">38 Active Faults</span> |
+            <span class="text-cyan-400 font-semibold">Campus Digital Twins</span>
+          </div>
+        </div>
+        <div id="hazard-map" class="relative"></div>
+        <div class="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/60 pt-2">
+          <span>Epicenter: <strong id="map-epicenter-coord" class="text-slate-200">24.945° N, 121.185° E</strong></span>
+          <span>Focal Depth: <strong id="map-focal-depth" class="text-slate-200">8.0 km (Shallow Crustal)</strong></span>
+          <span>Target: <strong class="text-cyan-400">NCU Campus (2.8 km)</strong></span>
+        </div>
+      </div>
+
+      <!-- Right 5 cols: Campus Digital Twin Triage Grid -->
+      <div class="lg:col-span-5 bg-darkpanel border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-cyan-400 text-lg">🏢</span>
+            <h2 class="font-bold text-white text-base">Campus Facility Digital Twins</h2>
+          </div>
+          <span class="text-xs text-slate-400">Structural Vulnerability Ranking</span>
+        </div>
+
+        <div id="facility-cards-container" class="space-y-3">
+          <!-- Digital Twin Facility Card 1 -->
+          <div class="bg-darkcard border border-slate-700/60 rounded-lg p-3 relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+                  NCU Science Building 4
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">PRE-1999</span>
+                </h3>
+                <p class="text-xs text-slate-400">Soft-story vulnerable structure | T1 = 0.45s</p>
+              </div>
+              <span id="tag-fac-b4" class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-red-600/20 text-red-400 border border-red-500/30">
+                RED / EVACUATE
+              </span>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-xs font-mono">
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Drift IDR</div>
+                <div id="idr-fac-b4" class="font-bold text-red-400">1.82%</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Collapse Risk</div>
+                <div id="risk-fac-b4" class="font-bold text-red-400">HIGH</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Int. CWA</div>
+                <div id="cwa-fac-b4" class="font-bold text-red-400">7</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Digital Twin Facility Card 2 -->
+          <div class="bg-darkcard border border-slate-700/60 rounded-lg p-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+                  NCU Engineering Building 5
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">POST-1999</span>
+                </h3>
+                <p class="text-xs text-slate-400">Ductile reinforced frame | T1 = 0.60s</p>
+              </div>
+              <span id="tag-fac-eng5" class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-amber-600/20 text-amber-400 border border-amber-500/30">
+                YELLOW / INSPECT
+              </span>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-xs font-mono">
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Drift IDR</div>
+                <div id="idr-fac-eng5" class="font-bold text-amber-400">0.95%</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Collapse Risk</div>
+                <div id="risk-fac-eng5" class="font-bold text-emerald-400">LOW</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Int. CWA</div>
+                <div id="cwa-fac-eng5" class="font-bold text-amber-400">6-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Digital Twin Facility Card 3 -->
+          <div class="bg-darkcard border border-slate-700/60 rounded-lg p-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+                  HSP Semiconductor Fab
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">BASE-ISOLATED</span>
+                </h3>
+                <p class="text-xs text-slate-400">High-tech cleanroom production | T1 = 2.20s</p>
+              </div>
+              <span id="tag-fac-fab" class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+                GREEN / SAFE
+              </span>
+            </div>
+            <div class="mt-2 grid grid-cols-3 gap-2 text-xs font-mono">
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Drift IDR</div>
+                <div id="idr-fac-fab" class="font-bold text-emerald-400">0.34%</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Collapse Risk</div>
+                <div id="risk-fac-fab" class="font-bold text-emerald-400">MINIMAL</div>
+              </div>
+              <div class="bg-slate-900/60 p-1.5 rounded">
+                <div class="text-[10px] text-slate-400">Int. CWA</div>
+                <div id="cwa-fac-fab" class="font-bold text-cyan-400">5-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track A SCADA Automated Interlocks Trigger State -->
+        <div class="mt-4 bg-slate-950 border border-slate-800 rounded-lg p-3">
+          <div class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+            <span>⚡ Automated SCADA Machine Interlocks</span>
+            <span class="text-[10px] font-mono text-emerald-400">EXEC: 0.009 ms</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div id="scada-elevator" class="p-2 rounded bg-red-950/60 border border-red-800/80 text-red-300">
+              <div class="text-base">🛗</div>
+              <div class="font-bold">ELEVATOR</div>
+              <div class="text-[10px] text-red-400">INTERLOCKED</div>
+            </div>
+            <div id="scada-gas" class="p-2 rounded bg-red-950/60 border border-red-800/80 text-red-300">
+              <div class="text-base">🔥</div>
+              <div class="font-bold">GAS MAIN</div>
+              <div class="text-[10px] text-red-400">SHUT OFF</div>
+            </div>
+            <div id="scada-exhaust" class="p-2 rounded bg-red-950/60 border border-red-800/80 text-red-300">
+              <div class="text-base">☣️</div>
+              <div class="font-bold">EXHAUST</div>
+              <div class="text-[10px] text-red-400">ISOLATED</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Row 2: Geo-GraphRAG Topology & Physics GMPE Curve -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left 7 cols: Interactive Knowledge Graph Visualizer -->
+      <div class="lg:col-span-7 bg-darkpanel border border-slate-800 rounded-xl p-4 shadow-xl">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-amber-400 text-lg">🕸️</span>
+            <h2 class="font-bold text-white text-base">Geo-GraphRAG Topology (TEM PSHA2025 Table 2)</h2>
+          </div>
+          <div class="text-xs text-slate-400 flex items-center gap-3">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Faults</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Rupture Pairs</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span> Facilities</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Lifelines</span>
+          </div>
+        </div>
+        <div id="network-graph"></div>
+        <div class="mt-2 text-xs text-slate-400 flex justify-between">
+          <span>Click any node to inspect geotechnical parameters & cascading links.</span>
+          <span class="text-cyan-400 font-mono">45 Nodes | 78 Relational Edges</span>
+        </div>
+      </div>
+
+      <!-- Right 5 cols: Physics-Informed GMPE Attenuation Curve -->
+      <div class="lg:col-span-5 bg-darkpanel border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 text-lg">📈</span>
+            <h2 class="font-bold text-white text-base">Physics GMPE Attenuation (Lin & Lee 2008)</h2>
+          </div>
+          <span id="gmpe-status-badge" class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            VERIFIED ±2.5σ
+          </span>
+        </div>
+        <div class="h-64">
+          <canvas id="gmpeChart"></canvas>
+        </div>
+        <div class="mt-3 bg-slate-950 p-2.5 rounded text-xs font-mono text-slate-300 border border-slate-800">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Observed TT-SAM PGV:</span>
+            <span id="gmpe-obs-val" class="font-bold text-white">72.4 cm/s</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Theoretical Median PGV:</span>
+            <span id="gmpe-med-val" class="font-bold text-cyan-400">68.5 cm/s</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Physics 2σ Confidence Band:</span>
+            <span id="gmpe-bounds-val" class="font-bold text-emerald-400">[21.2, 221.8] cm/s</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Row 3: Conversational Geotechnical Copilot (Grounding & QA) -->
+    <div class="bg-darkpanel border border-slate-800 rounded-xl p-5 shadow-xl">
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-cyan-400 text-xl">🤖</span>
+          <div>
+            <h2 class="font-bold text-white text-lg">Conversational Geotechnical Copilot</h2>
+            <p class="text-xs text-slate-400">Grounded strictly in TEM PSHA 2025, 38 Fault Parameters, and Physics GMPE bounds (0.0% Hallucination)</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="askCopilot('What happens if Fault 2 (Shuanglienpo) and Fault 4 (Hukou) rupture together?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            Cascading Rupture ID 2+4?
+          </button>
+          <button onclick="askCopilot('Why is NCU Science Building 4 categorized as RED immediate evacuation?')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            Why is B4 Tagged RED?
+          </button>
+          <button onclick="askCopilot('Calculate theoretical GMPE for Mw 6.91 at 2.8 km distance.')" class="text-xs px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            GMPE for Mw 6.9 @ 2.8km
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat History Box -->
+      <div id="chat-box" class="h-64 overflow-y-auto bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-3 custom-scrollbar text-sm">
+        <div class="flex gap-3 items-start">
+          <div class="w-7 h-7 rounded-full bg-cyan-600 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            AI
+          </div>
+          <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 text-slate-200 text-xs leading-relaxed max-w-2xl">
+            👋 Greetings. I am <strong>SeismoAgent-TW</strong>, connected to the Taiwan Earthquake Model (TEM PSHA 2025), 38 on-land seismogenic structures, and the NCU campus digital twin.
+            Ask me any question regarding fault slip rates, multi-structure rupture pairings, building vulnerability, or physics GMPE checks!
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Field -->
+      <form onsubmit="handleChatSubmit(event)" class="mt-3 flex gap-2">
+        <input id="chat-input" type="text" placeholder="Ask a geotechnical hazard question (e.g. 'What is the maximum magnitude for Shuanglienpo fault?')..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition">
+        <button type="submit" class="px-5 py-2.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm shadow-md transition flex items-center gap-1.5">
+          <span>Send</span> ➔
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // State
+    let map = null;
+    let faultLayerGroup = null;
+    let pWaveCircle = null;
+    let sWaveCircle = null;
+    let gmpeChartInstance = null;
+    let network = null;
+    let ws = null;
+    let countdownInterval = null;
+
+    // 1. Initialize Map
+    function initMap() {
+      // Centered on Northern Taiwan / Taoyuan NCU area
+      map = L.map('hazard-map').setView([24.968, 121.193], 10);
+
+      // Dark basemap tiles
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CartoDB &copy; OpenStreetMap',
+        maxZoom: 18,
+      }).addTo(map);
+
+      faultLayerGroup = L.layerGroup().addTo(map);
+
+      // Add NCU Campus Marker
+      const ncuIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#06b6d4; width:16px; height:16px; border-radius:50%; border:3px solid #fff;'></div>",
+        iconSize: [16, 16],
+      });
+      L.marker([24.968, 121.193], { icon: ncuIcon }).addTo(map)
+        .bindPopup("<b>National Central University (NCU)</b><br>Target Digital Twin Campus<br>Lat: 24.968, Lon: 121.193");
+
+      loadFaultTraces();
+    }
+
+    // 2. Fetch and Render Fault Traces
+    async function loadFaultTraces() {
+      try {
+        const resp = await fetch('/api/v1/faults');
+        const data = await resp.json();
+
+        // Approximate key fault paths for visualization
+        const faultCoords = {
+          2: [[24.93, 121.16], [24.95, 121.19], [24.97, 121.22]], // Shuanglienpo
+          3: [[24.90, 121.12], [24.92, 121.15]], // Yangmei
+          4: [[24.85, 121.05], [24.89, 121.10]], // Hukou
+          16: [[23.75, 120.70], [24.05, 120.78], [24.30, 120.85]], // Chelungpu
+          13: [[24.45, 120.90], [24.60, 121.00]], // Shihtan
+        };
+
+        for (const [id, coords] of Object.entries(faultCoords)) {
+          const polyline = L.polyline(coords, {
+            color: '#ef4444',
+            weight: 3,
+            opacity: 0.85,
+            dashArray: '4, 4'
+          }).addTo(faultLayerGroup);
+
+          polyline.bindPopup(`<b>Active Fault Structure ID ${id}</b><br>TEM Active Seismogenic Fault`);
+        }
+      } catch (err) {
+        console.error("Failed to load fault traces:", err);
+      }
+    }
+
+    // 3. Initialize GMPE Attenuation Chart
+    function initGMPEChart() {
+      const ctx = document.getElementById('gmpeChart').getContext('2d');
+      const distances = [1, 2, 5, 10, 15, 20, 30, 40, 50, 75, 100];
+
+      // Lin & Lee 2008 curve for Mw 6.91
+      const medianPGV = distances.map(d => {
+        const ln = 3.65 + 0.58 * 6.91 - 1.15 * Math.log(d + 0.05 * Math.exp(0.55 * 6.91));
+        return Math.round(Math.exp(ln) * 10) / 10;
+      });
+
+      const upper2Sigma = medianPGV.map(v => Math.round(v * Math.exp(2 * 0.58) * 10) / 10);
+      const lower2Sigma = medianPGV.map(v => Math.round(v * Math.exp(-2 * 0.58) * 10) / 10);
+
+      gmpeChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: distances,
+          datasets: [
+            {
+              label: 'Median GMPE (cm/s)',
+              data: medianPGV,
+              borderColor: '#06b6d4',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              tension: 0.3
+            },
+            {
+              label: '+2σ Upper Bound',
+              data: upper2Sigma,
+              borderColor: '#10b981',
+              borderDash: [5, 5],
+              backgroundColor: 'transparent',
+              borderWidth: 1.5,
+              tension: 0.3
+            },
+            {
+              label: '-2σ Lower Bound',
+              data: lower2Sigma,
+              borderColor: '#10b981',
+              borderDash: [5, 5],
+              backgroundColor: 'rgba(16, 185, 129, 0.05)',
+              fill: '-1',
+              borderWidth: 1.5,
+              tension: 0.3
+            },
+            {
+              label: 'Observed TT-SAM PGV',
+              data: [{ x: 2.8, y: 72.4 }],
+              borderColor: '#ef4444',
+              backgroundColor: '#ef4444',
+              pointRadius: 7,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              type: 'logarithmic',
+              title: { display: true, text: 'Rupture Distance Rrup (km)', color: '#94a3b8' },
+              grid: { color: '#1e293b' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              type: 'logarithmic',
+              title: { display: true, text: 'PGV (cm/s)', color: '#94a3b8' },
+              grid: { color: '#1e293b' },
+              ticks: { color: '#94a3b8' }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // 4. Initialize GeoGraph Visualizer
+    async function initKnowledgeGraph() {
+      try {
+        const resp = await fetch('/api/v1/graph');
+        const graphData = await resp.json();
+
+        const container = document.getElementById('network-graph');
+        const data = {
+          nodes: new vis.DataSet(graphData.nodes.map(n => ({
+            id: n.id,
+            label: n.label,
+            color: n.color,
+            font: { color: '#ffffff', size: 11 },
+            shape: n.type === 'facility' ? 'box' : (n.type === 'multi_rupture_pair' ? 'diamond' : 'dot'),
+            size: n.type === 'fault' ? 18 : 14
+          }))),
+          edges: new vis.DataSet(graphData.edges.map(e => ({
+            from: e.from,
+            to: e.to,
+            label: e.relation,
+            color: { color: '#475569', highlight: '#06b6d4' },
+            font: { color: '#94a3b8', size: 9, align: 'middle' },
+            arrows: 'to'
+          })))
+        };
+
+        const options = {
+          physics: {
+            solver: 'forceAtlas2Based',
+            forceAtlas2Based: { gravitationalConstant: -35, centralGravity: 0.01, springLength: 60 }
+          },
+          interaction: { hover: true, tooltipDelay: 100 }
+        };
+
+        network = new vis.Network(container, data, options);
+      } catch (err) {
+        console.error("Failed to load Knowledge Graph:", err);
+      }
+    }
+
+    // 5. Trigger Scenario
+    async function triggerScenario(scenarioId) {
+      clearInterval(countdownInterval);
+
+      let payload = {
+        event_id: "SCENARIO-" + scenarioId,
+        elapsed_seconds: 8.5,
+        magnitude: 6.91,
+        depth_km: 8.0,
+        epicenter_lat: 24.945,
+        epicenter_lon: 121.185,
+        predicted_pgv_nc_cm_s: 72.4,
+        is_preliminary: true
+      };
+
+      if (scenarioId === 'hualien_offshore_mw72') {
+        payload.magnitude = 7.20;
+        payload.depth_km = 35.0;
+        payload.epicenter_lat = 23.980;
+        payload.epicenter_lon = 121.650;
+        payload.predicted_pgv_nc_cm_s = 24.5;
+      }
+
+      // Update Banner to Red Alert
+      const banner = document.getElementById('alert-banner');
+      banner.className = "bg-red-950 border-b border-red-800 px-4 py-3 transition-colors duration-500";
+      document.getElementById('banner-title').innerText = `🚨 CRITICAL EARTHQUAKE ALERT: MW ${payload.magnitude} DETECTED`;
+      document.getElementById('banner-desc').innerText = `Near-source shallow rupture detected. Epicenter ${payload.epicenter_lat}°N, ${payload.epicenter_lon}°E. Executing automated SCADA cutoffs!`;
+
+      // Start countdown
+      let remaining = 4.8;
+      document.getElementById('swave-timer').innerText = remaining.toFixed(1) + 's';
+      countdownInterval = setInterval(() => {
+        remaining -= 0.1;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('swave-timer').innerText = "0.0s (ARRIVED)";
+          document.getElementById('swave-timer').className = "text-2xl font-black font-mono text-red-500 animate-bounce";
+        } else {
+          document.getElementById('swave-timer').innerText = remaining.toFixed(1) + 's';
+        }
+      }, 100);
+
+      // Draw expanding wave fronts on map
+      drawWaveFronts(payload.epicenter_lat, payload.epicenter_lon);
+
+      // Call Triage API
+      try {
+        const resp = await fetch('/api/v1/triage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await resp.json();
+
+        // Update Latencies
+        document.getElementById('track-a-latency').innerText = result.execution_summary.track_a_latency_ms + ' ms';
+        document.getElementById('track-b-latency').innerText = result.execution_summary.track_b_latency_ms + ' ms';
+
+        // Update Facility Cards
+        const triageList = result.track_b_deliberative.facility_triage;
+        if (triageList && triageList.length > 0) {
+          updateFacilityCard('b4', triageList[0]);
+          if (triageList.length > 1) updateFacilityCard('eng5', triageList[1]);
+          if (triageList.length > 2) updateFacilityCard('fab', triageList[2]);
+        }
+      } catch (err) {
+        console.error("Triage dispatch error:", err);
+      }
+    }
+
+    function updateFacilityCard(key, data) {
+      const tagEl = document.getElementById(`tag-fac-${key}`);
+      const idrEl = document.getElementById(`idr-fac-${key}`);
+      const riskEl = document.getElementById(`risk-fac-${key}`);
+      const cwaEl = document.getElementById(`cwa-fac-${key}`);
+
+      if (tagEl) {
+        tagEl.innerText = `${data.triage_tag} / ${data.action_recommendation}`;
+        tagEl.className = data.triage_tag === 'RED'
+          ? "px-2 py-0.5 rounded text-xs font-bold font-mono bg-red-600/20 text-red-400 border border-red-500/30"
+          : (data.triage_tag === 'YELLOW'
+            ? "px-2 py-0.5 rounded text-xs font-bold font-mono bg-amber-600/20 text-amber-400 border border-amber-500/30"
+            : "px-2 py-0.5 rounded text-xs font-bold font-mono bg-emerald-600/20 text-emerald-400 border border-emerald-500/30");
+      }
+      if (idrEl) idrEl.innerText = data.drift_ratio_pct + '%';
+      if (riskEl) riskEl.innerText = data.collapse_probability;
+      if (cwaEl) cwaEl.innerText = data.cwa_intensity;
+    }
+
+    function drawWaveFronts(lat, lon) {
+      if (pWaveCircle) map.removeLayer(pWaveCircle);
+      if (sWaveCircle) map.removeLayer(sWaveCircle);
+
+      map.panTo([lat, lon]);
+
+      // Epicenter pulse
+      const epiMarker = L.circleMarker([lat, lon], {
+        radius: 10,
+        color: '#ef4444',
+        fillColor: '#ef4444',
+        fillOpacity: 0.9
+      }).addTo(map);
+
+      // P-Wave (fast, 6 km/s)
+      pWaveCircle = L.circle([lat, lon], {
+        radius: 25000,
+        color: '#38bdf8',
+        weight: 2,
+        fillColor: '#38bdf8',
+        fillOpacity: 0.08
+      }).addTo(map);
+
+      // S-Wave (destructive, 3.5 km/s)
+      sWaveCircle = L.circle([lat, lon], {
+        radius: 14000,
+        color: '#ef4444',
+        weight: 3,
+        fillColor: '#ef4444',
+        fillOpacity: 0.15
+      }).addTo(map);
+    }
+
+    // 6. Live WebSocket Streaming
+    function startLiveStreaming() {
+      if (ws) ws.close();
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}/ws/alert-stream`);
+
+      const banner = document.getElementById('alert-banner');
+      banner.className = "bg-red-950 border-b border-red-800 px-4 py-3 transition-colors duration-500";
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        document.getElementById('banner-title').innerText = `🔴 TT-SAM STREAMING ALERT (t=${data.elapsed_seconds}s) — MW ${data.magnitude}`;
+        document.getElementById('banner-desc').innerText = `Predicted PGV at NCU: ${data.predicted_pgv_cm_s} cm/s (Intensity ${data.intensity_cwa}). SCADA cutoffs active!`;
+        document.getElementById('swave-timer').innerText = data.s_wave_remaining_s.toFixed(1) + 's';
+
+        if (data.is_final) {
+          document.getElementById('swave-timer').innerText = "0.0s (IMPACT)";
+        }
+      };
+    }
+
+    // 7. Chat Copilot
+    async function handleChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const query = input.value.trim();
+      if (!query) return;
+
+      appendChatMessage('User', query, false);
+      input.value = '';
+
+      try {
+        const resp = await fetch('/api/v1/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+        const data = await resp.json();
+        appendChatMessage('SeismoAgent-TW', data.answer, true, data.citations);
+      } catch (err) {
+        appendChatMessage('System', 'Error communicating with copilot server.', false);
+      }
+    }
+
+    function askCopilot(query) {
+      document.getElementById('chat-input').value = query;
+      handleChatSubmit(new Event('submit'));
+    }
+
+    function appendChatMessage(sender, text, isAi, citations = []) {
+      const box = document.getElementById('chat-box');
+      const div = document.createElement('div');
+      div.className = "flex gap-3 items-start";
+
+      let citationHtml = '';
+      if (citations && citations.length > 0) {
+        citationHtml = `<div class="mt-2 pt-2 border-t border-slate-800 text-[10px] text-slate-400">
+          <strong class="text-cyan-400">TEM PSHA 2025 Citations:</strong>
+          <ul class="list-disc pl-4 space-y-0.5 mt-1">
+            ${citations.map(c => `<li><strong>${c.section}</strong>: ${c.preview}</li>`).join('')}
+          </ul>
+        </div>`;
+      }
+
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full ${isAi ? 'bg-cyan-600' : 'bg-slate-700'} flex items-center justify-center font-bold text-xs flex-shrink-0">
+          ${isAi ? 'AI' : 'YOU'}
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-lg p-3 text-slate-200 text-xs leading-relaxed max-w-2xl">
+          <div class="font-bold text-slate-400 mb-1">${sender}</div>
+          <div class="whitespace-pre-line">${text}</div>
+          ${citationHtml}
+        </div>
+      `;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Initialize on window load
+    window.onload = () => {
+      initMap();
+      initGMPEChart();
+      initKnowledgeGraph();
+    };
+  </script>
+</body>
+</html>

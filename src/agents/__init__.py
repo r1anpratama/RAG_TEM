@@ -1,5 +1,6 @@
 """Agents layer exports for SeismoAgent-TW."""
 
+from src.agents.copilot import GeotechnicalCopilot
 from src.agents.geotech_worker import GeotechGraphReport, GeotechnicalGraphWorker
 from src.agents.orchestrator import (
     DualTrackOrchestrator,
@@ -11,6 +12,7 @@ from src.agents.seismic_analyst import SeismicAnalysisReport, SeismicSourceAnaly
 from src.agents.structural_worker import FacilityAssessmentResult, StructuralTriageWorker
 
 __all__ = [
+    "GeotechnicalCopilot",
     "GeotechnicalGraphWorker",
     "GeotechGraphReport",
     "StructuralTriageWorker",
@@ -23,3 +25,4 @@ __all__ = [
     "DualTrackTriageDispatch",
     "ReflexActionPacket",
 ]
+
