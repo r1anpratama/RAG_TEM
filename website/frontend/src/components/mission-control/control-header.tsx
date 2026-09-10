@@ -1,106 +1,102 @@
 "use client";
 
 import React from "react";
-import { Activity, Play, Bot, FileText, RefreshCw } from "lucide-react";
+import { Activity, Play, Bot, FileText } from "lucide-react";
 import { Scenario } from "@/types/triage";
 
 interface ControlHeaderProps {
   scenarios: Scenario[];
-  selectedScenarioId: string;
-  onSelectScenario: (id: string) => void;
+  selectedScenario: Scenario | null;
+  onSelectScenario: (scenario: Scenario) => void;
   onTriggerSimulation: () => void;
-  isLoading: boolean;
+  isSimulating: boolean;
   onToggleCopilot: () => void;
   isCopilotOpen: boolean;
-  onOpenUpload: () => void;
+  onOpenDocs: () => void;
 }
 
 export const ControlHeader: React.FC<ControlHeaderProps> = ({
   scenarios,
-  selectedScenarioId,
+  selectedScenario,
   onSelectScenario,
   onTriggerSimulation,
-  isLoading,
+  isSimulating,
   onToggleCopilot,
   isCopilotOpen,
-  onOpenUpload,
+  onOpenDocs,
 }) => {
   return (
-    <header className="sticky top-0 z-[1200] flex h-16 w-full items-center justify-between border-b border-stormy_teal-400/30 bg-ink_black-500 px-4 backdrop-blur-md shadow-lg">
-      {/* Brand & Lab Identity */}
+    <header className="sticky top-0 z-[1200] flex h-16 w-full items-center justify-between border-b border-prussian_blue-600/40 bg-black-500 px-4 backdrop-blur-md shadow-lg">
       <div className="flex items-center space-x-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-stormy_teal-500/20 border border-stormy_teal-500/40 text-stormy_teal-700 shadow-sm">
-          <Activity className="h-5 w-5 animate-pulse text-stormy_teal-700" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-prussian_blue-500/40 border border-prussian_blue-600 text-prussian_blue-800 shadow-sm">
+          <Activity className="h-5 w-5 animate-pulse text-orange-500" />
         </div>
         <div>
           <div className="flex items-center space-x-2">
-            <h1 className="text-sm font-bold tracking-wider text-papaya_whip-500 uppercase">
+            <h1 className="text-sm font-bold tracking-wider text-white-500 uppercase">
               SeismoAgent-TW
             </h1>
-            <span className="rounded bg-stormy_teal-500/30 px-1.5 py-0.5 text-[10px] font-bold text-stormy_teal-800 border border-stormy_teal-500/50">
-              MISSION CONTROL
+            <span className="rounded bg-prussian_blue-600/40 px-1.5 py-0.5 text-[10px] font-bold text-prussian_blue-800 border border-prussian_blue-600/60">
+              MISSION CONTROL v2.0
             </span>
           </div>
-          <p className="text-[11px] text-stormy_teal-800">
-            NCU E-DREaM Lab • TEM PSHA2025 Multi-Agent Seismic Triage
+          <p className="text-[11px] text-prussian_blue-800">
+            NCU Geophysics / E-DREaM Lab × NVIDIA AI Technology Center
           </p>
         </div>
       </div>
 
-      {/* Scenario Selection & Simulation Trigger */}
       <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-2 bg-ink_black-400 border border-stormy_teal-400/30 rounded-lg p-1 relative z-20">
-          <span className="text-xs text-stormy_teal-800 pl-2 font-medium">Scenario:</span>
+        {/* Scenario Selection Dropdown */}
+        <div className="flex items-center space-x-2 bg-prussian_blue-400/40 border border-prussian_blue-600/40 rounded-lg p-1 relative z-20">
+          <span className="text-xs text-prussian_blue-800 pl-2 font-medium">Scenario:</span>
           <select
-            value={selectedScenarioId}
-            onChange={(e) => onSelectScenario(e.target.value)}
-            disabled={isLoading}
-            className="bg-ink_black-300 text-xs text-papaya_whip-500 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-vivid_tangerine-500 border border-stormy_teal-400/40 cursor-pointer"
+            value={selectedScenario?.id || ""}
+            onChange={(e) => {
+              const sc = scenarios.find((s) => s.id === e.target.value);
+              if (sc) onSelectScenario(sc);
+            }}
+            className="bg-black-500 text-xs text-alabaster_grey-500 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-500 border border-prussian_blue-600/50 cursor-pointer"
           >
             {scenarios.map((sc) => (
-              <option key={sc.id} value={sc.id} className="bg-ink_black-500 text-papaya_whip-500 py-1">
+              <option key={sc.id} value={sc.id} className="bg-black-500 text-alabaster_grey-500 py-1">
                 {sc.title} (Mw {sc.magnitude})
               </option>
             ))}
           </select>
         </div>
 
+        {/* Trigger Simulation Button */}
         <button
           onClick={onTriggerSimulation}
-          disabled={isLoading}
-          className="flex items-center space-x-2 bg-vivid_tangerine-500 hover:bg-vivid_tangerine-600 active:bg-vivid_tangerine-700 text-ink_black-100 text-xs font-bold px-3.5 py-2 rounded-lg transition shadow-md shadow-vivid_tangerine-500/30 border border-vivid_tangerine-400 disabled:opacity-50"
+          disabled={isSimulating}
+          className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-black-500 text-xs font-bold px-3.5 py-2 rounded-lg transition shadow-md shadow-orange-500/30 border border-orange-400 disabled:opacity-50"
         >
-          {isLoading ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Play className="h-3.5 w-3.5 fill-current" />
-          )}
-          <span>{isLoading ? "CALCULATING..." : "SIMULATE DISPATCH"}</span>
+          <Play className="h-3.5 w-3.5 fill-current" />
+          <span>{isSimulating ? "Simulating..." : "Trigger Simulation"}</span>
         </button>
-      </div>
 
-      {/* Utility Actions (Copilot, Knowledge Base) */}
-      <div className="flex items-center space-x-2">
+        {/* Docs Trigger */}
         <button
-          onClick={onOpenUpload}
-          className="flex items-center space-x-1.5 rounded-lg border border-stormy_teal-400/30 bg-ink_black-400 px-3 py-1.5 text-xs text-papaya_whip-600 hover:bg-stormy_teal-500/20 hover:text-papaya_whip-500 transition"
-          title="Upload Domain Document"
+          onClick={onOpenDocs}
+          className="flex items-center space-x-1.5 rounded-lg border border-prussian_blue-600/40 bg-prussian_blue-500/30 px-3 py-1.5 text-xs text-alabaster_grey-500 hover:bg-prussian_blue-600/40 hover:text-white-500 transition"
         >
-          <FileText className="h-3.5 w-3.5 text-stormy_teal-700" />
+          <FileText className="h-3.5 w-3.5 text-prussian_blue-800" />
           <span>Docs</span>
         </button>
 
+        {/* Copilot Drawer Toggle */}
         <button
           onClick={onToggleCopilot}
-          className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border transition ${
+          className={`flex items-center space-x-2 rounded-lg border px-3.5 py-2 text-xs font-bold transition ${
             isCopilotOpen
-              ? "bg-stormy_teal-500/30 text-papaya_whip-500 border-stormy_teal-500 shadow-sm"
-              : "bg-ink_black-400 text-papaya_whip-600 border-stormy_teal-400/30 hover:bg-stormy_teal-500/20 hover:text-papaya_whip-500"
+              ? "bg-prussian_blue-600/50 text-white-500 border-orange-500 shadow-sm"
+              : "bg-prussian_blue-500/30 text-alabaster_grey-500 border-prussian_blue-600/40 hover:bg-prussian_blue-600/40 hover:text-white-500"
           }`}
         >
-          <Bot className="h-3.5 w-3.5 text-stormy_teal-700" />
+          <Bot className="h-3.5 w-3.5 text-orange-500" />
           <span>AI Copilot</span>
-          <span className="flex h-2 w-2 rounded-full bg-vivid_tangerine-500 animate-pulse"></span>
+          <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span>
         </button>
       </div>
     </header>

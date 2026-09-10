@@ -4,90 +4,90 @@
 @tailwind utilities;
 
 :root {
-  --background: 206 100% 7%;      /* #001524 ink_black */
-  --foreground: 36 100% 91%;      /* #ffecd1 papaya_whip */
-  --card: 206 100% 9%;            /* #001c30 */
-  --card-foreground: 36 100% 91%; /* #ffecd1 */
-  --popover: 206 100% 7%;
-  --popover-foreground: 36 100% 91%;
-  --primary: 188 68% 25%;         /* #15616d stormy_teal */
-  --primary-foreground: 36 100% 91%;
-  --secondary: 15 78% 26%;        /* #78290f brandy */
-  --secondary-foreground: 36 100% 91%;
-  --muted: 206 60% 12%;
-  --muted-foreground: 188 35% 65%;
-  --accent: 29 100% 50%;          /* #ff7d00 vivid_tangerine */
-  --accent-foreground: 206 100% 7%;
-  --destructive: 15 78% 26%;      /* #78290f */
-  --destructive-foreground: 36 100% 91%;
-  --border: 188 45% 18%;          /* subtle stormy teal border */
-  --input: 188 45% 18%;
-  --ring: 29 100% 50%;            /* vivid tangerine ring */
+  --background: 0 0% 0%;           /* #000000 black */
+  --foreground: 0 0% 90%;          /* #e5e5e5 alabaster_grey */
+  --card: 221 51% 16%;             /* #14213d prussian_blue */
+  --card-foreground: 0 0% 90%;     /* #e5e5e5 */
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 90%;
+  --primary: 221 51% 16%;          /* #14213d prussian_blue */
+  --primary-foreground: 0 0% 100%; /* #ffffff white */
+  --secondary: 221 51% 25%;        /* #29447e prussian_blue-600 */
+  --secondary-foreground: 0 0% 100%;
+  --muted: 221 50% 10%;            /* #0c1425 */
+  --muted-foreground: 221 51% 65%; /* #7e99d5 */
+  --accent: 37 97% 53%;            /* #fca311 orange */
+  --accent-foreground: 0 0% 0%;    /* #000000 */
+  --destructive: 37 97% 53%;       /* #fca311 orange */
+  --destructive-foreground: 0 0% 0%;
+  --border: 221 51% 25%;           /* #29447e / prussian_blue border */
+  --input: 221 51% 25%;
+  --ring: 37 97% 53%;              /* #fca311 orange ring */
   --radius: 0.75rem;
 }
 
 body {
-  color: #ffecd1;
-  background-color: #001524;
+  color: #e5e5e5;
+  background-color: #000000;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   overflow: hidden;
 }
 
-/* Custom scrollbars matching ink_black and stormy_teal */
+/* Custom scrollbars matching black and prussian_blue */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000c15;
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #104c56;
+  background: #14213d;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #15616d;
+  background: #29447e;
 }
 
 /* Leaflet dark styling adjustments */
 .leaflet-container {
-  background-color: #001524 !important;
+  background-color: #000000 !important;
   font-family: inherit !important;
   z-index: 10 !important;
 }
 
 .leaflet-control-zoom {
-  border: 1px solid rgba(21, 97, 109, 0.4) !important;
+  border: 1px solid rgba(41, 68, 126, 0.5) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7) !important;
 }
 
 .leaflet-control-zoom a {
-  background-color: #001524 !important;
-  color: #ffecd1 !important;
-  border-color: rgba(21, 97, 109, 0.3) !important;
+  background-color: #000000 !important;
+  color: #e5e5e5 !important;
+  border-color: rgba(41, 68, 126, 0.4) !important;
   width: 28px !important;
   height: 28px !important;
   line-height: 28px !important;
 }
 
 .leaflet-control-zoom a:hover {
-  background-color: #15616d !important;
-  color: #ffecd1 !important;
+  background-color: #14213d !important;
+  color: #fca311 !important;
 }
 
 .leaflet-control-attribution {
-  background-color: rgba(0, 21, 36, 0.8) !important;
-  color: #7ed9e7 !important;
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  color: #7e99d5 !important;
   font-size: 9px !important;
   border-top-left-radius: 6px !important;
   padding: 2px 6px !important;
 }
 
 .leaflet-control-attribution a {
-  color: #3ec5da !important;
+  color: #beccea !important;
 }

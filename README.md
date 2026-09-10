@@ -83,15 +83,15 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
 
 ## 🎨 Enterprise Palette Design System
 
-The platform user interface is built upon a custom geotechnical color palette:
+The platform user interface is styled using a precision high-contrast geotechnical design system:
 
-| Token | Hex Code | Purpose |
-| :--- | :--- | :--- |
-| `ink_black` | `#001524` | Primary deep background & surface contrast |
-| `stormy_teal` | `#15616d` | Accent borders, telemetry indicators & navigation |
-| `papaya_whip` | `#ffecd1` | High-readability light typography & highlighted metrics |
-| `vivid_tangerine` | `#ff7d00` | Warning badges, S-wave wavefronts & countdown clock |
-| `brandy` | `#78290f` | Critical alerts, emergency triage & structural failure states |
+| Token | Base Hex | Key Shades | Purpose |
+| :--- | :--- | :--- | :--- |
+| `black` | `#000000` | `600: #333333`, `800: #999999` | Deepest foundation background & ultra-dark card contrast |
+| `prussian_blue` | `#14213d` | `400: #101b31`, `700: #3e67bf`, `800: #7e99d5` | Structural panels, telemetry borders & technical data cards |
+| `orange` | `#fca311` | `600: #fdb541`, `700: #fec871`, `900: #ffedd0` | High-alert indicators, S-wave wavefronts & countdown clock |
+| `alabaster_grey` | `#e5e5e5` | `100: #2e2e2e`, `700: #f0f0f0`, `900: #fafafa` | High-readability light typography & technical readouts |
+| `white` | `#ffffff` | `DEFAULT: #ffffff`, `400: #cccccc` | Pure white highlights, focal headers & numeric emphasis |
 
 ---
 

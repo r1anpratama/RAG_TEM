@@ -5,21 +5,32 @@ export interface FaultTrace {
   slip_rate_mm_yr: number;
   mw_max: number;
   dip_deg: number;
-  rake_deg: number;
-  depth_max_km: number;
+  rake_deg?: number;
+  depth_max_km?: number;
   coordinates: [number, number][]; // [lat, lon]
 }
 
 export interface Scenario {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   magnitude: number;
   depth_km: number;
   epicenter: { lat: number; lon: number };
   predicted_pgv_cm_s: number;
   target_facility: string;
-  countdown_seconds: number;
+  countdown_seconds?: number;
+  fault_name?: string;
+  distance_to_target_km?: number;
+  estimated_cwa_intensity?: string;
+  s_wave_countdown_sec?: number;
+  track_a_actuators?: SCADAActuator[];
+  gmpe_validation?: {
+    status?: string;
+    theoretical_median_pgv?: number;
+    z_score?: number;
+    within_confidence_bounds?: boolean;
+  };
 }
 
 export interface FacilityTriage {

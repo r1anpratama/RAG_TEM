@@ -59,7 +59,6 @@ export const GisMap: React.FC<GisMapProps> = ({
         L.control.zoom({ position: "topright" }).addTo(map);
 
         // 100% Free Tile Providers (NO API KEY REQUIRED)
-        // 1. Esri Dark Gray Canvas (Default: High quality dark GIS basemap)
         const esriBase = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           {
@@ -73,7 +72,6 @@ export const GisMap: React.FC<GisMapProps> = ({
         );
         const esriGroup = L.layerGroup([esriBase, esriRef]);
 
-        // 2. CartoDB Dark Matter (High contrast dark basemap, Free)
         const cartoDark = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
           {
@@ -83,7 +81,6 @@ export const GisMap: React.FC<GisMapProps> = ({
           }
         );
 
-        // 3. CartoDB Voyager (Topographic / Terrain detail, Free)
         const cartoVoyager = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
           {
@@ -93,7 +90,6 @@ export const GisMap: React.FC<GisMapProps> = ({
           }
         );
 
-        // 4. OpenStreetMap Standard (Free Open GIS)
         const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (Free)',
           maxZoom: 19,
@@ -118,7 +114,7 @@ export const GisMap: React.FC<GisMapProps> = ({
       const map = mapInstanceRef.current;
       const { faultsLayer, markersLayer, wavefrontsLayer } = layersRef.current;
 
-      // Render 38 Active Seismogenic Fault Traces using new custom palette
+      // Render 38 Active Seismogenic Fault Traces
       if (faultsLayer) {
         faultsLayer.clearLayers();
 
@@ -129,13 +125,18 @@ export const GisMap: React.FC<GisMapProps> = ({
           const isReverse = f.fault_type.toUpperCase().includes("R");
           const isNormal = f.fault_type.toUpperCase().includes("N");
 
+          // New Palette Mapping:
+          // Reverse: #fca311 (orange-500)
+          // Normal: #3e67bf (prussian_blue-700)
+          // Strike-Slip: #e5e5e5 (alabaster_grey-500)
+          // Selected: #fdb541
           const color = isSelected
-            ? "#3ec5da" // stormy_teal-700
+            ? "#fdb541"
             : isReverse
-            ? "#ff7d00" // vivid_tangerine-500
+            ? "#fca311"
             : isNormal
-            ? "#2199ab" // stormy_teal-600
-            : "#ffc574"; // papaya_whip-400
+            ? "#3e67bf"
+            : "#e5e5e5";
 
           const polyline = L.polyline(f.coordinates, {
             color,
@@ -145,8 +146,8 @@ export const GisMap: React.FC<GisMapProps> = ({
           });
 
           polyline.bindTooltip(
-            `<div style="font-family:sans-serif;color:#ffecd1;background:#001524;border:1px solid #15616d;padding:6px;border-radius:6px;font-size:11px">
-              <strong style="color:#ff7d00">#${f.fault_id} ${f.name}</strong><br/>
+            `<div style="font-family:sans-serif;color:#e5e5e5;background:#000000;border:1px solid #14213d;padding:6px;border-radius:6px;font-size:11px">
+              <strong style="color:#fca311">#${f.fault_id} ${f.name}</strong><br/>
               Type: <b>${f.fault_type}</b> | Max Mw: <b>${f.mw_max}</b><br/>
               Slip Rate: <b>${f.slip_rate_mm_yr} mm/yr</b> | Dip: <b>${f.dip_deg}°</b>
             </div>`,
@@ -171,9 +172,9 @@ export const GisMap: React.FC<GisMapProps> = ({
         const ncuIcon = L.divIcon({
           className: "custom-ncu-marker",
           html: `<div style="position:relative;display:flex;align-items:center;justify-content:center">
-            <div style="position:absolute;inset:-8px;border-radius:9999px;background:rgba(33,153,171,0.35);animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite"></div>
-            <div style="height:16px;width:16px;border-radius:9999px;background:#2199ab;border:2px solid #001524;box-shadow:0 0 10px #3ec5da"></div>
-            <div style="position:absolute;left:20px;top:-2px;white-space:nowrap;border-radius:4px;background:rgba(0,21,36,0.92);padding:3px 7px;font-size:10px;font-weight:bold;color:#bfecf3;border:1px solid rgba(33,153,171,0.5);box-shadow:0 2px 8px rgba(0,0,0,0.5)">
+            <div style="position:absolute;inset:-8px;border-radius:9999px;background:rgba(62,103,191,0.35);animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite"></div>
+            <div style="height:16px;width:16px;border-radius:9999px;background:#3e67bf;border:2px solid #000000;box-shadow:0 0 10px #7e99d5"></div>
+            <div style="position:absolute;left:20px;top:-2px;white-space:nowrap;border-radius:4px;background:rgba(4,7,12,0.92);padding:3px 7px;font-size:10px;font-weight:bold;color:#beccea;border:1px solid rgba(41,68,126,0.5);box-shadow:0 2px 8px rgba(0,0,0,0.7)">
               NCU Campus Core
             </div>
           </div>`,
@@ -183,8 +184,8 @@ export const GisMap: React.FC<GisMapProps> = ({
 
         L.marker([ncuLat, ncuLon], { icon: ncuIcon })
           .bindPopup(
-            `<div style="font-family:sans-serif;color:#001524;padding:4px;font-size:11px">
-              <strong style="color:#15616d;font-size:12px">NCU Campus Core (E-DREaM Lab)</strong><br/>
+            `<div style="font-family:sans-serif;color:#000000;padding:4px;font-size:11px">
+              <strong style="color:#14213d;font-size:12px">NCU Campus Core (E-DREaM Lab)</strong><br/>
               Target Monitoring Site (Taoyuan Corridor)<br/>
               Coordinates: ${ncuLat}, ${ncuLon}
             </div>`
@@ -198,11 +199,11 @@ export const GisMap: React.FC<GisMapProps> = ({
           const epiIcon = L.divIcon({
             className: "custom-epi-marker",
             html: `<div style="position:relative;display:flex;align-items:center;justify-content:center">
-              <div style="position:absolute;inset:-12px;border-radius:9999px;background:rgba(255,125,0,0.45);animation:ping 1.2s cubic-bezier(0,0,0.2,1) infinite"></div>
-              <div style="height:22px;width:22px;border-radius:9999px;background:#ff7d00;border:2px solid #ffecd1;display:flex;align-items:center;justify-content:center;color:#001524;font-size:11px;font-weight:900;box-shadow:0 0 12px rgba(255,125,0,0.8)">
+              <div style="position:absolute;inset:-12px;border-radius:9999px;background:rgba(252,163,17,0.45);animation:ping 1.2s cubic-bezier(0,0,0.2,1) infinite"></div>
+              <div style="height:22px;width:22px;border-radius:9999px;background:#fca311;border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;color:#000000;font-size:11px;font-weight:900;box-shadow:0 0 12px rgba(252,163,17,0.85)">
                 ★
               </div>
-              <div style="position:absolute;left:26px;top:-4px;white-space:nowrap;border-radius:4px;background:rgba(120,41,15,0.92);padding:3px 8px;font-size:10px;font-weight:bold;color:#ffecd1;border:1px solid #ff7d00;box-shadow:0 2px 8px rgba(0,0,0,0.6)">
+              <div style="position:absolute;left:26px;top:-4px;white-space:nowrap;border-radius:4px;background:rgba(20,33,61,0.95);padding:3px 8px;font-size:10px;font-weight:bold;color:#ffedd0;border:1px solid #fca311;box-shadow:0 2px 8px rgba(0,0,0,0.8)">
                 Epicenter Mw ${scenario.magnitude}
               </div>
             </div>`,
@@ -212,10 +213,10 @@ export const GisMap: React.FC<GisMapProps> = ({
 
           L.marker([epiLat, epiLon], { icon: epiIcon })
             .bindPopup(
-              `<div style="font-family:sans-serif;color:#001524;padding:4px;font-size:11px">
-                <strong style="color:#78290f;font-size:12px">Hypocenter: ${scenario.title}</strong><br/>
+              `<div style="font-family:sans-serif;color:#000000;padding:4px;font-size:11px">
+                <strong style="color:#14213d;font-size:12px">Hypocenter: ${scenario.title}</strong><br/>
                 Magnitude: <b>Mw ${scenario.magnitude}</b> | Depth: <b>${scenario.depth_km} km</b><br/>
-                Predicted PGV at NCU: <b style="color:#ff7d00">${scenario.predicted_pgv_cm_s} cm/s</b>
+                Predicted PGV at NCU: <b style="color:#fca311">${scenario.predicted_pgv_cm_s} cm/s</b>
               </div>`
             )
             .addTo(markersLayer);
@@ -225,21 +226,21 @@ export const GisMap: React.FC<GisMapProps> = ({
 
             L.circle([epiLat, epiLon], {
               radius: 45000,
-              color: "#3ec5da",
+              color: "#3e67bf",
               weight: 1.5,
-              opacity: 0.7,
-              fillColor: "#15616d",
-              fillOpacity: 0.08,
+              opacity: 0.75,
+              fillColor: "#14213d",
+              fillOpacity: 0.1,
               dashArray: "4, 4",
             }).addTo(wavefrontsLayer);
 
             L.circle([epiLat, epiLon], {
               radius: 25000,
-              color: "#ff7d00",
+              color: "#fca311",
               weight: 2,
               opacity: 0.85,
-              fillColor: "#78290f",
-              fillOpacity: 0.14,
+              fillColor: "#14213d",
+              fillOpacity: 0.18,
             }).addTo(wavefrontsLayer);
           }
         }
@@ -270,31 +271,31 @@ export const GisMap: React.FC<GisMapProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden bg-ink_black-500 rounded-xl">
-      {/* Dedicated Card Header Toolbar (OUTSIDE the map canvas so it CAN NEVER be covered) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stormy_teal-400/30 bg-ink_black-400/90 px-3.5 py-2 z-20 backdrop-blur-md">
+    <div className="flex flex-col h-full w-full overflow-hidden bg-black-500 rounded-xl">
+      {/* Dedicated Card Header Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-prussian_blue-600/40 bg-black-500 px-3.5 py-2 z-20 backdrop-blur-md">
         <div className="flex items-center space-x-2">
-          <MapIcon className="h-4 w-4 text-stormy_teal-700" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-papaya_whip-500">
+          <MapIcon className="h-4 w-4 text-orange-500" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-white-500">
             Taiwan Seismogenic Faults (38 Structures)
           </h3>
-          <span className="hidden sm:inline-block rounded bg-stormy_teal-500/20 px-1.5 py-0.5 text-[9px] font-mono text-stormy_teal-800 border border-stormy_teal-500/30">
+          <span className="hidden sm:inline-block rounded bg-prussian_blue-600/40 px-1.5 py-0.5 text-[9px] font-mono text-prussian_blue-800 border border-prussian_blue-600/60">
             TEM PSHA2025
           </span>
         </div>
 
-        {/* Free Basemap Switcher Toolbar (Cleanly in header, NEVER overlays map content) */}
-        <div className="flex items-center space-x-1 rounded-lg border border-stormy_teal-400/30 bg-ink_black-500/90 p-1">
-          <div className="flex items-center space-x-1 px-1.5 text-[10px] font-semibold text-stormy_teal-800">
-            <Layers className="h-3 w-3 text-stormy_teal-700" />
+        {/* Free Basemap Switcher Toolbar */}
+        <div className="flex items-center space-x-1 rounded-lg border border-prussian_blue-600/40 bg-prussian_blue-400/40 p-1">
+          <div className="flex items-center space-x-1 px-1.5 text-[10px] font-semibold text-prussian_blue-800">
+            <Layers className="h-3 w-3 text-orange-500" />
             <span className="hidden md:inline">Basemap:</span>
           </div>
           <button
             onClick={() => handleSwitchBasemap("esri_dark")}
             className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
               activeBasemap === "esri_dark"
-                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+                ? "bg-orange-500 text-black-500 font-bold shadow-sm"
+                : "text-prussian_blue-800 hover:text-white-500 hover:bg-prussian_blue-600/30"
             }`}
           >
             Esri Dark
@@ -303,8 +304,8 @@ export const GisMap: React.FC<GisMapProps> = ({
             onClick={() => handleSwitchBasemap("carto_dark")}
             className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
               activeBasemap === "carto_dark"
-                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+                ? "bg-orange-500 text-black-500 font-bold shadow-sm"
+                : "text-prussian_blue-800 hover:text-white-500 hover:bg-prussian_blue-600/30"
             }`}
           >
             Carto Dark
@@ -313,8 +314,8 @@ export const GisMap: React.FC<GisMapProps> = ({
             onClick={() => handleSwitchBasemap("carto_voyager")}
             className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
               activeBasemap === "carto_voyager"
-                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+                ? "bg-orange-500 text-black-500 font-bold shadow-sm"
+                : "text-prussian_blue-800 hover:text-white-500 hover:bg-prussian_blue-600/30"
             }`}
           >
             Voyager
@@ -323,8 +324,8 @@ export const GisMap: React.FC<GisMapProps> = ({
             onClick={() => handleSwitchBasemap("osm")}
             className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
               activeBasemap === "osm"
-                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+                ? "bg-orange-500 text-black-500 font-bold shadow-sm"
+                : "text-prussian_blue-800 hover:text-white-500 hover:bg-prussian_blue-600/30"
             }`}
           >
             OSM
@@ -336,40 +337,40 @@ export const GisMap: React.FC<GisMapProps> = ({
       <div className="relative flex-1 w-full overflow-hidden">
         <div ref={mapContainerRef} className="h-full w-full" />
 
-        {/* Floating Collapsible Legend (High z-index: z-[1000] and pointer-events-auto) */}
-        <div className="absolute bottom-3 left-3 z-[1000] pointer-events-auto rounded-lg border border-stormy_teal-400/40 bg-ink_black-500/95 p-2 text-[11px] backdrop-blur-md shadow-xl text-papaya_whip-500 max-w-[280px]">
+        {/* Floating Collapsible Legend */}
+        <div className="absolute bottom-3 left-3 z-[1000] pointer-events-auto rounded-lg border border-prussian_blue-600/40 bg-black-500/95 p-2 text-[11px] backdrop-blur-md shadow-xl text-alabaster_grey-500 max-w-[280px]">
           <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsLegendOpen(!isLegendOpen)}>
-            <div className="font-bold text-papaya_whip-500 uppercase tracking-wider text-[10px] flex items-center space-x-1.5">
-              <Info className="h-3 w-3 text-stormy_teal-700" />
+            <div className="font-bold text-white-500 uppercase tracking-wider text-[10px] flex items-center space-x-1.5">
+              <Info className="h-3 w-3 text-orange-500" />
               <span>Fault Mechanism Legend</span>
             </div>
             {isLegendOpen ? (
-              <ChevronDown className="h-3.5 w-3.5 text-stormy_teal-700" />
+              <ChevronDown className="h-3.5 w-3.5 text-prussian_blue-800" />
             ) : (
-              <ChevronUp className="h-3.5 w-3.5 text-stormy_teal-700" />
+              <ChevronUp className="h-3.5 w-3.5 text-prussian_blue-800" />
             )}
           </div>
 
           {isLegendOpen && (
-            <div className="space-y-1 text-stormy_teal-800 text-[10px] mt-1.5 pt-1.5 border-t border-stormy_teal-400/30">
+            <div className="space-y-1 text-prussian_blue-800 text-[10px] mt-1.5 pt-1.5 border-t border-prussian_blue-600/30">
               <div className="flex items-center space-x-2">
-                <span className="h-1 w-4 bg-vivid_tangerine-500 rounded"></span>
-                <span className="text-papaya_whip-700">Reverse / Thrust Faults</span>
+                <span className="h-1 w-4 bg-orange-500 rounded"></span>
+                <span className="text-alabaster_grey-500">Reverse / Thrust Faults</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="h-1 w-4 bg-stormy_teal-600 rounded border-b border-dashed border-stormy_teal-700"></span>
-                <span className="text-papaya_whip-700">Normal Faults</span>
+                <span className="h-1 w-4 bg-prussian_blue-700 rounded border-b border-dashed border-prussian_blue-800"></span>
+                <span className="text-alabaster_grey-500">Normal Faults</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="h-1 w-4 bg-papaya_whip-400 rounded"></span>
-                <span className="text-papaya_whip-700">Strike-Slip Faults</span>
+                <span className="h-1 w-4 bg-alabaster_grey-500 rounded"></span>
+                <span className="text-alabaster_grey-500">Strike-Slip Faults</span>
               </div>
-              <div className="flex items-center space-x-2 pt-1 border-t border-stormy_teal-400/30">
-                <span className="h-2 w-2 rounded-full bg-stormy_teal-600 shadow-[0_0_6px_#3ec5da]"></span>
-                <span className="text-stormy_teal-700 font-medium">NCU Core</span>
-                <span className="text-ink_black-600">•</span>
-                <span className="h-2 w-2 rounded-full bg-vivid_tangerine-500 shadow-[0_0_6px_#ff7d00]"></span>
-                <span className="text-vivid_tangerine-600 font-medium">Epicenter & Wavefronts</span>
+              <div className="flex items-center space-x-2 pt-1 border-t border-prussian_blue-600/30">
+                <span className="h-2 w-2 rounded-full bg-prussian_blue-700 shadow-[0_0_6px_#7e99d5]"></span>
+                <span className="text-prussian_blue-800 font-medium">NCU Core</span>
+                <span className="text-prussian_blue-700">•</span>
+                <span className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_6px_#fca311]"></span>
+                <span className="text-orange-500 font-medium">Epicenter & Wavefronts</span>
               </div>
             </div>
           )}

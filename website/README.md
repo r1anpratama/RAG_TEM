@@ -82,13 +82,13 @@ npm run dev
 
 ## 🎨 Geotechnical Color Palette
 
-The interface is styled using an enterprise geotechnical theme defined in `tailwind.config.ts`:
+The interface is styled using a precision high-contrast geotechnical theme defined in `tailwind.config.ts`:
 
-- `ink_black`: `#001524` (Deep background & surfaces)
-- `stormy_teal`: `#15616d` (Telemetry borders & active navigation)
-- `papaya_whip`: `#ffecd1` (Light typography & highlighted readouts)
-- `vivid_tangerine`: `#ff7d00` (S-wave countdown & warning elements)
-- `brandy`: `#78290f` (Critical alerts & collapse risk badges)
+- `black`: `#000000` (Deepest foundation background & ultra-dark card surfaces)
+- `prussian_blue`: `#14213d` (Structural panels, telemetry borders & data cards)
+- `orange`: `#fca311` (High-alert indicators, S-wave wavefronts & countdown clock)
+- `alabaster_grey`: `#e5e5e5` (High-readability light typography & technical readouts)
+- `white`: `#ffffff` (Pure white highlights, focal headers & numeric emphasis)
 
 ---
 
