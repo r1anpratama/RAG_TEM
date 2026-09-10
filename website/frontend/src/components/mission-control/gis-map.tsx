@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { FaultTrace, Scenario } from "@/types/triage";
-import { Layers, Map as MapIcon } from "lucide-react";
+import { Layers, Map as MapIcon, Info, ChevronDown, ChevronUp } from "lucide-react";
 
 interface GisMapProps {
   faults: FaultTrace[];
@@ -22,6 +22,7 @@ export const GisMap: React.FC<GisMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const [activeBasemap, setActiveBasemap] = useState<BasemapStyle>("esri_dark");
+  const [isLegendOpen, setIsLegendOpen] = useState<boolean>(true);
   const tileLayersRef = useRef<{ [key: string]: any }>({});
   const layersRef = useRef<{
     faultsLayer?: any;
@@ -47,17 +48,18 @@ export const GisMap: React.FC<GisMapProps> = ({
 
       if (!mapInstanceRef.current) {
         const map = L.map(mapContainerRef.current, {
-          center: [24.3, 121.1],
-          zoom: 8,
+          center: [24.1, 121.0],
+          zoom: 7.8,
           minZoom: 7,
           maxZoom: 15,
           zoomControl: false,
         });
 
+        // Add zoom controls at top-right
         L.control.zoom({ position: "topright" }).addTo(map);
 
         // 100% Free Tile Providers (NO API KEY REQUIRED)
-        // 1. Esri Dark Gray Canvas (Default: Gorgeous scientific charcoal grey basemap)
+        // 1. Esri Dark Gray Canvas (Default: High quality dark GIS basemap)
         const esriBase = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           {
@@ -71,7 +73,7 @@ export const GisMap: React.FC<GisMapProps> = ({
         );
         const esriGroup = L.layerGroup([esriBase, esriRef]);
 
-        // 2. CartoDB Dark Matter (High Contrast Midnight, Free)
+        // 2. CartoDB Dark Matter (High contrast dark basemap, Free)
         const cartoDark = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
           {
@@ -81,7 +83,7 @@ export const GisMap: React.FC<GisMapProps> = ({
           }
         );
 
-        // 3. CartoDB Voyager (Detailed Terrain / Topography, Free)
+        // 3. CartoDB Voyager (Topographic / Terrain detail, Free)
         const cartoVoyager = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
           {
@@ -93,7 +95,7 @@ export const GisMap: React.FC<GisMapProps> = ({
 
         // 4. OpenStreetMap Standard (Free Open GIS)
         const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors (Free)',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (Free)',
           maxZoom: 19,
         });
 
@@ -127,7 +129,6 @@ export const GisMap: React.FC<GisMapProps> = ({
           const isReverse = f.fault_type.toUpperCase().includes("R");
           const isNormal = f.fault_type.toUpperCase().includes("N");
 
-          // Palette: vivid_tangerine (#ff7d00), stormy_teal (#2199ab), papaya_whip (#ffc574)
           const color = isSelected
             ? "#3ec5da" // stormy_teal-700
             : isReverse
@@ -149,7 +150,7 @@ export const GisMap: React.FC<GisMapProps> = ({
               Type: <b>${f.fault_type}</b> | Max Mw: <b>${f.mw_max}</b><br/>
               Slip Rate: <b>${f.slip_rate_mm_yr} mm/yr</b> | Dip: <b>${f.dip_deg}°</b>
             </div>`,
-            { sticky: true, className: "custom-leaflet-tooltip" }
+            { sticky: true }
           );
 
           polyline.on("click", () => {
@@ -222,7 +223,6 @@ export const GisMap: React.FC<GisMapProps> = ({
           if (wavefrontsLayer) {
             wavefrontsLayer.clearLayers();
 
-            // P-Wavefront (cyan / stormy_teal)
             L.circle([epiLat, epiLon], {
               radius: 45000,
               color: "#3ec5da",
@@ -233,7 +233,6 @@ export const GisMap: React.FC<GisMapProps> = ({
               dashArray: "4, 4",
             }).addTo(wavefrontsLayer);
 
-            // S-Wavefront (vivid_tangerine)
             L.circle([epiLat, epiLon], {
               radius: 25000,
               color: "#ff7d00",
@@ -258,14 +257,12 @@ export const GisMap: React.FC<GisMapProps> = ({
     const map = mapInstanceRef.current;
     const allLayers = tileLayersRef.current;
 
-    // Remove all basemaps
     Object.values(allLayers).forEach((layer) => {
       if (map.hasLayer(layer)) {
         map.removeLayer(layer);
       }
     });
 
-    // Add selected basemap
     if (allLayers[style]) {
       allLayers[style].addTo(map);
       setActiveBasemap(style);
@@ -273,83 +270,109 @@ export const GisMap: React.FC<GisMapProps> = ({
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink_black-500">
-      <div ref={mapContainerRef} className="h-full w-full" />
-
-      {/* Floating Free Basemap Switcher (Top-Left) */}
-      <div className="absolute top-3 left-3 z-20 flex items-center space-x-1 rounded-lg border border-stormy_teal-400/40 bg-ink_black-500/90 p-1 backdrop-blur-md shadow-lg">
-        <div className="flex items-center space-x-1 px-1.5 text-[10px] font-semibold text-stormy_teal-700">
-          <Layers className="h-3 w-3" />
-          <span className="hidden sm:inline">Map (No Key):</span>
+    <div className="flex flex-col h-full w-full overflow-hidden bg-ink_black-500 rounded-xl">
+      {/* Dedicated Card Header Toolbar (OUTSIDE the map canvas so it CAN NEVER be covered) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stormy_teal-400/30 bg-ink_black-400/90 px-3.5 py-2 z-20 backdrop-blur-md">
+        <div className="flex items-center space-x-2">
+          <MapIcon className="h-4 w-4 text-stormy_teal-700" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-papaya_whip-500">
+            Taiwan Seismogenic Faults (38 Structures)
+          </h3>
+          <span className="hidden sm:inline-block rounded bg-stormy_teal-500/20 px-1.5 py-0.5 text-[9px] font-mono text-stormy_teal-800 border border-stormy_teal-500/30">
+            TEM PSHA2025
+          </span>
         </div>
-        <button
-          onClick={() => handleSwitchBasemap("esri_dark")}
-          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-            activeBasemap === "esri_dark"
-              ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-              : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
-          }`}
-        >
-          Esri Dark Gray
-        </button>
-        <button
-          onClick={() => handleSwitchBasemap("carto_dark")}
-          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-            activeBasemap === "carto_dark"
-              ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-              : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
-          }`}
-        >
-          Carto Dark
-        </button>
-        <button
-          onClick={() => handleSwitchBasemap("carto_voyager")}
-          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-            activeBasemap === "carto_voyager"
-              ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-              : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
-          }`}
-        >
-          Voyager
-        </button>
-        <button
-          onClick={() => handleSwitchBasemap("osm")}
-          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-            activeBasemap === "osm"
-              ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
-              : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
-          }`}
-        >
-          OSM
-        </button>
+
+        {/* Free Basemap Switcher Toolbar (Cleanly in header, NEVER overlays map content) */}
+        <div className="flex items-center space-x-1 rounded-lg border border-stormy_teal-400/30 bg-ink_black-500/90 p-1">
+          <div className="flex items-center space-x-1 px-1.5 text-[10px] font-semibold text-stormy_teal-800">
+            <Layers className="h-3 w-3 text-stormy_teal-700" />
+            <span className="hidden md:inline">Basemap:</span>
+          </div>
+          <button
+            onClick={() => handleSwitchBasemap("esri_dark")}
+            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              activeBasemap === "esri_dark"
+                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
+                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+            }`}
+          >
+            Esri Dark
+          </button>
+          <button
+            onClick={() => handleSwitchBasemap("carto_dark")}
+            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              activeBasemap === "carto_dark"
+                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
+                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+            }`}
+          >
+            Carto Dark
+          </button>
+          <button
+            onClick={() => handleSwitchBasemap("carto_voyager")}
+            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              activeBasemap === "carto_voyager"
+                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
+                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+            }`}
+          >
+            Voyager
+          </button>
+          <button
+            onClick={() => handleSwitchBasemap("osm")}
+            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
+              activeBasemap === "osm"
+                ? "bg-stormy_teal-500 text-papaya_whip-500 shadow-sm"
+                : "text-stormy_teal-800 hover:text-papaya_whip-500 hover:bg-stormy_teal-400/20"
+            }`}
+          >
+            OSM
+          </button>
+        </div>
       </div>
 
-      {/* Map Overlay Legend */}
-      <div className="absolute bottom-3 left-3 z-20 rounded-lg border border-stormy_teal-400/30 bg-ink_black-500/90 p-2.5 text-[11px] backdrop-blur-md shadow-xl text-papaya_whip-500">
-        <div className="font-bold text-papaya_whip-500 mb-1 uppercase tracking-wider text-[10px] flex items-center justify-between gap-2">
-          <span>Taiwan Seismogenic Faults (38)</span>
-          <span className="text-[9px] text-stormy_teal-700 font-mono">100% Free GIS</span>
-        </div>
-        <div className="space-y-1 text-stormy_teal-800 text-[10px]">
-          <div className="flex items-center space-x-2">
-            <span className="h-1 w-4 bg-vivid_tangerine-500 rounded"></span>
-            <span className="text-papaya_whip-700">Reverse / Thrust (e.g. Chelungpu, Shuanglienpo)</span>
+      {/* Map DOM mount container */}
+      <div className="relative flex-1 w-full overflow-hidden">
+        <div ref={mapContainerRef} className="h-full w-full" />
+
+        {/* Floating Collapsible Legend (High z-index: z-[1000] and pointer-events-auto) */}
+        <div className="absolute bottom-3 left-3 z-[1000] pointer-events-auto rounded-lg border border-stormy_teal-400/40 bg-ink_black-500/95 p-2 text-[11px] backdrop-blur-md shadow-xl text-papaya_whip-500 max-w-[280px]">
+          <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsLegendOpen(!isLegendOpen)}>
+            <div className="font-bold text-papaya_whip-500 uppercase tracking-wider text-[10px] flex items-center space-x-1.5">
+              <Info className="h-3 w-3 text-stormy_teal-700" />
+              <span>Fault Mechanism Legend</span>
+            </div>
+            {isLegendOpen ? (
+              <ChevronDown className="h-3.5 w-3.5 text-stormy_teal-700" />
+            ) : (
+              <ChevronUp className="h-3.5 w-3.5 text-stormy_teal-700" />
+            )}
           </div>
-          <div className="flex items-center space-x-2">
-            <span className="h-1 w-4 bg-stormy_teal-600 rounded border-b border-dashed border-stormy_teal-700"></span>
-            <span className="text-papaya_whip-700">Normal Faults (e.g. Shanchiao)</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="h-1 w-4 bg-papaya_whip-400 rounded"></span>
-            <span className="text-papaya_whip-700">Strike-Slip Faults (e.g. Meishan)</span>
-          </div>
-          <div className="flex items-center space-x-2 pt-1 border-t border-stormy_teal-400/30">
-            <span className="h-2 w-2 rounded-full bg-stormy_teal-600 shadow-[0_0_6px_#3ec5da]"></span>
-            <span className="text-stormy_teal-700 font-medium">NCU Digital Twin Core</span>
-            <span className="mx-1 text-ink_black-600">•</span>
-            <span className="h-2 w-2 rounded-full bg-vivid_tangerine-500 shadow-[0_0_6px_#ff7d00]"></span>
-            <span className="text-vivid_tangerine-600 font-medium">Epicenter & P/S Waves</span>
-          </div>
+
+          {isLegendOpen && (
+            <div className="space-y-1 text-stormy_teal-800 text-[10px] mt-1.5 pt-1.5 border-t border-stormy_teal-400/30">
+              <div className="flex items-center space-x-2">
+                <span className="h-1 w-4 bg-vivid_tangerine-500 rounded"></span>
+                <span className="text-papaya_whip-700">Reverse / Thrust (Chelungpu, Shuanglienpo)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="h-1 w-4 bg-stormy_teal-600 rounded border-b border-dashed border-stormy_teal-700"></span>
+                <span className="text-papaya_whip-700">Normal Faults (Shanchiao, Ilan)</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="h-1 w-4 bg-papaya_whip-400 rounded"></span>
+                <span className="text-papaya_whip-700">Strike-Slip Faults (Meishan, Chihshang)</span>
+              </div>
+              <div className="flex items-center space-x-2 pt-1 border-t border-stormy_teal-400/30">
+                <span className="h-2 w-2 rounded-full bg-stormy_teal-600 shadow-[0_0_6px_#3ec5da]"></span>
+                <span className="text-stormy_teal-700 font-medium">NCU Core</span>
+                <span className="text-ink_black-600">•</span>
+                <span className="h-2 w-2 rounded-full bg-vivid_tangerine-500 shadow-[0_0_6px_#ff7d00]"></span>
+                <span className="text-vivid_tangerine-600 font-medium">Epicenter & Wavefronts</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

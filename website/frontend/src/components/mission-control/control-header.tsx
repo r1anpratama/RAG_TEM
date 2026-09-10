@@ -26,7 +26,7 @@ export const ControlHeader: React.FC<ControlHeaderProps> = ({
   onOpenUpload,
 }) => {
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-stormy_teal-400/30 bg-ink_black-500 px-4 backdrop-blur-md z-30">
+    <header className="sticky top-0 z-[1200] flex h-16 w-full items-center justify-between border-b border-stormy_teal-400/30 bg-ink_black-500 px-4 backdrop-blur-md shadow-lg">
       {/* Brand & Lab Identity */}
       <div className="flex items-center space-x-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-stormy_teal-500/20 border border-stormy_teal-500/40 text-stormy_teal-700 shadow-sm">
@@ -49,16 +49,16 @@ export const ControlHeader: React.FC<ControlHeaderProps> = ({
 
       {/* Scenario Selection & Simulation Trigger */}
       <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-2 bg-ink_black-400 border border-stormy_teal-400/30 rounded-lg p-1">
+        <div className="flex items-center space-x-2 bg-ink_black-400 border border-stormy_teal-400/30 rounded-lg p-1 relative z-20">
           <span className="text-xs text-stormy_teal-800 pl-2 font-medium">Scenario:</span>
           <select
             value={selectedScenarioId}
             onChange={(e) => onSelectScenario(e.target.value)}
             disabled={isLoading}
-            className="bg-ink_black-300 text-xs text-papaya_whip-500 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-vivid_tangerine-500 border border-stormy_teal-400/40"
+            className="bg-ink_black-300 text-xs text-papaya_whip-500 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-vivid_tangerine-500 border border-stormy_teal-400/40 cursor-pointer"
           >
             {scenarios.map((sc) => (
-              <option key={sc.id} value={sc.id}>
+              <option key={sc.id} value={sc.id} className="bg-ink_black-500 text-papaya_whip-500 py-1">
                 {sc.title} (Mw {sc.magnitude})
               </option>
             ))}

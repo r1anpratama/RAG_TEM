@@ -36,7 +36,7 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-stormy_teal-400/30 bg-ink_black-500/95 shadow-2xl backdrop-blur-xl sm:w-[440px]">
+    <aside className="fixed inset-y-0 right-0 z-[1300] flex w-full max-w-md flex-col border-l border-stormy_teal-400/30 bg-ink_black-500/98 shadow-2xl backdrop-blur-xl sm:w-[440px]">
       {/* Header */}
       <div className="flex h-14 items-center justify-between border-b border-stormy_teal-400/30 px-4 bg-ink_black-500">
         <div className="flex items-center space-x-2">

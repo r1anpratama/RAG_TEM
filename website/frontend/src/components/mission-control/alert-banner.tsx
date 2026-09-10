@@ -42,7 +42,7 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
   const latency = dispatch?.execution_summary.track_a_latency_ms || 1.84;
 
   return (
-    <div className="relative overflow-hidden border-b border-brandy-500/50 bg-gradient-to-r from-brandy-500/80 via-ink_black-500 to-ink_black-500 p-4 text-papaya_whip-500 shadow-xl">
+    <div className="relative z-[1100] overflow-hidden border-b border-brandy-500/50 bg-gradient-to-r from-brandy-500/80 via-ink_black-500 to-ink_black-500 p-4 text-papaya_whip-500 shadow-xl">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,236,209,0.02)_1px,transparent_1px)] bg-[size:100%_4px] opacity-30"></div>
 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">

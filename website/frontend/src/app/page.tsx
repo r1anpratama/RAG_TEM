@@ -117,7 +117,7 @@ export default function MissionControlPage() {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink_black-500 text-papaya_whip-500 antialiased font-sans">
-      {/* 1. Header Bar */}
+      {/* 1. Sticky Header Bar with high z-index (z-[1200]) */}
       <ControlHeader
         scenarios={scenarios}
         selectedScenarioId={selectedScenarioId}
@@ -132,7 +132,7 @@ export default function MissionControlPage() {
         onOpenUpload={() => setIsUploadOpen(true)}
       />
 
-      {/* 2. Real-Time Emergency S-Wave Alert Banner */}
+      {/* 2. Real-Time Emergency S-Wave Alert Banner (z-[1100]) */}
       <AlertBanner
         scenario={currentScenario}
         dispatch={dispatch}
@@ -141,10 +141,10 @@ export default function MissionControlPage() {
 
       {/* 3. Main Mission Control Operational Dashboard */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-ink_black-500">
-        {/* Top Operational Section: GIS Map (Left 60%) + SCADA & GMPE/Graph (Right 40%) */}
+        {/* Top Section: GIS Map (Left 60%) + SCADA & GMPE/Graph (Right 40%) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Interactive Leaflet GIS Map with Free Basemap Switcher */}
-          <div className="lg:col-span-7 h-[380px] rounded-xl border border-stormy_teal-400/40 overflow-hidden shadow-2xl bg-ink_black-500">
+          {/* Interactive Leaflet GIS Map with Isolated Stacking Context */}
+          <div className="lg:col-span-7 h-[440px] rounded-xl border border-stormy_teal-400/40 overflow-hidden shadow-2xl bg-ink_black-500 relative isolate z-0">
             <GisMap
               faults={faults}
               scenario={currentScenario}
@@ -182,14 +182,14 @@ export default function MissionControlPage() {
         />
       </main>
 
-      {/* 4. Docked / Slide-over RAG Copilot Chatbot */}
+      {/* 4. Docked / Slide-over RAG Copilot Chatbot (z-[1300]) */}
       <CopilotDrawer
         isOpen={isCopilotOpen}
         onClose={() => setIsCopilotOpen(false)}
         onOpenUpload={() => setIsUploadOpen(true)}
       />
 
-      {/* 5. Knowledge Base Document Upload Modal */}
+      {/* 5. Knowledge Base Document Upload Modal (z-[1400]) */}
       <UploadModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
