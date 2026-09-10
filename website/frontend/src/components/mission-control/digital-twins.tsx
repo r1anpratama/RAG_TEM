@@ -67,22 +67,22 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
     switch (tag) {
       case "RED_CRITICAL":
         return (
-          <span className="flex items-center space-x-1 rounded bg-red-950/80 px-2 py-0.5 text-[10px] font-bold text-red-400 border border-red-800/60">
-            <ShieldAlert className="h-3 w-3" />
+          <span className="flex items-center space-x-1 rounded bg-brandy-500/80 px-2 py-0.5 text-[10px] font-bold text-papaya_whip-500 border border-brandy-600">
+            <ShieldAlert className="h-3 w-3 text-vivid_tangerine-500" />
             <span>RED CRITICAL</span>
           </span>
         );
       case "YELLOW_INSPECT":
         return (
-          <span className="flex items-center space-x-1 rounded bg-amber-950/80 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-800/60">
+          <span className="flex items-center space-x-1 rounded bg-vivid_tangerine-500/20 px-2 py-0.5 text-[10px] font-bold text-vivid_tangerine-600 border border-vivid_tangerine-500/50">
             <AlertTriangle className="h-3 w-3" />
             <span>YELLOW INSPECT</span>
           </span>
         );
       default:
         return (
-          <span className="flex items-center space-x-1 rounded bg-emerald-950/80 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-800/60">
-            <CheckCircle className="h-3 w-3" />
+          <span className="flex items-center space-x-1 rounded bg-stormy_teal-500/30 px-2 py-0.5 text-[10px] font-bold text-stormy_teal-800 border border-stormy_teal-500/60">
+            <CheckCircle className="h-3 w-3 text-stormy_teal-700" />
             <span>GREEN SAFE</span>
           </span>
         );
@@ -91,14 +91,14 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
 
   return (
     <div className="flex flex-col space-y-3">
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
+      <div className="flex items-center justify-between border-b border-stormy_teal-400/30 pb-2">
         <div className="flex items-center space-x-2">
-          <Building2 className="h-4 w-4 text-emerald-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">
+          <Building2 className="h-4 w-4 text-stormy_teal-700" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-papaya_whip-500">
             Campus Digital Twins & Structural Triage (ASCE 41-17 / TEM)
           </h3>
         </div>
-        <span className="text-[11px] text-zinc-400 font-mono">
+        <span className="text-[11px] text-stormy_teal-800 font-mono">
           4 Facilities Monitored
         </span>
       </div>
@@ -114,19 +114,19 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
               key={fac.facility_id}
               className={`flex flex-col justify-between rounded-xl border p-3.5 transition backdrop-blur-sm ${
                 isDanger
-                  ? "border-red-600/50 bg-red-950/20 hover:border-red-500"
+                  ? "border-brandy-500/80 bg-brandy-500/25 hover:border-brandy-600"
                   : isWarning
-                  ? "border-amber-600/40 bg-amber-950/15 hover:border-amber-500"
-                  : "border-zinc-800 bg-zinc-900/40 hover:border-zinc-700"
+                  ? "border-vivid_tangerine-500/50 bg-vivid_tangerine-500/10 hover:border-vivid_tangerine-500"
+                  : "border-stormy_teal-400/30 bg-ink_black-400/70 hover:border-stormy_teal-500"
               }`}
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="text-xs font-bold text-zinc-100">
+                    <h4 className="text-xs font-bold text-papaya_whip-500">
                       {fac.facility_name}
                     </h4>
-                    <p className="text-[10px] font-mono text-zinc-400 mt-0.5">
+                    <p className="text-[10px] font-mono text-stormy_teal-800 mt-0.5">
                       {fac.building_era}
                     </p>
                   </div>
@@ -135,62 +135,62 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
 
                 <div className="mt-3.5 space-y-1">
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-zinc-400">Inter-Story Drift:</span>
+                    <span className="text-stormy_teal-800">Inter-Story Drift:</span>
                     <span
                       className={`font-mono font-bold ${
                         isDanger
-                          ? "text-red-400"
+                          ? "text-vivid_tangerine-500"
                           : isWarning
-                          ? "text-amber-400"
-                          : "text-emerald-400"
+                          ? "text-vivid_tangerine-600"
+                          : "text-stormy_teal-700"
                       }`}
                     >
                       {drift.toFixed(2)}%
                     </span>
                   </div>
 
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-ink_black-200">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         isDanger
-                          ? "bg-red-500"
+                          ? "bg-brandy-600"
                           : isWarning
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
+                          ? "bg-vivid_tangerine-500"
+                          : "bg-stormy_teal-600"
                       }`}
                       style={{ width: `${Math.min(100, (drift / 2.5) * 100)}%` }}
                     />
                   </div>
 
-                  <div className="flex justify-between text-[9px] text-zinc-500 font-mono pt-0.5">
+                  <div className="flex justify-between text-[9px] text-stormy_teal-800 font-mono pt-0.5">
                     <span>Safe &lt;0.5%</span>
                     <span>Yield 1.5%</span>
                     <span>Collapse &gt;2.0%</span>
                   </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-zinc-800/80 pt-2 text-[11px]">
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-stormy_teal-400/30 pt-2 text-[11px]">
                   <div>
-                    <span className="text-zinc-400">Collapse Risk:</span>{" "}
+                    <span className="text-stormy_teal-800">Collapse Risk:</span>{" "}
                     <span
                       className={`font-semibold ${
-                        isDanger ? "text-red-400" : "text-zinc-200"
+                        isDanger ? "text-vivid_tangerine-500" : "text-papaya_whip-600"
                       }`}
                     >
                       {fac.collapse_probability}
                     </span>
                   </div>
                   <div>
-                    <span className="text-zinc-400">Intensity:</span>{" "}
-                    <span className="font-semibold text-zinc-200">
+                    <span className="text-stormy_teal-800">Intensity:</span>{" "}
+                    <span className="font-semibold text-papaya_whip-600">
                       {fac.cwa_intensity}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 rounded bg-zinc-950/60 p-2 text-[10px] text-zinc-300 border border-zinc-800/60">
-                <span className="font-semibold text-zinc-400 block mb-0.5">
+              <div className="mt-3 rounded bg-ink_black-500/80 p-2 text-[10px] text-papaya_whip-700 border border-stormy_teal-400/30">
+                <span className="font-bold text-stormy_teal-700 block mb-0.5">
                   Triage Protocol:
                 </span>
                 {fac.action_recommendation}

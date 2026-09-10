@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Bot, Sparkles, Send, Square, FileText, ChevronRight } from "lucide-react";
+import React from "react";
+import { X, Bot, Sparkles, ChevronRight } from "lucide-react";
 import { ChatContainer } from "@/components/chat/chat-container";
 import { ChatInput } from "@/components/chat/chat-input";
 import { useRagStream } from "@/hooks/use-rag-stream";
@@ -36,18 +36,18 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-zinc-800 bg-zinc-950/95 shadow-2xl backdrop-blur-xl sm:w-[440px]">
+    <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-stormy_teal-400/30 bg-ink_black-500/95 shadow-2xl backdrop-blur-xl sm:w-[440px]">
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-zinc-800 px-4">
+      <div className="flex h-14 items-center justify-between border-b border-stormy_teal-400/30 px-4 bg-ink_black-500">
         <div className="flex items-center space-x-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-            <Bot className="h-4 w-4" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-stormy_teal-500/20 border border-stormy_teal-500/40 text-stormy_teal-700">
+            <Bot className="h-4 w-4 text-stormy_teal-700" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-papaya_whip-500 uppercase tracking-wider">
               SeismoAgent-TW AI Copilot
             </h3>
-            <p className="text-[10px] text-zinc-400">
+            <p className="text-[10px] text-stormy_teal-800">
               Streaming RAG with Ground Truth Citation
             </p>
           </div>
@@ -56,13 +56,13 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
         <div className="flex items-center space-x-1">
           <button
             onClick={clearMessages}
-            className="rounded px-2 py-1 text-[10px] text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 transition"
+            className="rounded px-2 py-1 text-[10px] text-stormy_teal-800 hover:bg-ink_black-400 hover:text-papaya_whip-500 transition"
           >
             Clear
           </button>
           <button
             onClick={onClose}
-            className="rounded p-1.5 text-zinc-400 hover:bg-zinc-900 hover:text-white transition"
+            className="rounded p-1.5 text-stormy_teal-800 hover:bg-ink_black-400 hover:text-papaya_whip-500 transition"
           >
             <X className="h-4 w-4" />
           </button>
@@ -71,7 +71,7 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
 
       {/* Global Error Notice */}
       {error && (
-        <div className="bg-red-950/80 border-b border-red-800/80 px-4 py-2 text-center text-[11px] text-red-200">
+        <div className="bg-brandy-500/90 border-b border-brandy-600 px-4 py-2 text-center text-[11px] text-papaya_whip-500 font-medium">
           {error}
         </div>
       )}
@@ -86,9 +86,9 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
 
       {/* Suggested Chips if no messages */}
       {messages.length === 0 && (
-        <div className="p-3 border-t border-zinc-800/80 bg-zinc-900/30">
-          <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-2 flex items-center space-x-1">
-            <Sparkles className="h-3 w-3 text-emerald-400" />
+        <div className="p-3 border-t border-stormy_teal-400/30 bg-ink_black-400/40">
+          <div className="text-[10px] font-bold text-stormy_teal-700 uppercase tracking-wider mb-2 flex items-center space-x-1">
+            <Sparkles className="h-3 w-3 text-vivid_tangerine-500" />
             <span>Recommended Seismological Inquiries</span>
           </div>
           <div className="flex flex-col space-y-1.5">
@@ -96,10 +96,10 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
               <button
                 key={i}
                 onClick={() => sendMessage(prompt)}
-                className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/70 px-2.5 py-1.5 text-left text-[11px] text-zinc-300 hover:border-emerald-500/40 hover:bg-zinc-800 transition"
+                className="flex items-center justify-between rounded-lg border border-stormy_teal-400/30 bg-ink_black-500/80 px-2.5 py-1.5 text-left text-[11px] text-papaya_whip-600 hover:border-vivid_tangerine-500 hover:bg-ink_black-400 transition"
               >
                 <span className="line-clamp-1">{prompt}</span>
-                <ChevronRight className="h-3 w-3 text-zinc-500 shrink-0 ml-1" />
+                <ChevronRight className="h-3 w-3 text-stormy_teal-700 shrink-0 ml-1" />
               </button>
             ))}
           </div>
@@ -107,7 +107,7 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
       )}
 
       {/* Input Area */}
-      <div className="border-t border-zinc-800 p-3 bg-zinc-950">
+      <div className="border-t border-stormy_teal-400/30 p-3 bg-ink_black-500">
         <ChatInput
           onSend={(p) => sendMessage(p)}
           onStop={stopStreaming}

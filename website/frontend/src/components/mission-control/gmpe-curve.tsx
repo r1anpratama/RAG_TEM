@@ -67,25 +67,29 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
   const obsY = scaleY(observedPgv);
 
   return (
-    <div className="flex flex-col space-y-2 rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 backdrop-blur-sm">
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-1.5">
+    <div className="flex flex-col space-y-2 rounded-xl border border-stormy_teal-400/30 bg-ink_black-400/80 p-3 backdrop-blur-sm shadow-md">
+      <div className="flex items-center justify-between border-b border-stormy_teal-400/30 pb-1.5">
         <div className="flex items-center space-x-2">
-          <TrendingDown className="h-4 w-4 text-cyan-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-200">
+          <TrendingDown className="h-4 w-4 text-stormy_teal-700" />
+          <h3 className="text-xs font-bold uppercase tracking-wider text-papaya_whip-500">
             Physics GMPE Attenuation Curve (Lin & Lee 2008)
           </h3>
         </div>
-        <span className="flex items-center space-x-1 rounded bg-emerald-950/60 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-800/40">
-          <ShieldCheck className="h-3 w-3" />
+        <span className="flex items-center space-x-1 rounded bg-stormy_teal-500/30 px-2 py-0.5 text-[10px] font-bold text-stormy_teal-800 border border-stormy_teal-500/50">
+          <ShieldCheck className="h-3 w-3 text-stormy_teal-700" />
           <span>+0.42σ Consistent</span>
         </span>
       </div>
 
       <div className="relative flex items-center justify-center">
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
-          <path d={bandPath} fill="#06b6d4" fillOpacity="0.12" />
-          <path d={medianPath} fill="none" stroke="#06b6d4" strokeWidth="2" />
+          {/* Shaded +/- 2 Sigma Uncertainty Band */}
+          <path d={bandPath} fill="#15616d" fillOpacity="0.25" />
 
+          {/* Median Attenuation Curve */}
+          <path d={medianPath} fill="none" stroke="#2199ab" strokeWidth="2.2" />
+
+          {/* Grid lines */}
           {[1, 10, 50, 100].map((d) => (
             <g key={d}>
               <line
@@ -93,13 +97,13 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
                 y1={margin.top}
                 x2={scaleX(d)}
                 y2={height - margin.bottom}
-                stroke="#27272a"
+                stroke="#0c3940"
                 strokeDasharray="2,2"
               />
               <text
                 x={scaleX(d)}
                 y={height - margin.bottom + 12}
-                fill="#71717a"
+                fill="#7ed9e7"
                 fontSize="8"
                 textAnchor="middle"
               >
@@ -115,13 +119,13 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
                 y1={scaleY(v)}
                 x2={width - margin.right}
                 y2={scaleY(v)}
-                stroke="#27272a"
+                stroke="#0c3940"
                 strokeDasharray="2,2"
               />
               <text
                 x={margin.left - 4}
                 y={scaleY(v) + 3}
-                fill="#71717a"
+                fill="#7ed9e7"
                 fontSize="8"
                 textAnchor="end"
               >
@@ -130,18 +134,19 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
             </g>
           ))}
 
+          {/* Observed TT-SAM Shaking Point */}
           <circle
             cx={obsX}
             cy={obsY}
             r="4.5"
-            fill="#ef4444"
-            stroke="#ffffff"
+            fill="#ff7d00"
+            stroke="#ffecd1"
             strokeWidth="1.5"
           />
           <text
             x={obsX + 6}
             y={obsY - 4}
-            fill="#f87171"
+            fill="#ff9633"
             fontSize="8"
             fontWeight="bold"
           >
@@ -150,9 +155,9 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
         </svg>
       </div>
 
-      <div className="flex items-center justify-between text-[10px] text-zinc-400 border-t border-zinc-800/80 pt-1 font-mono">
+      <div className="flex items-center justify-between text-[10px] text-stormy_teal-800 border-t border-stormy_teal-400/30 pt-1 font-mono">
         <span>TEM PSHA2025 Crustal Model</span>
-        <span className="text-cyan-400">±2σ Uncertainty Envelope</span>
+        <span className="text-stormy_teal-700">±2σ Uncertainty Envelope</span>
       </div>
     </div>
   );

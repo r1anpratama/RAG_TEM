@@ -42,60 +42,60 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
   const latency = dispatch?.execution_summary.track_a_latency_ms || 1.84;
 
   return (
-    <div className="relative overflow-hidden border-b border-red-900/60 bg-gradient-to-r from-red-950/90 via-zinc-950 to-zinc-950 p-4 text-zinc-100 shadow-xl">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px] opacity-40"></div>
+    <div className="relative overflow-hidden border-b border-brandy-500/50 bg-gradient-to-r from-brandy-500/80 via-ink_black-500 to-ink_black-500 p-4 text-papaya_whip-500 shadow-xl">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,236,209,0.02)_1px,transparent_1px)] bg-[size:100%_4px] opacity-30"></div>
 
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
-        {/* Giant S-Wave Countdown Clock */}
+        {/* S-Wave Countdown Clock */}
         <div className="flex items-center space-x-4">
           <div className="flex flex-col items-start">
-            <div className="flex items-center space-x-1.5 text-xs font-semibold tracking-wider text-red-400 uppercase">
-              <Clock className="h-3.5 w-3.5 animate-pulse text-red-500" />
+            <div className="flex items-center space-x-1.5 text-xs font-bold tracking-wider text-vivid_tangerine-500 uppercase">
+              <Clock className="h-3.5 w-3.5 animate-pulse text-vivid_tangerine-500" />
               <span>S-Wave Warning Window</span>
             </div>
             <div className="mt-1 flex items-baseline space-x-2">
               <span
                 className={`font-mono text-4xl font-extrabold tracking-tight ${
                   isArrived
-                    ? "text-red-500 animate-pulse"
+                    ? "text-brandy-600 animate-pulse"
                     : timeLeft < 5.0
-                    ? "text-amber-400"
-                    : "text-red-400"
+                    ? "text-vivid_tangerine-500"
+                    : "text-papaya_whip-500"
                 }`}
               >
                 {isArrived ? "00.0s" : `${timeLeft.toFixed(1)}s`}
               </span>
-              <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-stormy_teal-800">
                 {isArrived ? "STRONG SHAKING IMPACT" : "LEAD TIME TO NCU"}
               </span>
             </div>
           </div>
 
-          <div className="hidden h-12 w-px bg-zinc-800 md:block"></div>
+          <div className="hidden h-12 w-px bg-stormy_teal-400/30 md:block"></div>
 
           {/* Telemetry */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
             <div>
-              <span className="text-zinc-400">Magnitude:</span>{" "}
-              <span className="font-bold text-zinc-100">
+              <span className="text-stormy_teal-800">Magnitude:</span>{" "}
+              <span className="font-bold text-papaya_whip-500">
                 Mw {scenario?.magnitude.toFixed(2) || "6.91"}
               </span>
             </div>
             <div>
-              <span className="text-zinc-400">Focal Depth:</span>{" "}
-              <span className="font-bold text-zinc-100">
+              <span className="text-stormy_teal-800">Focal Depth:</span>{" "}
+              <span className="font-bold text-papaya_whip-500">
                 {scenario?.depth_km.toFixed(1) || "8.0"} km
               </span>
             </div>
             <div>
-              <span className="text-zinc-400">Target Facility:</span>{" "}
-              <span className="font-bold text-emerald-400">
+              <span className="text-stormy_teal-800">Target Facility:</span>{" "}
+              <span className="font-bold text-stormy_teal-700">
                 NCU Science & Tech Core
               </span>
             </div>
             <div>
-              <span className="text-zinc-400">Predicted PGV:</span>{" "}
-              <span className="font-bold text-red-400">
+              <span className="text-stormy_teal-800">Predicted PGV:</span>{" "}
+              <span className="font-extrabold text-vivid_tangerine-500">
                 {scenario?.predicted_pgv_cm_s || 72.4} cm/s (CWA 6-Weak)
               </span>
             </div>
@@ -105,22 +105,22 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
         {/* Reflex Status */}
         <div className="flex flex-col items-end space-y-1.5">
           <div className="flex items-center space-x-2">
-            <span className="flex items-center space-x-1 rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-semibold text-red-400 border border-red-500/40">
-              <Zap className="h-3 w-3 fill-current" />
+            <span className="flex items-center space-x-1 rounded-full bg-brandy-400/60 px-2.5 py-0.5 text-xs font-bold text-vivid_tangerine-700 border border-brandy-500">
+              <Zap className="h-3 w-3 fill-current text-vivid_tangerine-500" />
               <span>Track A Reflex: {reflexStatus}</span>
             </span>
-            <span className="rounded bg-zinc-900 px-2 py-0.5 text-[11px] font-mono text-zinc-300 border border-zinc-800">
+            <span className="rounded bg-ink_black-400 px-2 py-0.5 text-[11px] font-mono text-papaya_whip-600 border border-stormy_teal-400/30">
               {latency} ms latency
             </span>
           </div>
 
-          <div className="flex items-center space-x-2 text-[11px] text-zinc-400">
-            <span className="flex items-center space-x-1 text-emerald-400 font-medium">
-              <ShieldCheck className="h-3.5 w-3.5" />
+          <div className="flex items-center space-x-2 text-[11px] text-stormy_teal-800">
+            <span className="flex items-center space-x-1 text-stormy_teal-700 font-semibold">
+              <ShieldCheck className="h-3.5 w-3.5 text-stormy_teal-600" />
               <span>NeMo Critic: 0.0% Hallucination Verified</span>
             </span>
             <span>•</span>
-            <span className="text-zinc-300">
+            <span className="text-papaya_whip-700">
               3 SCADA Actuators Tripped
             </span>
           </div>

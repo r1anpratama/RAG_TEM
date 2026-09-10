@@ -12,15 +12,14 @@ import { CopilotDrawer } from "@/components/mission-control/copilot-drawer";
 import { UploadModal } from "@/components/upload/upload-modal";
 import { Scenario, FaultTrace, TriageDispatchResponse } from "@/types/triage";
 
-// Dynamically import GisMap to ensure SSR safety with Leaflet
 const GisMap = dynamic(
   () =>
     import("@/components/mission-control/gis-map").then((mod) => mod.GisMap),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-zinc-950 text-zinc-500 text-xs">
-        Loading GIS Spatial Fault Traces...
+      <div className="flex h-full w-full items-center justify-center bg-ink_black-500 text-stormy_teal-800 text-xs">
+        Loading 100% Free GIS Spatial Fault Traces...
       </div>
     ),
   }
@@ -37,7 +36,6 @@ export default function MissionControlPage() {
   const [isCopilotOpen, setIsCopilotOpen] = useState<boolean>(false);
   const [isUploadOpen, setIsUploadOpen] = useState<boolean>(false);
 
-  // 1. Fetch Scenarios on Mount
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/scenarios")
       .then((res) => res.json())
@@ -49,7 +47,6 @@ export default function MissionControlPage() {
       })
       .catch((err) => {
         console.error("Failed to load scenarios:", err);
-        // Fallback realistic scenario
         setScenarios([
           {
             id: "shuanglienpo_hukou_mw69",
@@ -66,7 +63,6 @@ export default function MissionControlPage() {
       });
   }, []);
 
-  // 2. Fetch 38 Taiwan Seismogenic Structures
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/faults")
       .then((res) => res.json())
@@ -78,11 +74,9 @@ export default function MissionControlPage() {
       .catch((err) => console.error("Failed to load faults:", err));
   }, []);
 
-  // 3. Current active scenario
   const currentScenario =
     scenarios.find((s) => s.id === selectedScenarioId) || scenarios[0] || null;
 
-  // 4. Handle Simulation Trigger
   const handleTriggerSimulation = async () => {
     if (!currentScenario) return;
     setIsLoading(true);
@@ -115,7 +109,6 @@ export default function MissionControlPage() {
     }
   };
 
-  // Trigger default simulation once scenario is loaded
   useEffect(() => {
     if (scenarios.length > 0 && !dispatch) {
       handleTriggerSimulation();
@@ -123,7 +116,7 @@ export default function MissionControlPage() {
   }, [scenarios]);
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-zinc-100 antialiased font-sans">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-ink_black-500 text-papaya_whip-500 antialiased font-sans">
       {/* 1. Header Bar */}
       <ControlHeader
         scenarios={scenarios}
@@ -147,11 +140,11 @@ export default function MissionControlPage() {
       />
 
       {/* 3. Main Mission Control Operational Dashboard */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4 bg-ink_black-500">
         {/* Top Operational Section: GIS Map (Left 60%) + SCADA & GMPE/Graph (Right 40%) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Interactive Leaflet GIS Map */}
-          <div className="lg:col-span-7 h-[380px] rounded-xl border border-zinc-800 overflow-hidden shadow-xl bg-zinc-950">
+          {/* Interactive Leaflet GIS Map with Free Basemap Switcher */}
+          <div className="lg:col-span-7 h-[380px] rounded-xl border border-stormy_teal-400/40 overflow-hidden shadow-2xl bg-ink_black-500">
             <GisMap
               faults={faults}
               scenario={currentScenario}
