@@ -25,6 +25,7 @@ Welcome to the central intelligence hub for the **RAG_TEM** project (Retrieval-A
 - Standard operating procedures for data ingestion and index generation.
 
 ### 3. [[System_Design|02. System Architecture]] & [[PRD_SeismoAgent_TW|Product Requirements Document (PRD)]]
+- **[[Geo_GraphRAG_and_MultiAgent|Spatial-Graph-Agentic Architecture & Dual-Track Engine]]**: Complete design of GeoGraph (TEM Table 2 pairings), physics GMPE validation, and multi-agent workers.
 - **[[PRD_SeismoAgent_TW|SeismoAgent-TW PRD v1.0.0]]**: Detailed specifications for Multimodal Agentic RAG and real-time emergency triage with NVIDIA stack.
 - High-level design of the RAG pipeline, chunking strategies, vector index, and retriever.
 - Component breakdown: Domain, Ingestion, Retrieval, Generation.
