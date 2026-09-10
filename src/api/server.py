@@ -403,5 +403,12 @@ async def websocket_alert_stream(websocket: WebSocket) -> None:
 
 if __name__ == "__main__":
     import uvicorn
-    print("Starting SeismoAgent-TW API Server on http://localhost:8000 ...")
-    uvicorn.run("src.api.server:app", host="0.0.0.0", port=8000, reload=False)
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", "8000"))
+    print("\n" + "=" * 60)
+    print("  SeismoAgent-TW Web Dashboard is ready!")
+    print(f"  Open in browser: http://localhost:{port}")
+    print(f"                or http://127.0.0.1:{port}")
+    print("=" * 60 + "\n")
+    uvicorn.run("src.api.server:app", host=host, port=port, reload=False)
+
