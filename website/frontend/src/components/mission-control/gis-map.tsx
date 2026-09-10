@@ -354,15 +354,15 @@ export const GisMap: React.FC<GisMapProps> = ({
             <div className="space-y-1 text-stormy_teal-800 text-[10px] mt-1.5 pt-1.5 border-t border-stormy_teal-400/30">
               <div className="flex items-center space-x-2">
                 <span className="h-1 w-4 bg-vivid_tangerine-500 rounded"></span>
-                <span className="text-papaya_whip-700">Reverse / Thrust (Chelungpu, Shuanglienpo)</span>
+                <span className="text-papaya_whip-700">Reverse / Thrust Faults</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="h-1 w-4 bg-stormy_teal-600 rounded border-b border-dashed border-stormy_teal-700"></span>
-                <span className="text-papaya_whip-700">Normal Faults (Shanchiao, Ilan)</span>
+                <span className="text-papaya_whip-700">Normal Faults</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="h-1 w-4 bg-papaya_whip-400 rounded"></span>
-                <span className="text-papaya_whip-700">Strike-Slip Faults (Meishan, Chihshang)</span>
+                <span className="text-papaya_whip-700">Strike-Slip Faults</span>
               </div>
               <div className="flex items-center space-x-2 pt-1 border-t border-stormy_teal-400/30">
                 <span className="h-2 w-2 rounded-full bg-stormy_teal-600 shadow-[0_0_6px_#3ec5da]"></span>
