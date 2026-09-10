@@ -19,7 +19,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from src.config import BASE_DIR
+from src.config import BASE_DIR, WEBSITE_DIR
 from src.domain.fault import FaultCatalog, haversine_distance_km
 from src.domain.graph import GeoGraph, NodeType, build_taiwan_seismic_graph
 from src.domain.gmpe import compute_taiwan_crustal_gmpe_pgv, validate_ground_motion_physics
@@ -82,10 +82,8 @@ def get_copilot() -> GeotechnicalCopilot:
     return _copilot
 
 
-# Static directory setup
-STATIC_DIR = Path(__file__).resolve().parent / "static"
-STATIC_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+# Website static directory setup
+app.mount("/website", StaticFiles(directory=str(WEBSITE_DIR)), name="website")
 
 
 # Pydantic Schemas
@@ -109,12 +107,13 @@ class ChatRequest(BaseModel):
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard() -> HTMLResponse:
-    """Serve the interactive single-page dashboard."""
-    index_path = STATIC_DIR / "index.html"
+    """Serve the interactive single-page dashboard from website directory."""
+    index_path = WEBSITE_DIR / "index.html"
     if not index_path.exists():
-        return HTMLResponse("<h3>Dashboard file not found. Please build frontend.</h3>", status_code=404)
+        return HTMLResponse("<h3>Dashboard file not found in website directory.</h3>", status_code=404)
     with open(index_path, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
+
 
 
 @app.get("/api/v1/health")

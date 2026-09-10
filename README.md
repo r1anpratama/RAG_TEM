@@ -78,6 +78,11 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
 
 ```text
 RAG_TEM/
+├── website/                    # Dedicated Web Application & Dashboard
+│   ├── index.html              # Main interactive dashboard UI
+│   ├── run.py                  # Standalone web runner (python website/run.py)
+│   ├── css/                    # Technical GIS dark-mode stylesheets
+│   └── js/                     # Modular frontend controllers (map, graph, chart, copilot, app)
 ├── .agents/                    # Agent guidelines & Ponytail skills
 │   ├── rules/                  # Ponytail clean code & project operating rules
 │   └── skills/                 # Ponytail analysis & review skills
@@ -91,7 +96,7 @@ RAG_TEM/
 │   └── processed/              # Processed chunks and indexes
 ├── src/
 │   ├── agents/                 # Specialized workers (Seismic, Geotech, Structural, Critic, Copilot)
-│   ├── api/                    # FastAPI REST & WebSocket server + Web Dashboard static assets
+│   ├── api/                    # FastAPI REST & WebSocket server
 │   ├── domain/                 # Domain entities (Fault, Seismic, GeoGraph, GMPE)
 │   ├── pipelines/              # PDF chunking, hybrid retrieval, and TT-SAM simulator
 │   ├── utils/                  # Minimal utilities
@@ -133,10 +138,12 @@ pip install -r requirements.txt
 
 ### 1. Launch the Interactive Web Dashboard
 ```bash
-python -m src.api.server
+python website/run.py
+# or: python -m src.api.server
 ```
 Open your browser and navigate to:
-👉 **`http://localhost:8000`**
+👉 **`http://localhost:8000`** (or **`http://127.0.0.1:8000`**)
+
 
 From the web dashboard, you can:
 - Trigger earthquake scenarios (e.g. **Shuanglienpo-Hukou $M_w\ 6.91$**).

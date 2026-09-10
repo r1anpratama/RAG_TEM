@@ -43,6 +43,17 @@ tags:
 5. **Documentation & Architecture**:
    - Authored [[Web_Dashboard_and_Streaming_API|Web Dashboard & Streaming API Architecture Specification]].
    - Updated Second Brain Dashboard [[Dashboard|MOC]].
+6. **Modular Website Architecture (`website/`)**:
+   - Reorganized frontend into a clean top-level `website/` folder separating concerns:
+     - `website/index.html`: Semantic HTML dashboard layout.
+     - `website/run.py`: Standalone launcher (`python website/run.py`).
+     - `website/css/style.css`: Technical grey GIS styles and animations.
+     - `website/js/map.js`: Free Leaflet OpenStreetMap with dynamic 38 active fault traces.
+     - `website/js/graph.js`: Vis.js Knowledge Graph visualizer.
+     - `website/js/gmpe_chart.js`: Chart.js attenuation curve.
+     - `website/js/copilot.js`: Geotechnical Copilot chat and citation engine.
+     - `website/js/app.js`: Main controller, scenarios, and WebSocket streaming.
+
 
 ## 📌 Next Steps
 - Package system for deployment with Docker / TensorRT-LLM container.
