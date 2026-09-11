@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { AlertBanner } from "@/components/mission-control/alert-banner";
 import { DigitalTwins } from "@/components/mission-control/digital-twins";
 import { ScadaPanel } from "@/components/mission-control/scada-panel";
 import { Scenario, FaultTrace } from "@/types/triage";
+import { Map as MapIcon, Box } from "lucide-react";
 
 const GisMap = dynamic(
   () =>
@@ -15,6 +16,21 @@ const GisMap = dynamic(
     loading: () => (
       <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate_obsidian-900 text-slate-400 text-xs">
         Initializing Taiwan Wavefront GIS Basemap...
+      </div>
+    ),
+  }
+);
+
+const NCU3DCampus = dynamic(
+  () =>
+    import("@/components/mission-control/ncu-3d-campus").then(
+      (mod) => mod.NCU3DCampus
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-slate-950 text-cyan-400 text-xs font-mono">
+        Loading NCU Real Campus 3D WebGL Digital Twin...
       </div>
     ),
   }
@@ -31,19 +47,65 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
   faults,
   isSimulating,
 }) => {
+  const [activeCampusView, setActiveCampusView] = useState<"gis" | "3d_campus">("gis");
+
   return (
     <div className="flex flex-col space-y-4">
       {/* Real-time S-wave countdown clock alert banner */}
       <AlertBanner scenario={scenario} isSimulating={isSimulating} />
 
-      {/* Main split: Left = GIS Wavefront Map, Right = SCADA Panel */}
+      {/* Main split: Left = GIS Wavefront Map / 3D Campus Twin, Right = SCADA Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-7 h-[420px] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-slate-100 dark:bg-slate_obsidian-900 relative isolate">
-          <GisMap
-            faults={faults}
-            scenario={scenario}
-            selectedFaultId={2}
-          />
+        <div className="lg:col-span-7 flex flex-col space-y-2">
+          {/* Top Switcher: GIS Aerial Satellite Map vs 3D Real Campus Twin */}
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center space-x-1.5 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md shadow-sm">
+              <button
+                onClick={() => setActiveCampusView("gis")}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                  activeCampusView === "gis"
+                    ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <MapIcon className="h-3.5 w-3.5" />
+                <span>GIS Aerial Satellite Map</span>
+              </button>
+              <button
+                onClick={() => setActiveCampusView("3d_campus")}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                  activeCampusView === "3d_campus"
+                    ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Box className="h-3.5 w-3.5 text-indigo-400" />
+                <span>NCU 3D Real Campus Twin</span>
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center space-x-2 text-[11px] text-slate-400 font-mono">
+              <span>Target:</span>
+              <span className="font-bold text-cyan-300">NCU Taoyuan Campus Core</span>
+            </div>
+          </div>
+
+          {/* Interactive Viewer Container */}
+          <div className="h-[440px] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-slate-100 dark:bg-slate_obsidian-900 relative isolate">
+            {activeCampusView === "gis" ? (
+              <GisMap
+                faults={faults}
+                scenario={scenario}
+                selectedFaultId={2}
+                isSimulating={isSimulating}
+              />
+            ) : (
+              <NCU3DCampus
+                scenario={scenario}
+                isSimulating={isSimulating}
+              />
+            )}
+          </div>
         </div>
 
         <div className="lg:col-span-5 flex flex-col space-y-4">
@@ -74,8 +136,8 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
         </div>
       </div>
 
-      {/* Campus Digital Twins */}
-      <DigitalTwins facilities={[]} />
+      {/* Campus Digital Twins - Neutral standby in idle, evaluated in simulation */}
+      <DigitalTwins facilities={[]} isSimulating={isSimulating} />
     </div>
   );
 };

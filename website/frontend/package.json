@@ -18,6 +18,7 @@
     "react-markdown": "^9.0.3",
     "rehype-sanitize": "^6.0.0",
     "tailwind-merge": "^2.6.0",
+    "three": "^0.174.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
