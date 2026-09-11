@@ -254,7 +254,7 @@ const NODES_REGISTRY: Record<string, NodeData> = {
   },
   nemotron_nano: {
     id: "nemotron_nano",
-    title: "Llama Nemotron Nano 8B v1 (Optional)",
+    title: "Llama Nemotron Nano 8B v1",
     subtitle: "Low-Latency Reflex Summarizer",
     tech: "Llama-3.1-Nemotron-Nano-8B (FP4/FP8 TensorRT-LLM)",
     category: "Reasoning",
@@ -293,7 +293,7 @@ const NODES_REGISTRY: Record<string, NodeData> = {
   },
   llm_optional: {
     id: "llm_optional",
-    title: "Domain LLM (Optional)",
+    title: "Domain LLM",
     subtitle: "Specialized Geotechnical Auxiliary LLM",
     tech: "DeepSeek-R1-Distill / Qwen-2.5-Geotech",
     category: "Reasoning",
@@ -810,7 +810,7 @@ export const RagArchitectureView: React.FC = () => {
                     markerEnd="url(#arrow-dashed)"
                   />
 
-                  {/* Wire 9: LLM Optional to Reflection */}
+                  {/* Wire 9: Domain LLM to Reflection */}
                   <path
                     d="M 460 94 L 460 141"
                     fill="none"
@@ -974,11 +974,8 @@ export const RagArchitectureView: React.FC = () => {
                     <path d="M 18 26 L 30 19 L 42 26 L 30 33 Z" fill="#22c55e" opacity="0.8" />
                     <path d="M 18 34 L 30 27 L 42 34 L 30 41 Z" fill="#22c55e" opacity="0.6" />
                     <path d="M 18 42 L 30 35 L 42 42 L 30 49 Z" fill="#22c55e" opacity="0.4" />
-                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                    <text x="30" y="84" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
                       NeMo Guardrails
-                    </text>
-                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
-                      Optional
                     </text>
                   </g>
 
@@ -1106,8 +1103,8 @@ export const RagArchitectureView: React.FC = () => {
                     <text x="30" y="80" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-bold">
                       Llama Nemotron
                     </text>
-                    <text x="30" y="90" textAnchor="middle" fill="#94a3b8" className="text-[8px] font-medium">
-                      Nano 8B v1 (Optional)
+                    <text x="30" y="92" textAnchor="middle" fill="#86efac" className="text-[9px] font-semibold">
+                      Nano 8B v1
                     </text>
                   </g>
 
@@ -1134,7 +1131,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 9. Domain LLM (Optional) */}
+                  {/* 9. Domain LLM */}
                   <g
                     transform="translate(430, 26)"
                     className="cursor-pointer"
@@ -1150,8 +1147,8 @@ export const RagArchitectureView: React.FC = () => {
                     <text x="30" y="39" textAnchor="middle" fill="#76b900" className="font-mono text-[11px] font-bold">
                       LLM
                     </text>
-                    <text x="30" y="80" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
-                      Optional
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Domain LLM
                     </text>
                   </g>
 
@@ -1196,11 +1193,8 @@ export const RagArchitectureView: React.FC = () => {
                     <path d="M 18 26 L 30 19 L 42 26 L 30 33 Z" fill="#22c55e" opacity="0.8" />
                     <path d="M 18 34 L 30 27 L 42 34 L 30 41 Z" fill="#22c55e" opacity="0.6" />
                     <path d="M 18 42 L 30 35 L 42 42 L 30 49 Z" fill="#22c55e" opacity="0.4" />
-                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                    <text x="30" y="84" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
                       NeMo Guardrails
-                    </text>
-                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
-                      Optional
                     </text>
                   </g>
                 </g>
