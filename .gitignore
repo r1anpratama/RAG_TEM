@@ -35,6 +35,8 @@ temp/
 data/processed/*.bin
 data/processed/*.pkl
 data/processed/*.parquet
+*.hdf5
+*.h5
 
 # Frontend / Node.js build artifacts
 node_modules/
