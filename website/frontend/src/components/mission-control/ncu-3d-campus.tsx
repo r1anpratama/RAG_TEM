@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Scenario } from "@/types/triage";
-import { RotateCcw, Building2, Map as MapIcon } from "lucide-react";
+import { RotateCcw, Building2, Map as MapIcon, Box } from "lucide-react";
+import { createDetailedScience4Building } from "./detailed-building-3d";
 
 interface NCU3DCampusProps {
   scenario: Scenario | null;
@@ -136,6 +137,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     phi: Math.PI / 3.2,
     radius: 250,
   });
+  const cameraTargetRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 10, 0));
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -251,6 +253,14 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     // 9. Build 3D NCU Buildings
     buildingMeshesRef.current.clear();
     buildingsRef.current.forEach((b) => {
+      if (b.id === "FAC_NCU_SCIENCE_B4") {
+        const detailed = createDetailedScience4Building();
+        detailed.group.position.set(b.x, 0, b.z);
+        scene.add(detailed.group);
+        buildingMeshesRef.current.set(b.id, detailed.group);
+        return;
+      }
+
       const group = new THREE.Group();
       group.position.set(b.x, 0, b.z);
 
@@ -281,18 +291,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       const roofPad = new THREE.Mesh(roofPadGeo, roofMat);
       roofPad.position.y = b.height + 0.75;
       group.add(roofPad);
-
-      if (b.id === "FAC_NCU_SCIENCE_B4") {
-        const colGeo = new THREE.CylinderGeometry(0.8, 0.8, 6, 8);
-        const colMat = new THREE.MeshStandardMaterial({ color: 0x475569 });
-        for (let cx of [-b.width / 2 + 2, b.width / 2 - 2]) {
-          for (let cz of [-b.depth / 2 + 2, b.depth / 2 - 2]) {
-            const col = new THREE.Mesh(colGeo, colMat);
-            col.position.set(cx, 3, cz);
-            group.add(col);
-          }
-        }
-      }
 
       scene.add(group);
       buildingMeshesRef.current.set(b.id, group);
@@ -361,6 +359,22 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       const group = buildingMeshesRef.current.get(b.id);
       if (!group) return;
 
+      if (b.id === "FAC_NCU_SCIENCE_B4") {
+        group.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh && child.name === "observatory_dome") {
+            const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+            if (isSimulating) {
+              mat.emissive.setHex(0xe11d48);
+              mat.emissiveIntensity = 0.55;
+            } else {
+              mat.emissive.setHex(0x000000);
+              mat.emissiveIntensity = 0.0;
+            }
+          }
+        });
+        return;
+      }
+
       const mainMesh = group.children[0] as THREE.Mesh;
       if (mainMesh && mainMesh.material) {
         if (!isSimulating) {
@@ -368,13 +382,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           (mainMesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x000000);
         } else {
           const pgv = scenario?.predicted_pgv_cm_s || 28.4;
-          if (b.id === "FAC_NCU_SCIENCE_B4") {
-            if (pgv >= 20) {
-              (mainMesh.material as THREE.MeshStandardMaterial).color.setHex(0x881337);
-              (mainMesh.material as THREE.MeshStandardMaterial).emissive.setHex(0xe11d48);
-              (mainMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.45;
-            }
-          } else if (b.id === "FAC_NCU_ENG_B5") {
+          if (b.id === "FAC_NCU_ENG_B5") {
             if (pgv >= 25) {
               (mainMesh.material as THREE.MeshStandardMaterial).color.setHex(0x78350f);
               (mainMesh.material as THREE.MeshStandardMaterial).emissive.setHex(0xd97706);
@@ -393,12 +401,13 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   const updateCameraPosition = () => {
     if (!cameraRef.current) return;
     const { theta, phi, radius } = cameraAngleRef.current;
-    const x = radius * Math.sin(phi) * Math.sin(theta);
-    const y = radius * Math.cos(phi);
-    const z = radius * Math.sin(phi) * Math.cos(theta);
+    const target = cameraTargetRef.current;
+    const x = target.x + radius * Math.sin(phi) * Math.sin(theta);
+    const y = target.y + radius * Math.cos(phi);
+    const z = target.z + radius * Math.sin(phi) * Math.cos(theta);
 
     cameraRef.current.position.set(x, y, z);
-    cameraRef.current.lookAt(0, 10, 0);
+    cameraRef.current.lookAt(target);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -428,7 +437,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     cameraAngleRef.current.radius = Math.max(
-      80,
+      50,
       Math.min(380, cameraAngleRef.current.radius + e.deltaY * 0.15)
     );
     updateCameraPosition();
@@ -437,15 +446,20 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   const setPreset = (preset: "campus" | "science4" | "eng5" | "library") => {
     setCameraMode(preset);
     if (preset === "campus") {
+      cameraTargetRef.current.set(0, 10, 0);
       cameraAngleRef.current = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 250 };
+      setSelectedBuilding(null);
     } else if (preset === "science4") {
-      cameraAngleRef.current = { theta: Math.PI / 1.8, phi: Math.PI / 3.6, radius: 130 };
+      cameraTargetRef.current.set(-5, 18, -65);
+      cameraAngleRef.current = { theta: Math.PI / 1.7, phi: Math.PI / 3.4, radius: 75 };
       setSelectedBuilding(buildingsRef.current[0]);
     } else if (preset === "eng5") {
-      cameraAngleRef.current = { theta: -Math.PI / 3, phi: Math.PI / 3.5, radius: 140 };
+      cameraTargetRef.current.set(-116, 18, 55);
+      cameraAngleRef.current = { theta: -Math.PI / 3, phi: Math.PI / 3.5, radius: 110 };
       setSelectedBuilding(buildingsRef.current[1]);
     } else if (preset === "library") {
-      cameraAngleRef.current = { theta: (5 * Math.PI) / 4, phi: Math.PI / 3.5, radius: 130 };
+      cameraTargetRef.current.set(57, 18, 19);
+      cameraAngleRef.current = { theta: (5 * Math.PI) / 4, phi: Math.PI / 3.5, radius: 100 };
       setSelectedBuilding(buildingsRef.current[2]);
     }
     updateCameraPosition();
@@ -489,13 +503,15 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         </button>
         <button
           onClick={() => setPreset("science4")}
-          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+          className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-medium transition ${
             cameraMode === "science4"
               ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-              : "text-slate-400 hover:text-white hover:bg-slate-800"
+              : "text-slate-300 hover:text-white hover:bg-slate-800"
           }`}
+          title="Inspect Detailed 3D Architectural Model of Science Building 4 (健雄館)"
         >
-          Science 4 (S4)
+          <Box className="h-3 w-3 text-cyan-400" />
+          <span>Science 4 (健雄館 3D)</span>
         </button>
         <button
           onClick={() => setPreset("eng5")}
