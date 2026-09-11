@@ -28,8 +28,10 @@ import {
   FileCode2,
   ExternalLink,
   ChevronRight,
-  ZoomIn,
-  ZoomOut
+  Mic,
+  Info,
+  Sliders,
+  Check
 } from "lucide-react";
 
 interface NodeData {
@@ -39,6 +41,10 @@ interface NodeData {
   tech: string;
   category: "Retrieval" | "Extraction" | "Storage" | "Reasoning" | "Guardrail" | "Entity";
   role: string;
+  whatWeDo: string; // What we build/do in this component
+  inputData: string; // Input data used
+  outputData: string; // Output data produced
+  speakerNotes: string; // Ready-to-read presentation script in Indonesian
   spec: string;
   hardware: string;
   latencyTarget: string;
@@ -54,189 +60,6 @@ interface TelemetryLog {
 }
 
 const NODES_REGISTRY: Record<string, NodeData> = {
-  user: {
-    id: "user",
-    title: "Client Operator / User",
-    subtitle: "Emergency Commander / SCADA Ingress",
-    tech: "Secure WebSocket / TLS 1.3 REST API",
-    category: "Entity",
-    role: "Submits seismic emergency queries, triggers simulation scenarios, and inspects real-time physical damage estimates.",
-    spec: "Session Auth Bearer Token, Client Ingress Validation",
-    hardware: "Edge Device / Web Client",
-    latencyTarget: "< 1.0 ms",
-    samplePayload: {
-      user_id: "NCU_DISASTER_CMD_01",
-      query: "Assess M6.91 Shuanglienpo-Hukou cascading PGA & drift ratio for NCU Science Building 4",
-      timestamp_utc: "2026-09-11T02:25:00Z"
-    }
-  },
-  guardrails_in: {
-    id: "guardrails_in",
-    title: "NeMo Guardrails (Input)",
-    subtitle: "Input Safety, Jailbreak & Topical Rail",
-    tech: "NVIDIA NeMo Guardrails (Colang / Python Critic)",
-    category: "Guardrail",
-    role: "Validates incoming query for prompt injection, out-of-domain scope, and sensitive critical infrastructure safety guidelines.",
-    spec: "Deterministic Rule Matching + Micro-LLM Input Classifier",
-    hardware: "NVIDIA TensorRT-LLM (Low-latency)",
-    latencyTarget: "< 2.0 ms",
-    samplePayload: {
-      input_passed: true,
-      jailbreak_score: 0.00,
-      topic_classification: "TAIWAN_SEISMOLOGY_EMERGENCY",
-      action: "ALLOW_INGRESS"
-    }
-  },
-  query_proc: {
-    id: "query_proc",
-    title: "Query Processing",
-    subtitle: "Decomposition & Spatial-Graph Entity Matcher",
-    tech: "LangChain / NeMo Query Decomposer + NetworkX",
-    category: "Retrieval",
-    role: "Extracts seismogenic fault IDs, target campus facilities, coordinates, and resolves multi-fault rupture pairs via GeoGraph.",
-    spec: "Spatial Entity Normalization against 38 Active Faults Catalog",
-    hardware: "CPU / Tensor Core",
-    latencyTarget: "< 5.0 ms",
-    samplePayload: {
-      extracted_faults: ["Shuanglienpo Fault (ID #2)", "Hukou Fault (ID #3)"],
-      target_facility: "NCU Science Building 4",
-      calc_intent: "GMPE_CRUSTAL_LIN_LEE_2008"
-    }
-  },
-  retriever_embed_query: {
-    id: "retriever_embed_query",
-    title: "NeMo Retriever Embedding (Query)",
-    subtitle: "Real-Time Query Vector Encoding",
-    tech: "NV-Embed-QA / NVIDIA NeMo Retriever NIM",
-    category: "Retrieval",
-    role: "Encodes structured query into dense 1024-dimensional vector space optimized for scientific and geotechnical literature search.",
-    spec: "NV-Embed-QA 4096 context, Cosine Similarity normalized",
-    hardware: "NVIDIA TensorRT Inference Engine",
-    latencyTarget: "< 3.0 ms",
-    samplePayload: {
-      embedding_dim: 1024,
-      norm: 1.000,
-      prefix: "query: ",
-      tokens_processed: 28
-    }
-  },
-  cuvs_store: {
-    id: "cuvs_store",
-    title: "Vector Database & Object Store (cuVS)",
-    subtitle: "GPU-Accelerated Vector Index & Document Chunks",
-    tech: "NVIDIA cuVS CAGRA + MinIO / Parquet Storage",
-    category: "Storage",
-    role: "Houses indexed TEM PSHA 2025 embeddings, borehole stratigraphic logs, and fault alignment tables with microsecond ANN graph search.",
-    spec: "cuVS CAGRA Graph Index (C-API / Python bindings), < 0.01ms probe",
-    hardware: "NVIDIA CUDA / High-Bandwidth GPU VRAM",
-    latencyTarget: "< 0.01 ms",
-    samplePayload: {
-      index_type: "CAGRA_GRAPH",
-      total_vectors: 1248,
-      nearest_chunks: [
-        { chunk_id: "TEM-P042-C0084", distance: 0.124 },
-        { chunk_id: "TEM-P043-C0085", distance: 0.141 },
-        { chunk_id: "BOR-NCU-B4-01", distance: 0.189 }
-      ]
-    }
-  },
-  reranking: {
-    id: "reranking",
-    title: "NeMo Retriever Reranking",
-    subtitle: "Cross-Encoder Relevance Scoring",
-    tech: "NVIDIA NeMo Retriever Reranking NIM",
-    category: "Retrieval",
-    role: "Scores retrieved chunk candidates against query with deep attention cross-encoder, filtering out irrelevant literature noise.",
-    spec: "Precision Cross-Encoder (Top-K Reordering from 12 to 3 chunks)",
-    hardware: "NVIDIA TensorRT-LLM FP16",
-    latencyTarget: "< 8.0 ms",
-    samplePayload: {
-      input_candidates: 12,
-      top_k_selected: 3,
-      top_score: 0.942,
-      selected_sources: ["TEM PSHA 2025 Table 2", "Lin & Lee (2008) Coefficients"]
-    }
-  },
-  nemotron_super: {
-    id: "nemotron_super",
-    title: "Llama Nemotron Super 49B",
-    subtitle: "Deliberative Multi-Agent Reasoning",
-    tech: "NVIDIA Llama-3.1-Nemotron-70B / Super 49B (TensorRT-LLM)",
-    category: "Reasoning",
-    role: "Executes deep physics reasoning, solves multi-segment fault rupture mechanics, calculates building drift ratio (2.14%), and synthesizes emergency triage.",
-    spec: "FP8 TensorRT-LLM inference, 128k context, Speculative Decoding",
-    hardware: "NVIDIA Hopper / Blackwell (H100/H200/B200)",
-    latencyTarget: "0.85 - 1.2 s",
-    samplePayload: {
-      reasoning_track: "Track B Deliberative",
-      predicted_pgv: 72.4,
-      structural_drift_pct: 2.14,
-      safety_tag: "RED TAG (IMMEDIATE EVACUATION)",
-      reinforcement_grounding: "100% Physics Verified"
-    }
-  },
-  nemotron_nano: {
-    id: "nemotron_nano",
-    title: "Llama Nemotron Nano 8B v1 (Optional)",
-    subtitle: "Low-Latency Reflex Summarizer",
-    tech: "Llama-3.1-Nemotron-Nano-8B (FP4/FP8 TensorRT-LLM)",
-    category: "Reasoning",
-    role: "Lightweight sub-10ms model for immediate SCADA telemetry extraction and short warning bulletin generation before full 49B deliberation finishes.",
-    spec: "Quantized FP8 / FP4 Engine, 8k window",
-    hardware: "NVIDIA L40S / Jetson AGX Orin",
-    latencyTarget: "< 25.0 ms",
-    samplePayload: {
-      quick_summary: "High hazard alert: Mw 6.91 near NCU. SCADA elevator and gas interlocks fired.",
-      tokens_per_sec: 142.5
-    }
-  },
-  llm_optional: {
-    id: "llm_optional",
-    title: "Domain LLM (Optional)",
-    subtitle: "Specialized Geotechnical Auxiliary LLM",
-    tech: "DeepSeek-R1-Distill / Qwen-2.5-Geotech",
-    category: "Reasoning",
-    role: "Secondary specialized foundation model for structural mechanics double-checking and code cross-validation.",
-    spec: "OpenAI-compatible NIM Microservice",
-    hardware: "NVIDIA Hopper GPU",
-    latencyTarget: "< 300 ms",
-    samplePayload: {
-      status: "STANDBY_AUXILIARY",
-      confidence: 0.981
-    }
-  },
-  reflection: {
-    id: "reflection",
-    title: "Reflection Agent",
-    subtitle: "Factual Critique & Self-Correction Loop",
-    tech: "SafetyCriticWorker + NeMo Self-Correction Loop",
-    category: "Guardrail",
-    role: "Performs adversarial cross-checking of all generated parameters against ground-truth catalogs. Loops back to Query Processing if numerical inconsistency is detected.",
-    spec: "Zero Hallucination Guarantee: Slip Rate, Dip, Mw exact match",
-    hardware: "Deterministic Rule Critic + TensorRT Micro-Agent",
-    latencyTarget: "< 4.0 ms",
-    samplePayload: {
-      hallucination_detected: false,
-      fault_verified: "Shuanglienpo (Slip: 1.5mm/yr, Dip: 45°)",
-      loop_action: "CERTIFIED_PROCEED"
-    }
-  },
-  guardrails_out: {
-    id: "guardrails_out",
-    title: "NeMo Guardrails (Output)",
-    subtitle: "Factual Consistency & Output Sanitization",
-    tech: "NVIDIA NeMo Guardrails Output Safety Rail",
-    category: "Guardrail",
-    role: "Final safety filter ensuring response adheres to civil defense formatting, zero PII leakage, and verified geotechnical citation stamps.",
-    spec: "Output Rail Validator + Format Enforcement",
-    hardware: "TensorRT-LLM",
-    latencyTarget: "< 2.0 ms",
-    samplePayload: {
-      output_verified: true,
-      citations_attached: 3,
-      red_tag_approved: true
-    }
-  },
   docs: {
     id: "docs",
     title: "Multimodal Enterprise Documents",
@@ -244,6 +67,10 @@ const NODES_REGISTRY: Record<string, NodeData> = {
     tech: "PDF / Excel / GeoJSON / Stratigraphic Boreholes",
     category: "Extraction",
     role: "Source corpus comprising TEM PSHA 2025 draft report, 38 on-land seismogenic structures, geological cross-sections, and NCREE borehole logs.",
+    inputData: "Laporan resmi draft TEM PSHA 2025 (142 hal), Excel 38 sesar aktif (Fault Parameters_update.xlsx), GeoJSON patahan, dan data log bor NCREE.",
+    whatWeDo: "Mengumpulkan dan mengintegrasikan korpus multimodal kebencanaan Taiwan menjadi dataset terstruktur siap ekstraksi.",
+    outputData: "Korpus data mentah multimodal (teks ilmiah, tabel koefisien, kurva hazard, dan log geoteknik).",
+    speakerNotes: "Alur sistem kami bermula dari Extraction Pipeline di bawah ini. Kami mengonsumsi dokumen enterprise kebencanaan Taiwan: draft laporan TEM PSHA 2025, katalog 38 sesar aktif, dan log pengeboran tanah NCREE.",
     spec: "Multi-page technical reports containing vector maps and data tables",
     hardware: "Object Store / Local Storage",
     latencyTarget: "Offline / Batch",
@@ -261,6 +88,10 @@ const NODES_REGISTRY: Record<string, NodeData> = {
     tech: "NVIDIA NeMo Multimodal Extraction NIM (LayoutLM / OCR)",
     category: "Extraction",
     role: "Parses complex figures, hazard curves, fault alignment maps, and structural damage photographs into clean visual embeddings and tabular text.",
+    inputData: "Halaman PDF berisi grafik kurva probabilitas bahaya gempa (Hazard Curves), peta patahan, dan diagram geoteknik.",
+    whatWeDo: "Mengeksekusi model vision berbasis GPU untuk mengenali tata letak (layout) dan mengekstrak grafik/tabel menjadi data numerik terstruktur.",
+    outputData: "Teks bersih dan matriks numerik koefisien bahaya gempa.",
+    speakerNotes: "Pada cabang atas, NeMo Retriever Extraction Models membaca elemen visual seperti kurva probabilitas bahaya gempa dan diagram patahan, lalu mengekstraknya menjadi teks data numerik tanpa kehilangan konteks grafik.",
     spec: "High-resolution OCR + Table transformer layout preservation",
     hardware: "NVIDIA GPU Vision Pipeline",
     latencyTarget: "~ 45 ms / page",
@@ -276,6 +107,10 @@ const NODES_REGISTRY: Record<string, NodeData> = {
     tech: "NVIDIA Nemotron Parse NIM",
     category: "Extraction",
     role: "Converts dense scientific PDF pages into semantic markdown, preserving heading hierarchies, footnote citations, and mathematical equations.",
+    inputData: "Teks naratif tebal, persamaan attenuasi Lin & Lee, dan catatan metodologi seismik.",
+    whatWeDo: "Mengonversi halaman PDF ilmiah menjadi format GitHub Flavored Markdown (GFM) dan mengekstrak metadata hierarki dokumen secara otomatis.",
+    outputData: "Markdown terstruktur dengan rumus matematis dan metadata JSON beranotasi.",
+    speakerNotes: "Secara bersamaan di cabang bawah, Nemotron Parse mengubah narasi ilmiah PDF menjadi markdown semantik, menjaga persamaan matematika attenuasi Lin & Lee, serta mengekstrak metadata dokumen.",
     spec: "Nemotron-Parse-v1 (Markdown + JSON Metadata output)",
     hardware: "NVIDIA TensorRT-LLM Inference",
     latencyTarget: "~ 30 ms / page",
@@ -292,6 +127,10 @@ const NODES_REGISTRY: Record<string, NodeData> = {
     tech: "NV-Embed-QA / NeMo Retriever NIM",
     category: "Extraction",
     role: "Vectorizes extracted text chunks and rich metadata into high-dimensional vectors and streams them directly into the cuVS CAGRA index.",
+    inputData: "1.248 potongan chunk teks (ukuran 1200 karakter, overlap 200 karakter) beserta metadata hasil parser.",
+    whatWeDo: "Memvektorisasi setiap chunk dokumen menjadi representasi vektor numerik 1024-dimensi menggunakan model NV-Embed-QA.",
+    outputData: "Dense vector embeddings berdimensi 1024 yang siap diindeks ke GPU.",
+    speakerNotes: "Seluruh potongan teks dan metadata kemudian dikonversi menjadi embedding vektor berdimensi 1024 menggunakan NVIDIA NV-Embed-QA, lalu diarahkan ke atas langsung ke dalam basis data vektor GPU.",
     spec: "Batch Embedding Ingestion, 1024-dim, FP16",
     hardware: "NVIDIA CUDA Acceleration",
     latencyTarget: "~ 12 ms / batch",
@@ -300,109 +139,361 @@ const NODES_REGISTRY: Record<string, NodeData> = {
       target_index: "cuVS_CAGRA_TEM_2025",
       upsert_status: "SYNCHRONIZED"
     }
+  },
+  cuvs_store: {
+    id: "cuvs_store",
+    title: "Vector Database & Object Store (cuVS)",
+    subtitle: "GPU-Accelerated Vector Index & Document Chunks",
+    tech: "NVIDIA cuVS CAGRA + MinIO / Parquet Storage",
+    category: "Storage",
+    role: "Houses indexed TEM PSHA 2025 embeddings, borehole stratigraphic logs, and fault alignment tables with microsecond ANN graph search.",
+    inputData: "1.248 vektor embedding dokumen dan objek dokumen asli.",
+    whatWeDo: "Membangun graf indeks pencarian vektor cepat (CAGRA) di memori GPU untuk pencarian kesamaan kosinus berlatensi sub-milidetik.",
+    outputData: "Indeks vektor GPU yang siap melayani k-nearest neighbor queries dalam waktu < 0.01 milidetik.",
+    speakerNotes: "Di sinilah jantung penyimpanan vektor: NVIDIA cuVS CAGRA. Indeks graf vektor dibangun langsung di memori GPU, memungkinkan pencarian dokumen pendukung gempa dalam waktu di bawah 0.01 milidetik!",
+    spec: "cuVS CAGRA Graph Index (C-API / Python bindings), < 0.01ms probe",
+    hardware: "NVIDIA CUDA / High-Bandwidth GPU VRAM",
+    latencyTarget: "< 0.01 ms",
+    samplePayload: {
+      index_type: "CAGRA_GRAPH",
+      total_vectors: 1248,
+      nearest_chunks: [
+        { chunk_id: "TEM-P042-C0084", distance: 0.124 },
+        { chunk_id: "TEM-P043-C0085", distance: 0.141 },
+        { chunk_id: "BOR-NCU-B4-01", distance: 0.189 }
+      ]
+    }
+  },
+  user: {
+    id: "user",
+    title: "Client Operator / User",
+    subtitle: "Emergency Commander / SCADA Ingress",
+    tech: "Secure WebSocket / TLS 1.3 REST API",
+    category: "Entity",
+    role: "Submits seismic emergency queries, triggers simulation scenarios, and inspects real-time physical damage estimates.",
+    inputData: "Query operator atau telemetri sistem deteksi gelombang P: 'Evaluasi PGA NCU Science Building 4 akibat patahan Shuanglienpo Mw 6.91'.",
+    whatWeDo: "Menerima input query operator secara real-time melalui WebSocket dan meneruskannya ke jalur Retrieval Pipeline.",
+    outputData: "Payload query terstruktur dengan stempel waktu UTC presisi tinggi.",
+    speakerNotes: "Sekarang kita beralih ke Retrieval Pipeline di bagian atas. Ketika terjadi gempa atau operator pusat komando menanyakan risiko di kampus NCU, query diajukan secara real-time.",
+    spec: "Session Auth Bearer Token, Client Ingress Validation",
+    hardware: "Edge Device / Web Client",
+    latencyTarget: "< 1.0 ms",
+    samplePayload: {
+      user_id: "NCU_DISASTER_CMD_01",
+      query: "Assess M6.91 Shuanglienpo-Hukou cascading PGA & drift ratio for NCU Science Building 4",
+      timestamp_utc: "2026-09-11T02:30:00Z"
+    }
+  },
+  guardrails_in: {
+    id: "guardrails_in",
+    title: "NeMo Guardrails (Input)",
+    subtitle: "Input Safety, Jailbreak & Topical Rail",
+    tech: "NVIDIA NeMo Guardrails (Colang / Python Critic)",
+    category: "Guardrail",
+    role: "Validates incoming query for prompt injection, out-of-domain scope, and sensitive critical infrastructure safety guidelines.",
+    inputData: "Teks query mentah dari operator.",
+    whatWeDo: "Memfilter pertanyaan terhadap prompt injection, jailbreak, dan memastikan pertanyaan berada dalam domain mitigasi seismik Taiwan.",
+    outputData: "Status lolos validasi (passed) dan skor toksisitas/topik.",
+    speakerNotes: "NeMo Guardrails memeriksa input pertama kali untuk memastikan integritas dan keamanan sistem. Pertanyaan di luar topik gempa atau upaya injeksi berbahaya akan langsung dicegat.",
+    spec: "Deterministic Rule Matching + Micro-LLM Input Classifier",
+    hardware: "NVIDIA TensorRT-LLM (Low-latency)",
+    latencyTarget: "< 2.0 ms",
+    samplePayload: {
+      input_passed: true,
+      jailbreak_score: 0.00,
+      topic_classification: "TAIWAN_SEISMOLOGY_EMERGENCY",
+      action: "ALLOW_INGRESS"
+    }
+  },
+  query_proc: {
+    id: "query_proc",
+    title: "Query Processing",
+    subtitle: "Decomposition & Spatial-Graph Entity Matcher",
+    tech: "LangChain / NeMo Query Decomposer + NetworkX",
+    category: "Retrieval",
+    role: "Extracts seismogenic fault IDs, target campus facilities, coordinates, and resolves multi-fault rupture pairs via GeoGraph.",
+    inputData: "Query yang telah diverifikasi keamanannya.",
+    whatWeDo: "Mengekstrak entitas sesar (Shuanglienpo ID #2, Hukou ID #3), gedung target (NCU Science B4), dan menghubungkannya dengan Knowledge Graph spasial.",
+    outputData: "Entitas patahan teridentifikasi, skenario gempa berantai, dan formula GMPE yang relevan.",
+    speakerNotes: "Query Processing membedah pertanyaan, mengekstrak nama sesar dan gedung target, lalu menyocokkannya dengan graf pengetahuan spasial 38 sesar aktif Taiwan kami.",
+    spec: "Spatial Entity Normalization against 38 Active Faults Catalog",
+    hardware: "CPU / Tensor Core",
+    latencyTarget: "< 5.0 ms",
+    samplePayload: {
+      extracted_faults: ["Shuanglienpo Fault (ID #2)", "Hukou Fault (ID #3)"],
+      target_facility: "NCU Science Building 4",
+      calc_intent: "GMPE_CRUSTAL_LIN_LEE_2008"
+    }
+  },
+  retriever_embed_query: {
+    id: "retriever_embed_query",
+    title: "NeMo Retriever Embedding (Query)",
+    subtitle: "Real-Time Query Vector Encoding",
+    tech: "NV-Embed-QA / NVIDIA NeMo Retriever NIM",
+    category: "Retrieval",
+    role: "Encodes structured query into dense 1024-dimensional vector space optimized for scientific and geotechnical literature search.",
+    inputData: "Struktur query teks dan entitas seismik hasil dekomposisi.",
+    whatWeDo: "Mengonversi query menjadi dense vector 1024-dimensi dalam waktu di bawah 3 milidetik menggunakan NV-Embed-QA.",
+    outputData: "Query vector 1024-dimensi siap untuk pencarian kemiripan kosinus.",
+    speakerNotes: "Query diubah menjadi representasi vektor numerik 1024-dimensi agar dapat dicari kecocokannya dengan literatur ilmiah yang sudah tersimpan di database vektor.",
+    spec: "NV-Embed-QA 4096 context, Cosine Similarity normalized",
+    hardware: "NVIDIA TensorRT Inference Engine",
+    latencyTarget: "< 3.0 ms",
+    samplePayload: {
+      embedding_dim: 1024,
+      norm: 1.000,
+      prefix: "query: ",
+      tokens_processed: 28
+    }
+  },
+  reranking: {
+    id: "reranking",
+    title: "NeMo Retriever Reranking",
+    subtitle: "Cross-Encoder Relevance Scoring",
+    tech: "NVIDIA NeMo Retriever Reranking NIM",
+    category: "Retrieval",
+    role: "Scores retrieved chunk candidates against query with deep attention cross-encoder, filtering out irrelevant literature noise.",
+    inputData: "12 kandidat potongan dokumen hasil temuan awal cuVS.",
+    whatWeDo: "Menjalankan model cross-encoder perhatian mendalam untuk menilai relevansi nyata antara query dengan 12 kandidat dokumen, lalu memilih 3 terbaik.",
+    outputData: "Top-3 chunk literatur TEM PSHA 2025 paling akurat dengan skor relevansi di atas 94%.",
+    speakerNotes: "Dari 12 dokumen yang ditarik cepat oleh cuVS, NeMo Retriever Reranking menggunakan cross-encoder presisi tinggi untuk menyaring 3 potongan paling relevan dengan skor akurasi 94%.",
+    spec: "Precision Cross-Encoder (Top-K Reordering from 12 to 3 chunks)",
+    hardware: "NVIDIA TensorRT-LLM FP16",
+    latencyTarget: "< 8.0 ms",
+    samplePayload: {
+      input_candidates: 12,
+      top_k_selected: 3,
+      top_score: 0.942,
+      selected_sources: ["TEM PSHA 2025 Table 2", "Lin & Lee (2008) Coefficients"]
+    }
+  },
+  nemotron_nano: {
+    id: "nemotron_nano",
+    title: "Llama Nemotron Nano 8B v1 (Optional)",
+    subtitle: "Low-Latency Reflex Summarizer",
+    tech: "Llama-3.1-Nemotron-Nano-8B (FP4/FP8 TensorRT-LLM)",
+    category: "Reasoning",
+    role: "Lightweight sub-10ms model for immediate SCADA telemetry extraction and short warning bulletin generation before full 49B deliberation finishes.",
+    inputData: "Sinyal telemetri stasiun terdekat dan estimasi magnitudo awal.",
+    whatWeDo: "Mengeksekusi model kecil berkecepatan tinggi (< 25 ms) untuk menerbitkan instruksi penghentian darurat SCADA lift dan gas kampus secara instan.",
+    outputData: "Aksi pemicu aktuator SCADA mesin kampus.",
+    speakerNotes: "Secara paralel, Nemotron Nano 8B yang ringan bertindak sebagai reflex track: memicu interlock SCADA lift dan katup gas dalam hitungan milidetik sebelum kalkulasi besar selesai.",
+    spec: "Quantized FP8 / FP4 Engine, 8k window",
+    hardware: "NVIDIA L40S / Jetson AGX Orin",
+    latencyTarget: "< 25.0 ms",
+    samplePayload: {
+      quick_summary: "High hazard alert: Mw 6.91 near NCU. SCADA elevator and gas interlocks fired.",
+      tokens_per_sec: 142.5
+    }
+  },
+  nemotron_super: {
+    id: "nemotron_super",
+    title: "Llama Nemotron Super 49B",
+    subtitle: "Deliberative Multi-Agent Reasoning",
+    tech: "NVIDIA Llama-3.1-Nemotron-70B / Super 49B (TensorRT-LLM)",
+    category: "Reasoning",
+    role: "Executes deep physics reasoning, solves multi-segment fault rupture mechanics, calculates building drift ratio (2.14%), and synthesizes emergency triage.",
+    inputData: "Top-3 chunk literatur TEM, parameter geoteknik sesar, dan persamaan pergerakan tanah Lin & Lee.",
+    whatWeDo: "Menjalankan penalaran berbasis fisika mendalam: mengkalkulasi Peak Ground Velocity (72.4 cm/s) dan rasio drift antar-lantai (2.14%) untuk Gedung Sains NCU.",
+    outputData: "Analisis teknis kerentanan gedung, estimasi guncangan, dan rekomendasi status RED TAG.",
+    speakerNotes: "Inti penalaran berada pada Llama Nemotron Super 49B. Model ini menghitung persamaan attenuasi Lin & Lee secara deterministik, menghasilkan prediksi PGV 72.4 cm/s dan drift ratio 2.14% pada Gedung Sains NCU.",
+    spec: "FP8 TensorRT-LLM inference, 128k context, Speculative Decoding",
+    hardware: "NVIDIA Hopper / Blackwell (H100/H200/B200)",
+    latencyTarget: "0.85 - 1.2 s",
+    samplePayload: {
+      reasoning_track: "Track B Deliberative",
+      predicted_pgv: 72.4,
+      structural_drift_pct: 2.14,
+      safety_tag: "RED TAG (IMMEDIATE EVACUATION)",
+      reinforcement_grounding: "100% Physics Verified"
+    }
+  },
+  llm_optional: {
+    id: "llm_optional",
+    title: "Domain LLM (Optional)",
+    subtitle: "Specialized Geotechnical Auxiliary LLM",
+    tech: "DeepSeek-R1-Distill / Qwen-2.5-Geotech",
+    category: "Reasoning",
+    role: "Secondary specialized foundation model for structural mechanics double-checking and code cross-validation.",
+    inputData: "Kode verifikasi persamaan mekanika struktur.",
+    whatWeDo: "Menyediakan model verifikasi sekunder opsional untuk audit silang kalkulasi teknik sipil.",
+    outputData: "Skor konsensus model tambahan.",
+    speakerNotes: "Sebagai opsi redundansi, kami menyediakan model LLM domain geoteknik sekunder untuk memvalidasi silang hasil mekanika struktur.",
+    spec: "OpenAI-compatible NIM Microservice",
+    hardware: "NVIDIA Hopper GPU",
+    latencyTarget: "< 300 ms",
+    samplePayload: {
+      status: "STANDBY_AUXILIARY",
+      confidence: 0.981
+    }
+  },
+  reflection: {
+    id: "reflection",
+    title: "Reflection Agent",
+    subtitle: "Factual Critique & Self-Correction Loop",
+    tech: "SafetyCriticWorker + NeMo Self-Correction Loop",
+    category: "Guardrail",
+    role: "Performs adversarial cross-checking of all generated parameters against ground-truth catalogs. Loops back to Query Processing if numerical inconsistency is detected.",
+    inputData: "Klaim angka dan parameter sesar yang dihasilkan oleh Nemotron Super 49B.",
+    whatWeDo: "Memverifikasi angka slip rate, dip, dan magnitudo terhadap Tabel 2 katalog resmi. Jika ada halusinasi, sistem looping kembali untuk koreksi mandiri.",
+    outputData: "Sertifikasi 0.0% Halusinasi Numerik (Zero Hallucination Guarantee).",
+    speakerNotes: "Sebelum jawaban dirilis, agen Reflection memverifikasi semua angka terhadap katalog resmi. Jika terjadi ketidaksesuaian angka, loop refleksi akan mengoreksi kembali ke Query Processing. Kami menjamin 0.0% halusinasi numerik!",
+    spec: "Zero Hallucination Guarantee: Slip Rate, Dip, Mw exact match",
+    hardware: "Deterministic Rule Critic + TensorRT Micro-Agent",
+    latencyTarget: "< 4.0 ms",
+    samplePayload: {
+      hallucination_detected: false,
+      fault_verified: "Shuanglienpo (Slip: 1.5mm/yr, Dip: 45°)",
+      loop_action: "CERTIFIED_PROCEED"
+    }
+  },
+  guardrails_out: {
+    id: "guardrails_out",
+    title: "NeMo Guardrails (Output)",
+    subtitle: "Factual Consistency & Output Sanitization",
+    tech: "NVIDIA NeMo Guardrails Output Safety Rail",
+    category: "Guardrail",
+    role: "Final safety filter ensuring response adheres to civil defense formatting, zero PII leakage, and verified geotechnical citation stamps.",
+    inputData: "Draf laporan tanggap darurat hasil verifikasi refleksi.",
+    whatWeDo: "Memastikan format respons sesuai standar komando kebencanaan (CWA/NCDR) dan mencantumkan stempel sitasi halaman dokumen rujukan.",
+    outputData: "Paket respons terverifikasi dengan stempel sitasi TEM PSHA 2025.",
+    speakerNotes: "NeMo Guardrails Output melakukan sanitasi akhir dan memastikan draf rekomendasi sesuai dengan SOP evakuasi darurat CWA/NCDR Taiwan.",
+    spec: "Output Rail Validator + Format Enforcement",
+    hardware: "TensorRT-LLM",
+    latencyTarget: "< 2.0 ms",
+    samplePayload: {
+      output_verified: true,
+      citations_attached: 3,
+      red_tag_approved: true
+    }
   }
 };
 
-const SIMULATION_PIPELINE_STEPS = [
+// Full 15-step End-to-End lifecycle starting from Extraction Pipeline
+const FULL_LIFECYCLE_STEPS = [
+  // Phase 1: Ingestion & Extraction Pipeline (Data Ingestion to cuVS)
   {
     step: 1,
-    node: "user",
-    title: "Step 1: User Query Ingress",
-    log: "User initiates seismic hazard query for NCU Science Building 4 via secure WebSocket.",
+    node: "docs",
+    title: "Step 1: Enterprise Document Ingestion",
+    log: "Loading TEM PSHA 2025 PDF (142 pages), 38 Fault Catalogs, and NCREE borehole stratigraphic logs.",
     status: "INFO"
   },
   {
     step: 2,
-    node: "guardrails_in",
-    title: "Step 2: NeMo Guardrails Input Validation",
-    log: "NeMo Guardrails passes query: Jailbreak score 0.00, topic matched to Taiwan seismology.",
-    status: "SUCCESS"
+    node: "extraction_models",
+    title: "Step 2: NeMo Retriever Vision Extraction",
+    log: "Vision NIM parsed hazard curve figures & Lin & Lee GMPE coefficient tables to clean structured text.",
+    status: "EXEC"
   },
   {
     step: 3,
-    node: "query_proc",
-    title: "Step 3: Query Decomposition & Graph Matching",
-    log: "Resolved target entities: Shuanglienpo Fault (ID #2) + Hukou Fault (ID #3) multi-rupture scenario.",
-    status: "INFO"
+    node: "nemotron_parse",
+    title: "Step 3: Nemotron Parse Document Hierarchy",
+    log: "Nemotron Parse converted report chapters to GitHub Markdown with intact attenuation formulas.",
+    status: "EXEC"
   },
   {
     step: 4,
-    node: "retriever_embed_query",
-    title: "Step 4: NeMo Retriever Embedding",
-    log: "Generated 1024-dim dense query embedding using NV-Embed-QA in 0.003 ms.",
+    node: "retriever_embed_docs",
+    title: "Step 4: Chunk Vectorization (NV-Embed-QA)",
+    log: "Vectorized 1,248 document chunks (1200 char window, 200 overlap) into 1024-dim dense vectors.",
     status: "EXEC"
   },
   {
     step: 5,
     node: "cuvs_store",
-    title: "Step 5: cuVS CAGRA GPU Vector Search",
+    title: "Step 5: cuVS CAGRA GPU Indexing",
+    log: "cuVS CAGRA indexed 1,248 vectors into high-bandwidth GPU memory. Ready for <0.01ms ANN search.",
+    status: "SUCCESS"
+  },
+  // Phase 2: Online Retrieval & Decision Pipeline
+  {
+    step: 6,
+    node: "user",
+    title: "Step 6: User Query Ingress",
+    log: "Operator query: 'Assess M6.91 Shuanglienpo-Hukou cascading PGA & drift ratio for NCU Science Building 4'.",
+    status: "INFO"
+  },
+  {
+    step: 7,
+    node: "guardrails_in",
+    title: "Step 7: NeMo Guardrails Input Validation",
+    log: "NeMo Guardrails passed: Jailbreak score 0.00, verified within Taiwan seismology safety policy.",
+    status: "SUCCESS"
+  },
+  {
+    step: 8,
+    node: "query_proc",
+    title: "Step 8: Query Decomposition & Graph Matching",
+    log: "Resolved target entities: Shuanglienpo Fault (#2) + Hukou (#3) multi-rupture scenario via GeoGraph.",
+    status: "INFO"
+  },
+  {
+    step: 9,
+    node: "retriever_embed_query",
+    title: "Step 9: NeMo Retriever Query Embedding",
+    log: "Generated 1024-dim dense query embedding using NV-Embed-QA in 0.003 ms.",
+    status: "EXEC"
+  },
+  {
+    step: 10,
+    node: "cuvs_store",
+    title: "Step 10: cuVS CAGRA GPU Vector Probing",
     log: "cuVS GPU index probed 1,248 vectors: 12 candidate chunks retrieved in 0.009 ms.",
     status: "SUCCESS"
   },
   {
-    step: 6,
+    step: 11,
     node: "reranking",
-    title: "Step 6: NeMo Retriever Cross-Encoder Reranking",
+    title: "Step 11: NeMo Retriever Cross-Encoder Reranking",
     log: "Cross-encoder re-ranked chunks -> Top-3 TEM PSHA 2025 literature chunks selected (Top Score: 0.942).",
     status: "EXEC"
   },
   {
-    step: 7,
+    step: 12,
+    node: "nemotron_nano",
+    title: "Step 12: Nemotron Nano 8B Reflex Trigger",
+    log: "Nemotron Nano 8B executed sub-5ms SCADA elevator stop and natural gas shutoff actuators.",
+    status: "SUCCESS"
+  },
+  {
+    step: 13,
     node: "nemotron_super",
-    title: "Step 7: Llama Nemotron Super 49B Deliberation",
+    title: "Step 13: Nemotron Super 49B Deliberation",
     log: "Nemotron Super 49B calculated Lin & Lee GMPE: PGV=72.4 cm/s, Drift=2.14% (RED TAG evacuation).",
     status: "EXEC"
   },
   {
-    step: 8,
+    step: 14,
     node: "reflection",
-    title: "Step 8: Reflection Agent Critique Loop",
-    log: "Safety Critic cross-checked parameters against Table 2 catalog: 0.0% Hallucination verified.",
+    title: "Step 14: Reflection Agent Critique Loop",
+    log: "Safety Critic verified parameters against Table 2 catalog: 0.0% Hallucination verified.",
     status: "SUCCESS"
   },
   {
-    step: 9,
+    step: 15,
     node: "guardrails_out",
-    title: "Step 9: NeMo Guardrails Output Certification",
-    log: "Output safety filters verified: citations attached, emergency protocol confirmed.",
+    title: "Step 15: NeMo Guardrails Output Certification",
+    log: "Output safety filters verified: citations attached, RED TAG emergency directive certified.",
     status: "SUCCESS"
-  },
-  {
-    step: 10,
-    node: "user",
-    title: "Step 10: Response Delivery to Client",
-    log: "Response package transmitted to operator dashboard. End-to-end deliberative loop: 0.864s.",
-    status: "INFO"
   }
 ];
 
 export const RagArchitectureView: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<string>("nemotron_super");
+  const [selectedNode, setSelectedNode] = useState<string>("docs");
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simulationStep, setSimulationStep] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [activeInspectorTab, setActiveInspectorTab] = useState<"speaker" | "tech" | "payload">("speaker");
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([
     {
       id: 1,
-      time: "10:25:01.104",
-      step: "SYSTEM_READY",
+      time: "10:30:00.000",
+      step: "SYSTEM_INIT",
       status: "INFO",
-      message: "NVIDIA NeMo Multimodal Agentic RAG pipeline initialized in FP8 mode."
-    },
-    {
-      id: 2,
-      time: "10:25:01.108",
-      step: "CUVS_INIT",
-      status: "SUCCESS",
-      message: "cuVS CAGRA index loaded 1,248 document vectors into GPU memory."
-    },
-    {
-      id: 3,
-      time: "10:25:01.112",
-      step: "GUARDRAIL_READY",
-      status: "SUCCESS",
-      message: "NeMo Guardrails active with zero-hallucination factual rail enforcement."
+      message: "Ready for End-to-End Presentation: Extraction Pipeline -> cuVS -> Retrieval & Deliberation."
     }
   ]);
 
@@ -416,12 +507,11 @@ export const RagArchitectureView: React.FC = () => {
     }
   }, [telemetryLogs]);
 
-  // Handle Simulation Loop
+  // Handle Full Simulation Loop
   const startSimulation = () => {
     setIsSimulating(true);
     setSimulationStep(1);
 
-    // Add initial start log
     const now = new Date();
     const timeStr = now.toTimeString().split(" ")[0] + "." + String(now.getMilliseconds()).padStart(3, "0");
     setTelemetryLogs((prev) => [
@@ -429,18 +519,18 @@ export const RagArchitectureView: React.FC = () => {
       {
         id: Date.now(),
         time: timeStr,
-        step: "SIM_START",
+        step: "STORY_START",
         status: "INFO",
-        message: "▶ Initiated End-to-End Query & Retrieval Simulation packet."
+        message: "▶ Starting Full Presentation Flow: (1) Extraction Pipeline -> (2) cuVS Vector Store -> (3) Retrieval Pipeline."
       }
     ]);
 
     let stepIndex = 0;
-    const intervalMs = 1200 / playbackSpeed;
+    const intervalMs = 1400 / playbackSpeed;
 
     const runNextStep = () => {
-      if (stepIndex < SIMULATION_PIPELINE_STEPS.length) {
-        const currentData = SIMULATION_PIPELINE_STEPS[stepIndex];
+      if (stepIndex < FULL_LIFECYCLE_STEPS.length) {
+        const currentData = FULL_LIFECYCLE_STEPS[stepIndex];
         setSimulationStep(currentData.step);
         setSelectedNode(currentData.node);
 
@@ -448,7 +538,7 @@ export const RagArchitectureView: React.FC = () => {
         const stepTimeStr = stepTime.toTimeString().split(" ")[0] + "." + String(stepTime.getMilliseconds()).padStart(3, "0");
 
         setTelemetryLogs((prev) => [
-          ...prev.slice(-25),
+          ...prev.slice(-30),
           {
             id: Date.now() + stepIndex,
             time: stepTimeStr,
@@ -471,15 +561,15 @@ export const RagArchitectureView: React.FC = () => {
           {
             id: Date.now() + 999,
             time: endTimeStr,
-            step: "SIM_COMPLETE",
+            step: "STORY_COMPLETE",
             status: "SUCCESS",
-            message: "✔ End-to-End Simulation completed successfully. All guardrails passed."
+            message: "✔ Complete End-to-End Presentation Workflow Finished: Ingestion, cuVS Indexing, and Multi-Agent Reasoning verified."
           }
         ]);
       }
     };
 
-    simulationTimerRef.current = setTimeout(runNextStep, 400);
+    simulationTimerRef.current = setTimeout(runNextStep, 300);
   };
 
   const pauseSimulation = () => {
@@ -495,10 +585,10 @@ export const RagArchitectureView: React.FC = () => {
     }
     setIsSimulating(false);
     setSimulationStep(0);
-    setSelectedNode("nemotron_super");
+    setSelectedNode("docs");
   };
 
-  const selected = NODES_REGISTRY[selectedNode] || NODES_REGISTRY.nemotron_super;
+  const selected = NODES_REGISTRY[selectedNode] || NODES_REGISTRY.docs;
 
   return (
     <div className={`flex flex-col space-y-4 w-full transition-all duration-200 ${isFullscreen ? "fixed inset-0 z-50 bg-[#070d17] p-6 overflow-y-auto" : ""}`}>
@@ -514,16 +604,16 @@ export const RagArchitectureView: React.FC = () => {
                 NVIDIA NeMo Multimodal Agentic RAG Architecture
               </h2>
               <span className="rounded bg-[#76b900]/15 px-2 py-0.5 text-[10px] font-mono font-bold text-[#76b900] border border-[#76b900]/30">
-                ENTERPRISE WORKFLOW
+                PRESENTATION WORKFLOW
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Interactive dual-pipeline workflow: Real-Time Retrieval (Top) &amp; Multimodal Document Ingestion (Bottom)
+              Complete End-to-End Story: 1. Extraction Pipeline (Data Ingestion) &rarr; 2. cuVS Indexing &rarr; 3. Real-Time Retrieval &amp; Multi-Agent Reasoning
             </p>
           </div>
         </div>
 
-        {/* Live Simulation & Canvas Controls */}
+        {/* Presentation Controls */}
         <div className="flex flex-wrap items-center gap-2">
           {!isSimulating ? (
             <button
@@ -531,7 +621,7 @@ export const RagArchitectureView: React.FC = () => {
               className="flex items-center space-x-1.5 bg-gradient-to-r from-[#76b900] to-emerald-600 hover:from-[#6ca900] hover:to-emerald-500 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md shadow-[#76b900]/20 cursor-pointer"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
-              <span>Simulate End-to-End Flow</span>
+              <span>Mulai Presentasi Simulasi (Extraction &rarr; Retrieval)</span>
             </button>
           ) : (
             <button
@@ -539,14 +629,14 @@ export const RagArchitectureView: React.FC = () => {
               className="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md cursor-pointer"
             >
               <Pause className="h-3.5 w-3.5 fill-current" />
-              <span>Pause</span>
+              <span>Pause Presentasi</span>
             </button>
           )}
 
           <button
             onClick={resetSimulation}
             className="flex items-center space-x-1 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium px-2.5 py-2 rounded-xl transition cursor-pointer"
-            title="Reset Simulation State"
+            title="Reset ke Langkah Awal (Enterprise Documents)"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Reset</span>
@@ -573,7 +663,7 @@ export const RagArchitectureView: React.FC = () => {
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="flex items-center space-x-1 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium px-2.5 py-2 rounded-xl transition cursor-pointer"
-            title={isFullscreen ? "Exit Fullscreen Canvas" : "Expand to Fullscreen"}
+            title={isFullscreen ? "Keluar dari Layar Penuh" : "Buka Layar Penuh (Presentasi)"}
           >
             {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
             <span className="hidden md:inline">{isFullscreen ? "Exit" : "Expand"}</span>
@@ -581,12 +671,12 @@ export const RagArchitectureView: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Interactive Stage: Full Width Layout utilizing all screen space */}
+      {/* Main Interactive Stage: Full Width Layout */}
       <div className="grid grid-cols-1 2xl:grid-cols-12 gap-4 items-start w-full">
-        {/* SVG Diagram Canvas (8 cols on 2xl, full width on xl and below) */}
+        {/* SVG Diagram Canvas (8 cols on 2xl) */}
         <div className="2xl:col-span-8 flex flex-col space-y-4 w-full">
           <div className="relative w-full rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070d17] overflow-hidden shadow-xl p-3 sm:p-5">
-            {/* Background High-Tech Dot Matrix */}
+            {/* Background Dot Matrix */}
             <div 
               className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] pointer-events-none"
               style={{
@@ -595,7 +685,7 @@ export const RagArchitectureView: React.FC = () => {
               }}
             />
 
-            {/* SVG Architectural Canvas (viewBox: 1200 x 640 - spacious and collision-free) */}
+            {/* SVG Architectural Canvas (1200 x 640) */}
             <div className="w-full overflow-x-auto">
               <svg
                 viewBox="0 0 1200 640"
@@ -655,21 +745,6 @@ export const RagArchitectureView: React.FC = () => {
                     <stop offset="0%" stopColor="#0284c7" />
                     <stop offset="100%" stopColor="#0369a1" />
                   </linearGradient>
-
-                  <linearGradient id="grad-green-node" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#16291a" />
-                    <stop offset="100%" stopColor="#0b170f" />
-                  </linearGradient>
-
-                  <linearGradient id="grad-yellow-node" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#2c2208" />
-                    <stop offset="100%" stopColor="#191304" />
-                  </linearGradient>
-
-                  <linearGradient id="grad-orange-node" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#2e1605" />
-                    <stop offset="100%" stopColor="#1a0b02" />
-                  </linearGradient>
                 </defs>
 
                 {/* ========================================================================= */}
@@ -682,16 +757,16 @@ export const RagArchitectureView: React.FC = () => {
                     fill="#94a3b8"
                     className="font-mono text-[11px] font-bold tracking-widest uppercase"
                   >
-                    RETRIEVAL PIPELINE
+                    RETRIEVAL PIPELINE (ONLINE DECISION LAYER)
                   </text>
 
                   {/* SVG CONNECTING WIRES */}
-                  {/* Wire 1: User to Guardrails In (through Query pill) */}
+                  {/* Wire 1: User to Guardrails In */}
                   <path
                     d="M 110 245 L 150 245 L 235 245"
                     fill="none"
-                    stroke={simulationStep === 1 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 1 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 6 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 6 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -699,8 +774,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 295 245 L 410 245"
                     fill="none"
-                    stroke={simulationStep === 2 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 2 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 7 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 7 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -708,8 +783,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 470 245 L 610 245"
                     fill="none"
-                    stroke={simulationStep === 3 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 3 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 8 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 8 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -717,26 +792,26 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 670 245 L 850 245"
                     fill="none"
-                    stroke={simulationStep === 4 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 4 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 9 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 9 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
-                  {/* Wire 5: cuVS Store UP to Reranking (Clean vertical ascent) */}
+                  {/* Wire 5: cuVS Store UP to Reranking */}
                   <path
                     d="M 940 200 L 940 178"
                     fill="none"
-                    stroke={simulationStep === 5 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 5 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 10 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 10 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
-                  {/* Wire 6: Reranking to Nemotron Super 49B (Solid Left) */}
+                  {/* Wire 6: Reranking to Nemotron Super 49B */}
                   <path
                     d="M 910 145 L 670 145"
                     fill="none"
-                    stroke={simulationStep === 6 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 6 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 13 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 13 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -744,8 +819,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 940 110 L 940 50 L 815 50"
                     fill="none"
-                    stroke="#64748b"
-                    strokeWidth="1.5"
+                    stroke={simulationStep === 12 ? "#76b900" : "#64748b"}
+                    strokeWidth={simulationStep === 12 ? "2.5" : "1.5"}
                     strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                   />
@@ -760,7 +835,7 @@ export const RagArchitectureView: React.FC = () => {
                     markerEnd="url(#arrow-dashed)"
                   />
 
-                  {/* Wire 9: LLM Optional to Reflection (Dashed Vertical Down) */}
+                  {/* Wire 9: LLM Optional to Reflection */}
                   <path
                     d="M 440 85 L 440 115"
                     fill="none"
@@ -774,8 +849,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 610 145 L 470 145"
                     fill="none"
-                    stroke={simulationStep === 7 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 7 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 14 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 14 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -783,8 +858,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 440 178 L 440 212"
                     fill="none"
-                    stroke={simulationStep === 8 ? "#eab308" : "#64748b"}
-                    strokeWidth={simulationStep === 8 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 14 ? "#eab308" : "#64748b"}
+                    strokeWidth={simulationStep === 14 ? "2.5" : "1.5"}
                     strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                     markerStart="url(#arrow-dashed)"
@@ -794,17 +869,17 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 410 145 L 295 145"
                     fill="none"
-                    stroke={simulationStep === 9 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 9 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 15 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 15 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
-                  {/* Wire 13: Guardrails Out to User (through Response pill, down to User) */}
+                  {/* Wire 13: Guardrails Out to User */}
                   <path
                     d="M 235 145 L 140 145 L 80 145 L 80 215"
                     fill="none"
-                    stroke={simulationStep === 10 ? "#76b900" : "#475569"}
-                    strokeWidth={simulationStep === 10 ? "2.5" : "1.5"}
+                    stroke={simulationStep === 15 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 15 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -816,28 +891,38 @@ export const RagArchitectureView: React.FC = () => {
                       filter="url(#glow-pulse)"
                       className="animate-ping"
                       cx={
-                        simulationStep === 1 ? 160 :
-                        simulationStep === 2 ? 265 :
+                        simulationStep === 1 ? 110 :
+                        simulationStep === 2 ? 440 :
                         simulationStep === 3 ? 440 :
-                        simulationStep === 4 ? 640 :
+                        simulationStep === 4 ? 940 :
                         simulationStep === 5 ? 940 :
-                        simulationStep === 6 ? 940 :
-                        simulationStep === 7 ? 640 :
+                        simulationStep === 6 ? 160 :
+                        simulationStep === 7 ? 265 :
                         simulationStep === 8 ? 440 :
-                        simulationStep === 9 ? 265 :
-                        simulationStep === 10 ? 80 : 80
+                        simulationStep === 9 ? 640 :
+                        simulationStep === 10 ? 940 :
+                        simulationStep === 11 ? 940 :
+                        simulationStep === 12 ? 780 :
+                        simulationStep === 13 ? 640 :
+                        simulationStep === 14 ? 440 :
+                        simulationStep === 15 ? 265 : 110
                       }
                       cy={
-                        simulationStep === 1 ? 245 :
-                        simulationStep === 2 ? 245 :
-                        simulationStep === 3 ? 245 :
-                        simulationStep === 4 ? 245 :
+                        simulationStep === 1 ? 510 :
+                        simulationStep === 2 ? 430 :
+                        simulationStep === 3 ? 555 :
+                        simulationStep === 4 ? 520 :
                         simulationStep === 5 ? 245 :
-                        simulationStep === 6 ? 145 :
-                        simulationStep === 7 ? 145 :
-                        simulationStep === 8 ? 145 :
-                        simulationStep === 9 ? 145 :
-                        simulationStep === 10 ? 245 : 245
+                        simulationStep === 6 ? 245 :
+                        simulationStep === 7 ? 245 :
+                        simulationStep === 8 ? 245 :
+                        simulationStep === 9 ? 245 :
+                        simulationStep === 10 ? 245 :
+                        simulationStep === 11 ? 145 :
+                        simulationStep === 12 ? 50 :
+                        simulationStep === 13 ? 145 :
+                        simulationStep === 14 ? 145 :
+                        simulationStep === 15 ? 145 : 510
                       }
                     />
                   )}
@@ -975,7 +1060,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 5. Vector Database Object Store cuVS (Spacious Clean Chassis) */}
+                  {/* 5. Vector Database Object Store cuVS */}
                   <g
                     transform="translate(855, 205)"
                     className="cursor-pointer"
@@ -992,7 +1077,6 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "cuvs_store" ? "2.5" : "1.5"}
                       filter={selectedNode === "cuvs_store" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Header Label inside chassis */}
                     <text x="85" y="16" textAnchor="middle" fill="#fdba74" className="font-mono text-[9px] font-bold uppercase tracking-wider">
                       Vector DB &amp; Object Store (cuVS)
                     </text>
@@ -1013,7 +1097,7 @@ export const RagArchitectureView: React.FC = () => {
                     <ellipse cx="124" cy="58" rx="16" ry="5" fill="#fed7aa" />
                   </g>
 
-                  {/* 6. NeMo Retriever Reranking (Above cuVS) */}
+                  {/* 6. NeMo Retriever Reranking */}
                   <g
                     transform="translate(910, 111)"
                     className="cursor-pointer"
@@ -1035,7 +1119,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 7. Llama Nemotron Nano 8B v1 (Top Right Optional) */}
+                  {/* 7. Llama Nemotron Nano 8B v1 */}
                   <g
                     transform="translate(750, 16)"
                     className="cursor-pointer"
@@ -1057,7 +1141,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 8. Llama Nemotron Super 49B (Core Deliberative Reasoning) */}
+                  {/* 8. Llama Nemotron Super 49B */}
                   <g
                     transform="translate(610, 111)"
                     className="cursor-pointer"
@@ -1080,7 +1164,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 9. Domain LLM (Optional - Top Center, Clean single label) */}
+                  {/* 9. Domain LLM (Optional) */}
                   <g
                     transform="translate(410, 16)"
                     className="cursor-pointer"
@@ -1104,7 +1188,7 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 10. Reflection Agent (Yellow Document) */}
+                  {/* 10. Reflection Agent */}
                   <g
                     transform="translate(410, 111)"
                     className="cursor-pointer"
@@ -1155,7 +1239,7 @@ export const RagArchitectureView: React.FC = () => {
                 </g>
 
                 {/* ========================================================================= */}
-                {/* 2. PIPELINE DIVIDER (Generously Spaced Dashed Horizontal Line) */}
+                {/* 2. PIPELINE DIVIDER (Dashed Horizontal Line) */}
                 {/* ========================================================================= */}
                 <g id="pipeline-divider">
                   <line
@@ -1173,7 +1257,7 @@ export const RagArchitectureView: React.FC = () => {
                     fill="#94a3b8"
                     className="font-mono text-[11px] font-bold tracking-widest uppercase"
                   >
-                    EXTRACTION PIPELINE
+                    EXTRACTION PIPELINE (DATA INGESTION &amp; VECTOR INDEXING)
                   </text>
                 </g>
 
@@ -1181,25 +1265,24 @@ export const RagArchitectureView: React.FC = () => {
                 {/* 3. EXTRACTION PIPELINE (BOTTOM SWIMLANE) */}
                 {/* ========================================================================= */}
                 <g id="extraction-swimlane">
-                  {/* Wire E1: Docs to Extraction Models (Top Branch) */}
+                  {/* Wire E1: Docs to Extraction Models */}
                   <path
                     d="M 160 485 L 230 430 L 410 430"
                     fill="none"
-                    stroke="#475569"
-                    strokeWidth="1.5"
+                    stroke={simulationStep === 2 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 2 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
-                  {/* Clean Label placed above horizontal path without touching node */}
                   <text x="320" y="418" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
                     Pages as Images, Infographics, Charts, Tables
                   </text>
 
-                  {/* Wire E2: Docs to Nemotron Parse (Bottom Branch) */}
+                  {/* Wire E2: Docs to Nemotron Parse */}
                   <path
                     d="M 160 535 L 230 555 L 410 555"
                     fill="none"
-                    stroke="#475569"
-                    strokeWidth="1.5"
+                    stroke={simulationStep === 3 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 3 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
@@ -1207,8 +1290,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 470 430 L 680 430 L 680 515 L 910 515"
                     fill="none"
-                    stroke="#475569"
-                    strokeWidth="1.5"
+                    stroke={simulationStep === 4 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 4 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
                   <text x="575" y="420" textAnchor="middle" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
@@ -1219,8 +1302,8 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 470 555 L 720 555 L 910 530"
                     fill="none"
-                    stroke="#475569"
-                    strokeWidth="1.5"
+                    stroke={simulationStep === 4 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 4 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
                   <text x="595" y="546" textAnchor="middle" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
@@ -1231,11 +1314,10 @@ export const RagArchitectureView: React.FC = () => {
                   <path
                     d="M 940 485 L 940 290"
                     fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="2.5"
+                    stroke={simulationStep === 5 ? "#76b900" : "#22c55e"}
+                    strokeWidth={simulationStep === 5 ? "3.5" : "2.5"}
                     markerEnd="url(#arrow-green)"
                   />
-                  {/* Label on the right of the vertical line with plenty of clearance */}
                   <text x="955" y="390" fill="#86efac" className="font-mono text-[10px] font-bold">
                     Into cuVS
                   </text>
@@ -1345,7 +1427,7 @@ export const RagArchitectureView: React.FC = () => {
             </div>
           </div>
 
-          {/* Real-Time Telemetry Log Stream (Professional Live Console) */}
+          {/* Real-Time Telemetry Log Stream */}
           <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#080e1a] text-slate-200 shadow-md overflow-hidden w-full">
             <div className="flex items-center justify-between px-4 py-2.5 bg-[#0e1726] border-b border-slate-800">
               <div className="flex items-center space-x-2">
@@ -1356,7 +1438,7 @@ export const RagArchitectureView: React.FC = () => {
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-400">
-                <span>Active Step: {simulationStep ? `Step ${simulationStep}/10` : "Idle (Standby)"}</span>
+                <span>Active Step: {simulationStep ? `Step ${simulationStep}/15` : "Standby (Klik Mulai Presentasi)"}</span>
                 <span>|</span>
                 <button
                   onClick={() => setTelemetryLogs([])}
@@ -1394,19 +1476,57 @@ export const RagArchitectureView: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Node Inspector Drawer (4 cols on 2xl, full width stacked on smaller screens) */}
+        {/* Right Node Inspector Drawer (with Speaker Notes & Task Explanations) */}
         <div className="2xl:col-span-4 flex flex-col space-y-4 w-full">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-5 shadow-lg">
+            {/* Header & Tabs */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
               <div className="flex items-center space-x-2">
                 <Sparkles className="h-4 w-4 text-[#76b900]" />
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                  NVIDIA Node Inspector
+                  Node Inspector
                 </span>
               </div>
               <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-600 dark:text-slate-300">
                 {selected.category}
               </span>
+            </div>
+
+            {/* Inspector Navigation Tabs */}
+            <div className="flex items-center space-x-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 mb-4 text-xs font-medium">
+              <button
+                onClick={() => setActiveInspectorTab("speaker")}
+                className={`flex items-center justify-center space-x-1 flex-1 py-1.5 rounded-lg transition ${
+                  activeInspectorTab === "speaker"
+                    ? "bg-[#76b900] text-slate-950 font-bold shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Mic className="h-3.5 w-3.5" />
+                <span>Skrip Presentasi</span>
+              </button>
+              <button
+                onClick={() => setActiveInspectorTab("tech")}
+                className={`flex items-center justify-center space-x-1 flex-1 py-1.5 rounded-lg transition ${
+                  activeInspectorTab === "tech"
+                    ? "bg-[#76b900] text-slate-950 font-bold shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <Sliders className="h-3.5 w-3.5" />
+                <span>Spesifikasi Teknis</span>
+              </button>
+              <button
+                onClick={() => setActiveInspectorTab("payload")}
+                className={`flex items-center justify-center space-x-1 flex-1 py-1.5 rounded-lg transition ${
+                  activeInspectorTab === "payload"
+                    ? "bg-[#76b900] text-slate-950 font-bold shadow-sm"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <FileCode2 className="h-3.5 w-3.5" />
+                <span>JSON Data</span>
+              </button>
             </div>
 
             {/* Node Title & Subtitle */}
@@ -1419,60 +1539,108 @@ export const RagArchitectureView: React.FC = () => {
               </p>
             </div>
 
-            {/* Role in Prototype */}
-            <div className="space-y-3.5 text-xs">
-              <div>
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-                  Role in Prototype
-                </label>
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed">
-                  {selected.role}
+            {/* Tab 1: Speaker Notes & What We Do */}
+            {activeInspectorTab === "speaker" && (
+              <div className="space-y-3.5 text-xs">
+                {/* Ready-to-Read Speaker Script */}
+                <div>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-[#76b900] font-bold block mb-1 flex items-center space-x-1">
+                    <Mic className="h-3 w-3" />
+                    <span>Skrip Narasi Presentasi (Speaker Notes)</span>
+                  </label>
+                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-950 dark:text-emerald-200 leading-relaxed font-sans italic text-[12px]">
+                    &ldquo;{selected.speakerNotes}&rdquo;
+                  </div>
+                </div>
+
+                {/* What We Do in this Component */}
+                <div>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    Apa yang Kita Lakukan di Komponen Ini? (Our Task)
+                  </label>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {selected.whatWeDo}
+                  </div>
+                </div>
+
+                {/* Data In vs Data Out */}
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block font-bold mb-0.5">
+                      Input Data
+                    </span>
+                    <span className="text-xs text-slate-800 dark:text-slate-200 block">
+                      {selected.inputData}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <span className="text-[9px] font-mono uppercase text-[#76b900] block font-bold mb-0.5">
+                      Output Data / Artifact
+                    </span>
+                    <span className="text-xs text-slate-800 dark:text-slate-200 block">
+                      {selected.outputData}
+                    </span>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Hardware Acceleration & Latency */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
-                    Target Latency
-                  </span>
-                  <span className="font-mono text-xs font-bold text-[#76b900]">
-                    {selected.latencyTarget}
-                  </span>
+            {/* Tab 2: Technical Specifications */}
+            {activeInspectorTab === "tech" && (
+              <div className="space-y-3.5 text-xs">
+                <div>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    Role in Prototype Architecture
+                  </label>
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed">
+                    {selected.role}
+                  </div>
                 </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
-                  <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
-                    Execution Layer
-                  </span>
-                  <span className="font-mono text-[11px] font-bold text-cyan-600 dark:text-cyan-400 truncate block">
-                    {selected.hardware}
-                  </span>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
+                      Target Latency
+                    </span>
+                    <span className="font-mono text-xs font-bold text-[#76b900]">
+                      {selected.latencyTarget}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                    <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
+                      Execution Engine
+                    </span>
+                    <span className="font-mono text-[11px] font-bold text-cyan-600 dark:text-cyan-400 truncate block">
+                      {selected.hardware}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
+                    NVIDIA Architecture Specification
+                  </label>
+                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 font-mono text-[11px] text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                    {selected.spec}
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Architectural Spec */}
-              <div>
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-                  Architecture Specification
-                </label>
-                <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 font-mono text-[11px] text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
-                  {selected.spec}
-                </div>
-              </div>
-
-              {/* Sample Telemetry JSON Packet */}
+            {/* Tab 3: JSON Data Packet */}
+            {activeInspectorTab === "payload" && (
               <div>
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Sample Telemetry Data Packet
                 </label>
-                <pre className="p-3 rounded-xl bg-[#060b13] text-[#76b900] font-mono text-[10px] overflow-x-auto border border-slate-800/80 max-h-48 scrollbar-thin">
+                <pre className="p-3 rounded-xl bg-[#060b13] text-[#76b900] font-mono text-[10px] overflow-x-auto border border-slate-800/80 max-h-60 scrollbar-thin">
                   {JSON.stringify(selected.samplePayload, null, 2)}
                 </pre>
               </div>
-            </div>
+            )}
           </div>
 
-          {/* NVIDIA Hardware Acceleration Badge Card */}
+          {/* NVIDIA AI Enterprise Hardware Stack */}
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-4 shadow-sm text-xs">
             <h4 className="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase mb-3 flex items-center space-x-2">
               <Zap className="h-3.5 w-3.5 text-[#76b900]" />
