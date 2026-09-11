@@ -53,7 +53,7 @@ export function ChatContainer({ messages, onSelectPrompt }: ChatContainerProps) 
         <h2 className="text-xl font-bold text-white mb-2">
           SeismoAgent-TW &amp; RAG Knowledge Platform
         </h2>
-        <p className="text-sm text-zinc-400 max-w-md mb-8 leading-relaxed">
+        <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-md mb-8 leading-relaxed">
           Decoupled RAG system grounded with Taiwan tectonic catalogs, TEM probability models, and emergency triage guidelines.
         </p>
 
@@ -68,11 +68,11 @@ export function ChatContainer({ messages, onSelectPrompt }: ChatContainerProps) 
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <Icon className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-semibold text-zinc-200 group-hover:text-emerald-300">
+                  <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-emerald-300">
                     {item.title}
                   </span>
                 </div>
-                <span className="text-[11px] text-zinc-400 line-clamp-2">
+                <span className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-2">
                   {item.desc}
                 </span>
               </button>

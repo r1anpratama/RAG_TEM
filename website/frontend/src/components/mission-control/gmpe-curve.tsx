@@ -67,11 +67,11 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
   const obsY = scaleY(observedPgv);
 
   return (
-    <div className="flex flex-col space-y-2 rounded-xl border border-slate-800 bg-slate_obsidian-card p-3 shadow-md">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+    <div className="flex flex-col space-y-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-3 shadow-md">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
         <div className="flex items-center space-x-2">
           <TrendingDown className="h-4 w-4 text-cyan-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-100">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             Physics GMPE Attenuation Curve (Lin & Lee 2008)
           </h3>
         </div>
@@ -155,7 +155,7 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
         </svg>
       </div>
 
-      <div className="flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-800 pt-1 font-mono">
+      <div className="flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-1 font-mono">
         <span>TEM PSHA2025 Crustal Model</span>
         <span className="text-cyan-400">±2σ Uncertainty Envelope</span>
       </div>

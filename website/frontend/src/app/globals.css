@@ -4,6 +4,29 @@
 @tailwind utilities;
 
 :root {
+  --background: 210 40% 98%;       /* #f8fafc Light Slate Foundation */
+  --foreground: 222 47% 11%;       /* #0f172a Deep Slate Text */
+  --card: 0 0% 100%;               /* #ffffff Clean White Card */
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 199 89% 48%;          /* Vibrant Sky Cyan */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;        /* #f1f5f9 Soft Slate */
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%; /* #64748b Muted Slate */
+  --accent: 38 92% 50%;            /* #f59e0b Amber */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 347 89% 61%;      /* #f43f5e Rose */
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 32% 91%;           /* #e2e8f0 Light Border */
+  --input: 214 32% 91%;
+  --ring: 199 89% 48%;
+  --radius: 0.75rem;
+}
+
+.dark {
   --background: 222 47% 7%;        /* #0b0f19 Deep Obsidian Slate */
   --foreground: 210 40% 98%;       /* #f8fafc Crisp Ice White */
   --card: 217 44% 12%;             /* #111c2e Elevation Level 1 Card */
@@ -23,14 +46,10 @@
   --border: 217 33% 20%;           /* #1e2d48 Clean Subtle Slate Border */
   --input: 217 33% 20%;
   --ring: 189 94% 43%;             /* #06b6d4 Cyber Cyan Focus Ring */
-  --radius: 0.75rem;
 }
 
 body {
-  color: #94a3b8;
-  background-color: #0b0f19;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  overflow: hidden;
 }
 
 /* Ergonomic soft scrollbars */
@@ -40,48 +59,76 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+}
+
 ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
 
-/* High-tech Leaflet map dark styling */
+/* Leaflet styling */
 .leaflet-container {
-  background-color: #0b0f19 !important;
+  background-color: #f8fafc !important;
   font-family: inherit !important;
   z-index: 10 !important;
 }
 
+.dark .leaflet-container {
+  background-color: #0b0f19 !important;
+}
+
 .leaflet-control-zoom {
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
   border-radius: 8px !important;
   overflow: hidden !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dark .leaflet-control-zoom {
+  border: 1px solid rgba(51, 65, 85, 0.6) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
 }
 
 .leaflet-control-zoom a {
-  background-color: #111c2e !important;
-  color: #f8fafc !important;
-  border-color: rgba(51, 65, 85, 0.4) !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
   width: 28px !important;
   height: 28px !important;
   line-height: 28px !important;
 }
 
+.dark .leaflet-control-zoom a {
+  background-color: #111c2e !important;
+  color: #f8fafc !important;
+  border-color: rgba(51, 65, 85, 0.4) !important;
+}
+
 .leaflet-control-zoom a:hover {
+  background-color: #f1f5f9 !important;
+  color: #0284c7 !important;
+}
+
+.dark .leaflet-control-zoom a:hover {
   background-color: #1e293b !important;
   color: #06b6d4 !important;
 }
 
 .leaflet-control-attribution {
-  background-color: rgba(11, 15, 25, 0.88) !important;
+  background-color: rgba(255, 255, 255, 0.92) !important;
   color: #64748b !important;
   font-size: 9px !important;
   border-top-left-radius: 6px !important;
@@ -89,6 +136,15 @@ body {
   backdrop-filter: blur(4px);
 }
 
+.dark .leaflet-control-attribution {
+  background-color: rgba(11, 15, 25, 0.88) !important;
+  color: #64748b !important;
+}
+
 .leaflet-control-attribution a {
+  color: #0284c7 !important;
+}
+
+.dark .leaflet-control-attribution a {
   color: #38bdf8 !important;
 }

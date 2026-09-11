@@ -28,14 +28,15 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
    - 45 nodes & 78 attributed edges linking 38 active faults, TEM PSHA 2025 Table 2 multi-structure rupture pairings (e.g. Shuanglienpo ID 2 + Hukou ID 4 $M_w\ 6.91$), regional campus digital twins (NCU Science B4, NCU Eng B5, NCU Library, HSP TSMC Fab), and municipal utility lifelines.
 3. **Physics-Informed GMPE Attenuation Model**:
    - Grounded in Taiwan crustal GMPE logic trees (Lin & Lee 2008 / Campbell & Bozorgnia 2014) to validate neural network predictions against theoretical $\pm 2.5\sigma$ confidence intervals.
-4. **Next.js 15 Institutional Portal & RAG Dashboard**:
-   - **E-DREaM Center Portal (`/`)**: Emulates the official NCU E-DREaM Lab (`https://e-dream.tw/en/`), featuring institutional branding, the Sprout project research charter, 5 core divisions, enterprise partners, and quick entry into the RAG suites.
-   - **Interactive RAG Visualization Dashboard (`/dashboard`)**:
+4. **Next.js 15 RAG Model Visualization Dashboard (Direct Entry at `/`)**:
+   - **Direct Dashboard Experience**: Accessible immediately at `/` (no landing page gatekeeping), featuring official NCU E-DREaM Lab × NVAITC branding in the top mission control bar.
+   - **Native Tailwind CSS Light / Dark Mode**: Built-in toggle (☀️ / 🌙) in the mission control header with persistent `localStorage` preference and full ergonomic styling across light and dark modes.
+   - **4 Core Visualization Modules**:
      - **RAG Architecture (`?tab=rag_arch`)**: Pipeline flow visualizer with TT-SAM alert ingestion, Track A Reflex Engine (<5 ms), Track B Deliberative 4-agent reasoning, Lin & Lee GMPE physics validation, hybrid retrieval vector store, and real-time telemetry inspector.
      - **EEWS (`?tab=eews`)**: Earthquake Early Warning System with millisecond S-wave countdown clock, interactive Leaflet GIS wavefront propagation, Track A SCADA interlocks, and facility digital twins.
      - **PSHA (`?tab=psha`)**: Probabilistic Seismic Hazard Analysis displaying Taiwan's 38 active on-land fault traces, TEM PSHA 2025 Table 2 cascading rupture matrix, and Lin & Lee (2008) PGV attenuation curve.
      - **Geotechnical AI Copilot (`?tab=copilot`)**: Full-height domain assistant with Server-Sent Events (SSE) streaming, quick-prompt chips, and strict TEM PSHA citations.
-   - **100% Free GIS Basemaps**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager, and OpenStreetMap—**no external API keys required**.
+   - **100% Free GIS Basemaps**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager (Light), and OpenStreetMap—**no external API keys required**.
 
 ---
 

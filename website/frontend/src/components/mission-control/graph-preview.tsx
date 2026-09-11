@@ -40,11 +40,11 @@ export const GraphPreview: React.FC<GraphPreviewProps> = ({
   const items = cascades && cascades.length > 0 ? cascades : defaultCascades;
 
   return (
-    <div className="flex flex-col space-y-2 rounded-xl border border-slate-800 bg-slate_obsidian-card p-3 shadow-md">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+    <div className="flex flex-col space-y-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-3 shadow-md">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-1.5">
         <div className="flex items-center space-x-2">
           <GitFork className="h-4 w-4 text-cyan-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-100">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             Geo-GraphRAG Cascading Ruptures (TEM Table 2)
           </h3>
         </div>
@@ -57,10 +57,10 @@ export const GraphPreview: React.FC<GraphPreviewProps> = ({
         {items.map((c, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 p-2 text-xs hover:border-slate-700 transition"
+            className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 p-2 text-xs hover:border-slate-700 transition"
           >
             <div className="space-y-0.5">
-              <div className="font-bold text-slate-200">
+              <div className="font-bold text-slate-800 dark:text-slate-200">
                 {c.pairing_label || `${primaryFaultName} ↔ Fault #${c.target_fault_id}`}
               </div>
               <div className="text-[10px] text-slate-400">
@@ -79,7 +79,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = ({
         ))}
       </div>
 
-      <div className="flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-800 pt-1 font-mono">
+      <div className="flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-1 font-mono">
         <span>Knowledge Graph: 38 Fault Nodes</span>
         <span className="text-cyan-400 font-medium">Multi-Hop Traversal</span>
       </div>

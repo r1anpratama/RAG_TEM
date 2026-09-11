@@ -44,7 +44,7 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
   if (!scenario) return null;
 
   return (
-    <div className="relative z-[1100] overflow-hidden border-b border-slate-800 bg-gradient-to-r from-slate_obsidian-card via-slate_obsidian-900 to-slate_obsidian-900 p-4 shadow-xl">
+    <div className="relative z-[1100] overflow-hidden border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-white via-slate-50 to-slate-50 dark:from-slate_obsidian-card dark:via-slate_obsidian-900 dark:to-slate_obsidian-900 p-4 shadow-xl">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* S-Wave Countdown Clock */}
         <div className="flex items-center space-x-5">
@@ -60,7 +60,7 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
                     ? "text-rose-400 animate-pulse drop-shadow-[0_0_12px_rgba(244,63,94,0.6)]"
                     : secondsRemaining > 0
                     ? "text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]"
-                    : "text-slate-100"
+                    : "text-slate-900 dark:text-slate-100"
                 }`}
               >
                 {secondsRemaining > 0 ? secondsRemaining.toFixed(1) : "0.0"}
@@ -77,13 +77,13 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
             <div>
               <span className="text-slate-400">Magnitude:</span>{" "}
-              <span className="font-bold text-slate-100">
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 Mw {scenario.magnitude}
               </span>
             </div>
             <div>
               <span className="text-slate-400">Focal Depth:</span>{" "}
-              <span className="font-bold text-slate-100">
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 {scenario.depth_km} km
               </span>
             </div>
@@ -109,7 +109,7 @@ export const AlertBanner: React.FC<AlertBannerProps> = ({
               <Zap className="h-3 w-3 fill-current text-emerald-400" />
               <span>Track A Reflex Active (&lt; 5 ms)</span>
             </span>
-            <span className="rounded-md bg-slate-800/80 px-2.5 py-1 text-[11px] font-mono text-slate-200 border border-slate-700/50">
+            <span className="rounded-md bg-slate-800/80 px-2.5 py-1 text-[11px] font-mono text-slate-800 dark:text-slate-200 border border-slate-700/50">
               CWA: {scenario.estimated_cwa_intensity}
             </span>
           </div>

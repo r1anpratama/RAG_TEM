@@ -76,7 +76,7 @@ export const RagArchitectureView: React.FC = () => {
   return (
     <div className="flex flex-col space-y-6">
       {/* Top Banner Overview */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between rounded-xl border border-slate-800 bg-slate_obsidian-card p-4 shadow-md gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-4 shadow-md gap-4">
         <div>
           <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-wider font-bold block">
             System Architecture Blueprint
@@ -111,7 +111,7 @@ export const RagArchitectureView: React.FC = () => {
             className={`cursor-pointer rounded-xl border p-4 transition-all ${
               selectedNode === "tt_sam"
                 ? "border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10"
-                : "border-slate-800 bg-slate_obsidian-card hover:border-slate-700"
+                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
             }`}
           >
             <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ export const RagArchitectureView: React.FC = () => {
               className={`cursor-pointer rounded-xl border p-4 transition-all ${
                 selectedNode === "track_a"
                   ? "border-emerald-400 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
-                  : "border-slate-800 bg-slate_obsidian-card hover:border-slate-700"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -172,7 +172,7 @@ export const RagArchitectureView: React.FC = () => {
               className={`cursor-pointer rounded-xl border p-4 transition-all ${
                 selectedNode === "track_b"
                   ? "border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10"
-                  : "border-slate-800 bg-slate_obsidian-card hover:border-slate-700"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
@@ -192,25 +192,25 @@ export const RagArchitectureView: React.FC = () => {
               <div className="grid grid-cols-2 gap-1.5 mt-2">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setSelectedNode("agent_seismic"); }}
-                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-800 hover:border-cyan-400"
+                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-cyan-400"
                 >
                   1. Seismic Source
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setSelectedNode("agent_geotech"); }}
-                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-800 hover:border-cyan-400"
+                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-cyan-400"
                 >
                   2. Geotech Graph
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setSelectedNode("agent_structural"); }}
-                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-800 hover:border-cyan-400"
+                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-cyan-400"
                 >
                   3. Structural Triage
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setSelectedNode("agent_critic"); }}
-                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-800 hover:border-cyan-400"
+                  className="rounded bg-slate-900 px-2 py-1 text-[10px] text-left text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-cyan-400"
                 >
                   4. Safety Critic
                 </button>
@@ -229,7 +229,7 @@ export const RagArchitectureView: React.FC = () => {
               className={`cursor-pointer rounded-xl border p-4 transition-all ${
                 selectedNode === "physics_gmpe"
                   ? "border-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/10"
-                  : "border-slate-800 bg-slate_obsidian-card hover:border-slate-700"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
               }`}
             >
               <div className="flex items-center space-x-2 mb-1">
@@ -243,7 +243,7 @@ export const RagArchitectureView: React.FC = () => {
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate_obsidian-card p-4">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-4">
               <div className="flex items-center space-x-2 mb-1">
                 <Database className="h-4 w-4 text-sky-400" />
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider">
@@ -259,7 +259,7 @@ export const RagArchitectureView: React.FC = () => {
 
         {/* Selected Component Inspector Detail */}
         <div className="lg:col-span-4 flex flex-col space-y-4">
-          <div className="rounded-xl border border-cyan-500/30 bg-slate_obsidian-card p-5 shadow-xl">
+          <div className="rounded-xl border border-cyan-500/30 bg-white dark:bg-slate_obsidian-card p-5 shadow-xl">
             <div className="flex items-center space-x-2 text-cyan-400 mb-2">
               <Info className="h-4 w-4" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
@@ -271,7 +271,7 @@ export const RagArchitectureView: React.FC = () => {
               {selected.title}
             </h3>
 
-            <div className="mt-2 rounded-lg bg-slate-900/90 px-2.5 py-1 text-[11px] font-mono text-cyan-300 border border-slate-800">
+            <div className="mt-2 rounded-lg bg-slate-900/90 px-2.5 py-1 text-[11px] font-mono text-cyan-300 border border-slate-200 dark:border-slate-800">
               {selected.latency}
             </div>
 
@@ -279,22 +279,22 @@ export const RagArchitectureView: React.FC = () => {
               {selected.desc}
             </p>
 
-            <div className="mt-4 pt-3 border-t border-slate-800">
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">
                 Mathematical / Operational Formulation:
               </span>
-              <code className="block rounded bg-slate-950 p-2 text-[10px] font-mono text-amber-300 border border-slate-800/80">
+              <code className="block rounded bg-slate-950 p-2 text-[10px] font-mono text-amber-300 border border-slate-200 dark:border-slate-800/80">
                 {selected.math}
               </code>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
               <span>Grounding Guarantee:</span>
               <span className="font-bold text-emerald-400">100% Verified</span>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate_obsidian-card p-4 space-y-2 text-xs">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-4 space-y-2 text-xs">
             <h4 className="font-bold text-white flex items-center space-x-1.5">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
               <span>Zero-Hallucination Gate</span>

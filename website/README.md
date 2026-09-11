@@ -10,14 +10,15 @@ The architecture is fully decoupled into a **Next.js 15 App Router frontend** an
 
 ```text
 website/
-├── frontend/                       # Next.js 15 + React 19 Institutional Portal & Dashboard
+├── frontend/                       # Next.js 15 + React 19 Direct RAG Dashboard
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx            # E-DREaM Center institutional homepage
-│   │   │   ├── dashboard/page.tsx  # 4-Module RAG visualization dashboard controller
-│   │   │   ├── layout.tsx          # Root shell layout
-│   │   │   └── globals.css         # Typography & Cyber Slate styling
+│   │   │   ├── page.tsx            # SeismoAgent-TW direct 4-module dashboard
+│   │   │   ├── dashboard/page.tsx  # Direct alias/forward to `/`
+│   │   │   ├── layout.tsx          # Root shell layout with hydration-safe theme
+│   │   │   └── globals.css         # Light & Dark mode theme variables & styles
 │   │   ├── components/
+│   │   │   ├── theme-toggle.tsx    # Native Tailwind Light/Dark mode switcher (☀️/🌙)
 │   │   │   ├── dashboard/          # 4 Dedicated RAG visualization views
 │   │   │   │   ├── rag-architecture-view.tsx # Reflex & Deliberative pipeline graph
 │   │   │   │   ├── eews-view.tsx             # S-wave countdown clock & GIS wavefronts
@@ -28,7 +29,7 @@ website/
 │   │   ├── lib/                    # Zod validation & API client helpers
 │   │   └── types/                  # TypeScript interfaces for triage, faults & twins
 │   ├── .env.example                # NEXT_PUBLIC_API_URL=http://localhost:8000
-│   ├── tailwind.config.ts          # Cyber Slate & Modern Mission Control design system
+│   ├── tailwind.config.ts          # Tailwind CSS configuration with darkMode: ["class"]
 │   └── package.json                # Next.js 15, React 19, Lucide, Leaflet, Tailwind
 │
 └── backend/                        # FastAPI Application Server (SSE Streaming + Multi-Agent Triage)

@@ -36,11 +36,11 @@ export const ScadaPanel: React.FC<ScadaPanelProps> = ({
   const items = actuators && actuators.length > 0 ? actuators : defaultActuators;
 
   return (
-    <div className="flex flex-col space-y-3 rounded-xl border border-slate-800 bg-slate_obsidian-card p-3.5 shadow-md">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+    <div className="flex flex-col space-y-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-3.5 shadow-md">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
         <div className="flex items-center space-x-2">
           <Zap className="h-4 w-4 text-amber-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-100">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             Track A Reflex SCADA Interlocks (&lt; 5 ms)
           </h3>
         </div>
@@ -59,12 +59,12 @@ export const ScadaPanel: React.FC<ScadaPanelProps> = ({
         {items.map((act, idx) => (
           <div
             key={idx}
-            className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/80 p-2.5 hover:border-slate-700 transition"
+            className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 p-2.5 hover:border-slate-700 transition"
           >
             <div className="space-y-0.5">
               <div className="flex items-center space-x-1.5">
                 <span className="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
-                <span className="text-[11px] font-bold text-slate-200">
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
                   {act.target}
                 </span>
               </div>

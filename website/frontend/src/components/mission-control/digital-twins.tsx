@@ -91,10 +91,10 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
 
   return (
     <div className="flex flex-col space-y-3">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
         <div className="flex items-center space-x-2">
           <Building2 className="h-4 w-4 text-cyan-400" />
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-100">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             Campus Digital Twins & Structural Triage (ASCE 41-17 / TEM)
           </h3>
         </div>
@@ -117,13 +117,13 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
                   ? "border-rose-500/40 bg-rose-500/5 hover:border-rose-500/60"
                   : isWarning
                   ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60"
-                  : "border-slate-800 bg-slate_obsidian-card hover:border-slate-700"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
               }`}
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-100">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
                       {fac.facility_name}
                     </h4>
                     <p className="text-[10px] font-mono text-slate-400 mt-0.5">
@@ -169,12 +169,12 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
                   </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-800 pt-2 text-[11px]">
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-200 dark:border-slate-800 pt-2 text-[11px]">
                   <div>
                     <span className="text-slate-400">Collapse Risk:</span>{" "}
                     <span
                       className={`font-semibold ${
-                        isDanger ? "text-rose-400" : "text-slate-200"
+                        isDanger ? "text-rose-400" : "text-slate-800 dark:text-slate-200"
                       }`}
                     >
                       {fac.collapse_probability}
@@ -182,14 +182,14 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities }) => {
                   </div>
                   <div>
                     <span className="text-slate-400">Intensity:</span>{" "}
-                    <span className="font-semibold text-slate-200">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
                       {fac.cwa_intensity}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-3 rounded-lg bg-slate-900/80 p-2.5 text-[10px] text-slate-300 border border-slate-800">
+              <div className="mt-3 rounded-lg bg-slate-50 dark:bg-slate-900/80 p-2.5 text-[10px] text-slate-300 border border-slate-200 dark:border-slate-800">
                 <span className="font-bold text-cyan-400 block mb-0.5">
                   Triage Recommendation:
                 </span>

@@ -13,7 +13,7 @@ const GisMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full w-full items-center justify-center bg-slate_obsidian-900 text-slate-400 text-xs">
+      <div className="flex h-full w-full items-center justify-center bg-slate-100 dark:bg-slate_obsidian-900 text-slate-400 text-xs">
         Initializing Taiwan Wavefront GIS Basemap...
       </div>
     ),
@@ -38,7 +38,7 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
 
       {/* Main split: Left = GIS Wavefront Map, Right = SCADA Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-7 h-[420px] rounded-xl border border-slate-800 overflow-hidden shadow-xl bg-slate_obsidian-900 relative isolate">
+        <div className="lg:col-span-7 h-[420px] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-slate-100 dark:bg-slate_obsidian-900 relative isolate">
           <GisMap
             faults={faults}
             scenario={scenario}
@@ -53,16 +53,16 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
             latencyMs={1.84}
           />
 
-          <div className="rounded-xl border border-slate-800 bg-slate_obsidian-card p-4 space-y-2">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-4 space-y-2">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
               Wavefront Propagation Telemetry
             </h4>
             <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300 font-mono">
-              <div className="rounded bg-slate-900/90 p-2 border border-slate-800">
+              <div className="rounded bg-slate-900/90 p-2 border border-slate-200 dark:border-slate-800">
                 <span className="text-cyan-400 block font-bold">P-Wave Velocity:</span>
                 ~ 6.0 km/s (Compressional)
               </div>
-              <div className="rounded bg-slate-900/90 p-2 border border-slate-800">
+              <div className="rounded bg-slate-900/90 p-2 border border-slate-200 dark:border-slate-800">
                 <span className="text-amber-400 block font-bold">S-Wave Velocity:</span>
                 ~ 3.5 km/s (Shear Damaging)
               </div>
