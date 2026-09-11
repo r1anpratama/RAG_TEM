@@ -1,21 +1,226 @@
 import * as THREE from "three";
 
 /**
- * Procedural 3D Architectural Model for NCU Science Building 4 (健雄館)
- * Faithfully constructed according to the architectural drawing:
- * - 8-story high-rise with symmetrical stepped wings and recessed central atrium
- * - 2-story sandstone entrance portico with stairs, ramp, and signage
- * - Rooftop Astronomical Observatory Dome on a cylindrical rotunda drum
- * - Rooftop curved glass barrel-vault skylight / elevator penthouse
- * - Rooftop tilted solar panel array (PV cells)
- * - Rooftop dual HVAC industrial chiller turbines and AC heat pump compressors
- * - Paved granite entrance plaza with park benches and green landscaping trees
+ * Procedural High-Fidelity 3D Architectural Model for NCU Science Building 4 (健雄館 / S4)
+ * Faithfully constructed according to the architectural isometric drawing:
+ * - 8-story high-rise massing with symmetrical stepped wings and recessed central atrium
+ * - 2-story travertine/sandstone entrance portico with Chinese calligraphy plaque and glass lobby
+ * - Rooftop Astronomical Observatory Dome with geodesic framing, telescope slit, and red beacon
+ * - Rooftop curved barrel-vault glass skylight / elevator penthouse
+ * - Rooftop tilted photovoltaic solar panel array with photorealistic cell textures
+ * - Rooftop dual HVAC industrial chillers with turbine fan shrouds and AC heat pump bank
+ * - Landscaped entrance plaza with paving grid, multi-tiered trees, park benches, and access ramp
  */
+
+// ==========================================
+// PROCEDURAL CANVAS TEXTURE GENERATORS
+// ==========================================
+
+function createFacadeCanvasTexture(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Base architectural warm off-white / light concrete
+  ctx.fillStyle = "#e5e7eb";
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Concrete precast panel division joints
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = 3;
+  for (let y = 0; y <= 512; y += 64) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(512, y);
+    ctx.stroke();
+  }
+  for (let x = 0; x <= 512; x += 128) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, 512);
+    ctx.stroke();
+  }
+
+  // Subtle concrete aggregate grain
+  ctx.fillStyle = "rgba(0, 0, 0, 0.025)";
+  for (let i = 0; i < 1500; i++) {
+    const rx = Math.random() * 512;
+    const ry = Math.random() * 512;
+    ctx.fillRect(rx, ry, 2, 2);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2, 4);
+  return texture;
+}
+
+function createSolarCanvasTexture(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Deep anti-reflective photovoltaic silicon blue
+  ctx.fillStyle = "#0c2340";
+  ctx.fillRect(0, 0, 512, 512);
+
+  const cols = 6;
+  const rows = 10;
+  const cellW = 512 / cols;
+  const cellH = 512 / rows;
+
+  for (let c = 0; c < cols; c++) {
+    for (let r = 0; r < rows; r++) {
+      // Cell background
+      ctx.fillStyle = "#1e3a8a";
+      ctx.fillRect(c * cellW + 2, r * cellH + 2, cellW - 4, cellH - 4);
+
+      // Metallic grid lines
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
+      ctx.lineWidth = 1;
+      for (let g = 1; g < 4; g++) {
+        ctx.beginPath();
+        ctx.moveTo(c * cellW + 2, r * cellH + (g * cellH) / 4);
+        ctx.lineTo(c * cellW + cellW - 2, r * cellH + (g * cellH) / 4);
+        ctx.stroke();
+      }
+
+      // Main silver busbars
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.fillRect(c * cellW + cellW * 0.3, r * cellH + 2, 2, cellH - 4);
+      ctx.fillRect(c * cellW + cellW * 0.7, r * cellH + 2, 2, cellH - 4);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
+function createWindowCanvasTexture(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Deep tinted architectural glass gradient
+  const grad = ctx.createLinearGradient(0, 0, 256, 256);
+  grad.addColorStop(0, "#090d16");
+  grad.addColorStop(0.5, "#172554");
+  grad.addColorStop(1, "#0369a1");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Outer mullion frame
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = 12;
+  ctx.strokeRect(6, 6, 244, 244);
+
+  // Horizontal and vertical division bars (transom & mullion)
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(128, 0);
+  ctx.lineTo(128, 256);
+  ctx.moveTo(0, 100);
+  ctx.lineTo(256, 100);
+  ctx.stroke();
+
+  // Glass reflection highlight streak
+  ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+  ctx.beginPath();
+  ctx.moveTo(30, 0);
+  ctx.lineTo(80, 0);
+  ctx.lineTo(20, 256);
+  ctx.lineTo(0, 256);
+  ctx.closePath();
+  ctx.fill();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
+function createPlazaCanvasTexture(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Granite paver stone background
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Interlocking paving grid
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 2;
+  const step = 32;
+  for (let x = 0; x <= 256; x += step) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, 256);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= 256; y += step) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(256, y);
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(6, 6);
+  return texture;
+}
+
+function createSignPlaqueTexture(): THREE.CanvasTexture | null {
+  if (typeof document === "undefined") return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  // Bronze / dark wood sign backing
+  ctx.fillStyle = "#2d2013";
+  ctx.fillRect(0, 0, 512, 128);
+
+  // Gold border
+  ctx.strokeStyle = "#d97706";
+  ctx.lineWidth = 6;
+  ctx.strokeRect(6, 6, 500, 116);
+
+  // Gold embossed inscription
+  ctx.fillStyle = "#fef08a";
+  ctx.font = "bold 36px 'Microsoft JhengHei', 'PingFang TC', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("國立中央大學 理學院四館", 256, 48);
+
+  ctx.fillStyle = "#93c5fd";
+  ctx.font = "bold 20px 'Segoe UI', sans-serif";
+  ctx.fillText("SCIENCE BUILDING 4 (S4)", 256, 92);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
 export function createDetailedScience4Building(): {
   group: THREE.Group;
   mainMeshes: THREE.Mesh[];
   domeMesh: THREE.Mesh;
   windowMeshes: THREE.Mesh[];
+  beaconLight: THREE.PointLight;
 } {
   const buildingGroup = new THREE.Group();
   buildingGroup.name = "FAC_NCU_SCIENCE_B4_DETAILED";
@@ -23,14 +228,22 @@ export function createDetailedScience4Building(): {
   const mainMeshes: THREE.Mesh[] = [];
   const windowMeshes: THREE.Mesh[] = [];
 
+  // Generate textures
+  const facadeTexture = createFacadeCanvasTexture();
+  const solarTexture = createSolarCanvasTexture();
+  const windowTexture = createWindowCanvasTexture();
+  const plazaTexture = createPlazaCanvasTexture();
+  const signTexture = createSignPlaqueTexture();
+
   // ==========================================
-  // 1. PALETTE & MATERIALS
+  // 1. PALETTE & PBR MATERIALS
   // ==========================================
-  // Facade Concrete Panels (Clean light architectural beige/gray)
+  // Main Facade Concrete Panels (Clean architectural beige/gray with panel seams)
   const facadeMat = new THREE.MeshStandardMaterial({
     color: 0xdedede,
     roughness: 0.45,
     metalness: 0.15,
+    map: facadeTexture || undefined,
   });
 
   // Darker accent concrete / structural columns
@@ -47,34 +260,45 @@ export function createDetailedScience4Building(): {
     metalness: 0.1,
   });
 
-  // Deep Tinted Window Glass
+  // Deep Tinted Window Glass with Mullion Grid Map
   const glassMat = new THREE.MeshStandardMaterial({
-    color: 0x0f172a,
+    color: 0xffffff,
     roughness: 0.1,
     metalness: 0.85,
+    map: windowTexture || undefined,
   });
 
-  // Observatory Geodesic Glass Dome (Cyan translucent glass)
+  // Simple pure glass for balustrades
+  const pureGlassMat = new THREE.MeshStandardMaterial({
+    color: 0x38bdf8,
+    roughness: 0.1,
+    metalness: 0.4,
+    transparent: true,
+    opacity: 0.55,
+  });
+
+  // Observatory Geodesic Glass Dome (Cyan translucent glass with high specular)
   const domeGlassMat = new THREE.MeshStandardMaterial({
     color: 0x38bdf8,
     roughness: 0.15,
-    metalness: 0.4,
+    metalness: 0.35,
     transparent: true,
-    opacity: 0.72,
+    opacity: 0.75,
   });
 
   // Steel Dome Ribs & Pergola Frames
   const steelMat = new THREE.MeshStandardMaterial({
     color: 0x334155,
     roughness: 0.3,
-    metalness: 0.8,
+    metalness: 0.85,
   });
 
-  // Solar Photovoltaic Panels (Rich iridescent blue)
+  // Solar Photovoltaic Panels (Rich iridescent blue with PV cell map)
   const solarMat = new THREE.MeshStandardMaterial({
-    color: 0x1d4ed8,
+    color: 0xffffff,
     roughness: 0.2,
     metalness: 0.8,
+    map: solarTexture || undefined,
   });
 
   // Rooftop Membrane
@@ -86,9 +310,10 @@ export function createDetailedScience4Building(): {
 
   // Plaza Pavers / Ground Slab
   const plazaMat = new THREE.MeshStandardMaterial({
-    color: 0xd6d3d1,
+    color: 0xffffff,
     roughness: 0.8,
     metalness: 0.05,
+    map: plazaTexture || undefined,
   });
 
   // Asphalt road in front
@@ -131,10 +356,19 @@ export function createDetailedScience4Building(): {
   roadMesh.receiveShadow = true;
   buildingGroup.add(roadMesh);
 
+  // Roadway center divider stripes
+  for (let sx = -14; sx <= 14; sx += 4) {
+    const stripeGeo = new THREE.BoxGeometry(2.2, 0.05, 0.25);
+    const stripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+    stripe.position.set(sx, 0.32, 17);
+    buildingGroup.add(stripe);
+  }
+
   // Entrance Steps (3-tiered)
   for (let i = 0; i < 3; i++) {
     const stepGeo = new THREE.BoxGeometry(10 - i * 0.8, 0.25, 1.2);
-    const stepMesh = new THREE.Mesh(stepGeo, plazaMat);
+    const stepMesh = new THREE.Mesh(stepGeo, sandstoneMat);
     stepMesh.position.set(0, 0.25 + i * 0.25, 11.8 - i * 0.6);
     stepMesh.receiveShadow = true;
     buildingGroup.add(stepMesh);
@@ -142,7 +376,7 @@ export function createDetailedScience4Building(): {
 
   // Handicap access ramp (left of steps)
   const rampGeo = new THREE.BoxGeometry(2.4, 0.75, 4);
-  const rampMesh = new THREE.Mesh(rampGeo, plazaMat);
+  const rampMesh = new THREE.Mesh(rampGeo, concreteAccentMat);
   rampMesh.position.set(-6.5, 0.45, 11.2);
   rampMesh.rotation.x = 0.12;
   buildingGroup.add(rampMesh);
@@ -167,17 +401,19 @@ export function createDetailedScience4Building(): {
     buildingGroup.add(benchGroup);
   }
 
-  // Landscaping Trees (Foliage on left & right sides)
+  // Landscaping Trees (Multi-tiered pine & deciduous trees on perimeter)
   const trunkMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.9 });
   const foliageMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.8 });
   const foliageMat2 = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.8 });
+  const foliageMat3 = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.85 });
 
   const treeLocations = [
     { x: -13.5, z: 3.5, scale: 1.1, mat: foliageMat },
     { x: -14.0, z: -1.0, scale: 1.3, mat: foliageMat2 },
+    { x: -13.0, z: -5.5, scale: 0.95, mat: foliageMat3 },
     { x: 13.5, z: 2.0, scale: 1.0, mat: foliageMat },
     { x: 14.0, z: -3.0, scale: 1.3, mat: foliageMat2 },
-    { x: 13.0, z: -7.5, scale: 0.9, mat: foliageMat },
+    { x: 13.0, z: -7.5, scale: 0.9, mat: foliageMat3 },
   ];
 
   treeLocations.forEach((tl) => {
@@ -202,13 +438,22 @@ export function createDetailedScience4Building(): {
     buildingGroup.add(tree);
   });
 
+  // Entrance Plaza Lantern Light Poles
+  for (const lx of [-9.5, 9.5]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 4.5, 8), steelMat);
+    pole.position.set(lx, 3.25, 12.5);
+    const luminaire = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+    luminaire.position.set(lx, 5.5, 12.5);
+    buildingGroup.add(pole, luminaire);
+  }
+
   // ==========================================
   // 3. ENTRANCE PORTICO (2-Story Canopy)
   // ==========================================
   const porticoGroup = new THREE.Group();
   porticoGroup.position.set(0, 1.0, 9.2);
 
-  // Left & Right Sandstone Pillars
+  // Left & Right Sandstone Pillars (Travertine with fluted profile)
   const leftCol = new THREE.Mesh(new THREE.BoxGeometry(2.4, 6.8, 4.2), sandstoneMat);
   leftCol.position.set(-4.5, 3.4, 0);
   leftCol.castShadow = true;
@@ -233,11 +478,11 @@ export function createDetailedScience4Building(): {
   mainMeshes.push(lintel);
   addEdges(lintel, porticoGroup);
 
-  // Inscription Sign Plaque
-  const plaque = new THREE.Mesh(
-    new THREE.BoxGeometry(7.5, 1.1, 0.25),
-    new THREE.MeshStandardMaterial({ color: 0x3b2d20, roughness: 0.4 })
-  );
+  // Chinese Inscription Sign Plaque: "國立中央大學 理學院四館"
+  const plaqueMat = signTexture
+    ? new THREE.MeshStandardMaterial({ map: signTexture, roughness: 0.3, metalness: 0.4 })
+    : new THREE.MeshStandardMaterial({ color: 0x3b2d20, roughness: 0.4 });
+  const plaque = new THREE.Mesh(new THREE.BoxGeometry(7.6, 1.3, 0.25), plaqueMat);
   plaque.position.set(0, 5.7, 2.2);
   porticoGroup.add(plaque);
 
@@ -249,13 +494,13 @@ export function createDetailedScience4Building(): {
   mainMeshes.push(porticoRoof);
   addEdges(porticoRoof, porticoGroup);
 
-  // Portico 2nd Floor Clerestory Ribbon Windows
+  // Portico 2nd Floor Ribbon Windows
   const porticoWindows = new THREE.Mesh(new THREE.BoxGeometry(9.0, 1.8, 0.4), glassMat);
   porticoWindows.position.set(0, 8.4, 0);
   porticoGroup.add(porticoWindows);
   windowMeshes.push(porticoWindows);
 
-  // Front Entrance Glass Sliding Doors (Recessed inside the archway)
+  // Front Entrance Glass Lobby Sliding Doors (Recessed inside the archway)
   const mainDoor = new THREE.Mesh(new THREE.BoxGeometry(6.6, 4.5, 0.3), glassMat);
   mainDoor.position.set(0, 2.25, -1.2);
   porticoGroup.add(mainDoor);
@@ -297,6 +542,13 @@ export function createDetailedScience4Building(): {
   mainMeshes.push(rightWing);
   addEdges(rightWing, towerGroup);
 
+  // Vertical Architectural Relief Fins on Stepped Wing Corners
+  for (const wx of [-12.1, -5.5, 5.5, 12.1]) {
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.4, towerHeight, 0.4), concreteAccentMat);
+    fin.position.set(wx, towerHeight / 2, 10.3);
+    towerGroup.add(fin);
+  }
+
   // Decorative Top Pergolas / Trellises on Left & Right Wings
   for (const wx of [-8.8, 8.8]) {
     const corniceRoof = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.9, 8.0), concreteAccentMat);
@@ -322,15 +574,7 @@ export function createDetailedScience4Building(): {
     towerGroup.add(balcSlab);
 
     // Balcony glass railing
-    const balcRail = new THREE.Mesh(
-      new THREE.BoxGeometry(10.8, 1.0, 0.15),
-      new THREE.MeshStandardMaterial({
-        color: 0x38bdf8,
-        transparent: true,
-        opacity: 0.6,
-        roughness: 0.2,
-      })
-    );
+    const balcRail = new THREE.Mesh(new THREE.BoxGeometry(10.8, 1.0, 0.15), pureGlassMat);
     balcRail.position.set(0, by + 0.6, 9.7);
     towerGroup.add(balcRail);
 
@@ -422,6 +666,18 @@ export function createDetailedScience4Building(): {
   parapetMesh.position.set(0, towerHeight + 0.8, 0);
   addEdges(parapetMesh, towerGroup);
 
+  // Perimeter Roof Safety Handrail
+  const railMat = new THREE.LineBasicMaterial({ color: 0x94a3b8 });
+  const railGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-12.2, towerHeight + 1.6, -9.6),
+    new THREE.Vector3(12.2, towerHeight + 1.6, -9.6),
+    new THREE.Vector3(12.2, towerHeight + 1.6, 9.6),
+    new THREE.Vector3(-12.2, towerHeight + 1.6, 9.6),
+    new THREE.Vector3(-12.2, towerHeight + 1.6, -9.6),
+  ]);
+  const railLine = new THREE.Line(railGeo, railMat);
+  towerGroup.add(railLine);
+
   // ==========================================
   // 7. ROOFTOP OBSERVATORY ROTUNDA & GLASS DOME
   // ==========================================
@@ -439,7 +695,7 @@ export function createDetailedScience4Building(): {
   mainMeshes.push(rotundaDrum);
   addEdges(rotundaDrum, observatoryGroup);
 
-  // Ribbon Windows on Rotunda Drum (Lower tier)
+  // Ribbon Windows on Rotunda Drum (Observation gallery)
   const drumRibbonWindows = new THREE.Mesh(
     new THREE.CylinderGeometry(5.45, 5.45, 1.0, 32, 1, true),
     glassMat
@@ -448,7 +704,7 @@ export function createDetailedScience4Building(): {
   observatoryGroup.add(drumRibbonWindows);
   windowMeshes.push(drumRibbonWindows);
 
-  // 12 Vertical Columns / Pilasters Ringing the Upper Drum
+  // 16 Vertical Architectural Columns / Pilasters Ringing the Drum
   for (let i = 0; i < 16; i++) {
     const angle = (i / 16) * Math.PI * 2;
     const px = Math.cos(angle) * 5.35;
@@ -459,15 +715,12 @@ export function createDetailedScience4Building(): {
   }
 
   // Dome Cornice Ring Beam
-  const domeRing = new THREE.Mesh(
-    new THREE.TorusGeometry(5.4, 0.3, 12, 32),
-    steelMat
-  );
+  const domeRing = new THREE.Mesh(new THREE.TorusGeometry(5.4, 0.3, 12, 32), steelMat);
   domeRing.rotation.x = Math.PI / 2;
   domeRing.position.y = 3.6;
   observatoryGroup.add(domeRing);
 
-  // Geodesic Glass Half-Sphere Dome
+  // Geodesic Glass Half-Sphere Dome (Translucent Cyan)
   const domeGeo = new THREE.SphereGeometry(5.3, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
   const domeMesh = new THREE.Mesh(domeGeo, domeGlassMat);
   domeMesh.name = "observatory_dome";
@@ -487,11 +740,11 @@ export function createDetailedScience4Building(): {
   }
 
   // Astronomy Telescope Viewing Shutter Slit (Vertical Guide Rails)
-  const railGeo = new THREE.BoxGeometry(0.2, 5.4, 0.2);
-  const rail1 = new THREE.Mesh(railGeo, steelMat);
+  const railGeoSlit = new THREE.BoxGeometry(0.2, 5.4, 0.2);
+  const rail1 = new THREE.Mesh(railGeoSlit, steelMat);
   rail1.position.set(-0.8, 6.0, 4.2);
   rail1.rotation.x = -0.6;
-  const rail2 = new THREE.Mesh(railGeo, steelMat);
+  const rail2 = new THREE.Mesh(railGeoSlit, steelMat);
   rail2.position.set(0.8, 6.0, 4.2);
   rail2.rotation.x = -0.6;
   observatoryGroup.add(rail1, rail2);
@@ -500,6 +753,18 @@ export function createDetailedScience4Building(): {
   const peakCap = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 0.4, 16), steelMat);
   peakCap.position.y = 8.9;
   observatoryGroup.add(peakCap);
+
+  // Red Aviation Obstruction Warning Beacon atop Dome
+  const beaconMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xef4444 })
+  );
+  beaconMesh.position.y = 9.3;
+  observatoryGroup.add(beaconMesh);
+
+  const beaconLight = new THREE.PointLight(0xef4444, 1.2, 15);
+  beaconLight.position.y = 9.3;
+  observatoryGroup.add(beaconLight);
 
   towerGroup.add(observatoryGroup);
 
@@ -529,11 +794,22 @@ export function createDetailedScience4Building(): {
   const solarGroup = new THREE.Group();
   solarGroup.position.set(5.5, towerHeight + 0.8, 4.2);
   solarGroup.rotation.y = -0.2;
-  solarGroup.rotation.x = 0.42; // Tilted toward the sun
+  solarGroup.rotation.x = 0.42; // Tilted toward the sun at 24°
 
+  // Steel subframe truss
   const solarRack = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.15, 3.4), steelMat);
+  // Photovoltaic cell surface with realistic PV texture
   const solarCells = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.18, 3.2), solarMat);
   solarGroup.add(solarRack, solarCells);
+
+  // Solar frame mounting stanchions
+  for (const px of [-2.0, 2.0]) {
+    for (const pz of [-1.2, 1.2]) {
+      const stanchion = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.8, 6), steelMat);
+      stanchion.position.set(px, -0.4, pz);
+      solarGroup.add(stanchion);
+    }
+  }
   towerGroup.add(solarGroup);
 
   // 8C. Dual Industrial Rooftop Condenser Fans (HVAC Chillers)
@@ -592,5 +868,6 @@ export function createDetailedScience4Building(): {
     mainMeshes,
     domeMesh,
     windowMeshes,
+    beaconLight,
   };
 }
