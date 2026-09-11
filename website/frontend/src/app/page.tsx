@@ -2,18 +2,13 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { 
-  Cpu, 
-  Activity, 
-  Map, 
-  Bot, 
-  Play
-} from "lucide-react";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Header } from "@/components/layout/header";
+import { KpiMetrics } from "@/components/dashboard/kpi-metrics";
 import { RagArchitectureView } from "@/components/dashboard/rag-architecture-view";
 import { EEWSView } from "@/components/dashboard/eews-view";
 import { PSHAView } from "@/components/dashboard/psha-view";
 import { CopilotView } from "@/components/dashboard/copilot-view";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Scenario, FaultTrace } from "@/types/triage";
 
 function DashboardContent() {
@@ -21,6 +16,7 @@ function DashboardContent() {
   const initialTab = (searchParams.get("tab") as "rag_arch" | "eews" | "psha" | "copilot") || "rag_arch";
 
   const [activeTab, setActiveTab] = useState<"rag_arch" | "eews" | "psha" | "copilot">(initialTab);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [faults, setFaults] = useState<FaultTrace[]>([]);
@@ -120,127 +116,86 @@ function DashboardContent() {
     setTimeout(() => setIsSimulating(false), 12000);
   };
 
-  const tabs = [
-    { id: "rag_arch", label: "1. RAG Architecture", icon: Cpu },
-    { id: "eews", label: "2. Real-Time EEWS", icon: Activity },
-    { id: "psha", label: "3. TEM PSHA Hazard", icon: Map },
-    { id: "copilot", label: "4. AI Copilot", icon: Bot },
-  ];
+  const getTabTitle = () => {
+    switch (activeTab) {
+      case "rag_arch":
+        return "1. RAG Architecture Blueprint";
+      case "eews":
+        return "2. Real-Time EEWS & Wavefronts";
+      case "psha":
+        return "3. TEM PSHA Hazard Evaluation";
+      case "copilot":
+        return "4. AI Geotechnical Copilot";
+      default:
+        return "RAG Dashboard";
+    }
+  };
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate_obsidian-900 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
-      {/* Top Header */}
-      <header className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate_obsidian-900/90 px-4 sm:px-6 backdrop-blur-xl transition-colors duration-200">
-        <div className="flex items-center space-x-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-black text-xs font-mono">
-            NCU
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-sm font-black tracking-wide text-slate-900 dark:text-white uppercase">
-                SeismoAgent-TW
-              </h1>
-              <span className="hidden sm:inline-block rounded bg-cyan-500/10 dark:bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold text-cyan-700 dark:text-cyan-400 border border-cyan-500/30 font-mono">
-                RAG Dashboard
-              </span>
-            </div>
-            <p className="hidden md:block text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-              E-DREaM Lab (NCU Geophysics) × NVAITC
-            </p>
-          </div>
-        </div>
+    <div className="flex min-h-screen w-full bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+      {/* TailwindAdmin Collapsible Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        selectedScenario={selectedScenario}
+      />
 
-        {/* Global Controls & Status */}
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          {/* Scenario Selector */}
-          <div className="hidden sm:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-1">
-            <span className="text-[11px] text-slate-600 dark:text-slate-400 pl-2 font-medium">Scenario:</span>
-            <select
-              value={selectedScenario?.id || ""}
-              onChange={(e) => {
-                const sc = scenarios.find((s) => s.id === e.target.value);
-                if (sc) setSelectedScenario(sc);
-              }}
-              className="bg-white dark:bg-slate_obsidian-card text-xs text-slate-800 dark:text-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-cyan-500 border border-slate-200 dark:border-slate-700/60 cursor-pointer shadow-sm"
-            >
-              {scenarios.map((sc) => (
-                <option key={sc.id} value={sc.id} className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                  {sc.title} (Mw {sc.magnitude})
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Main Content Shell */}
+      <div
+        className={`flex flex-col flex-1 min-h-screen transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? "pl-20" : "pl-64"
+        }`}
+      >
+        {/* Sticky Header Bar */}
+        <Header
+          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          activeTabLabel={getTabTitle()}
+          scenarios={scenarios}
+          selectedScenario={selectedScenario}
+          onSelectScenario={setSelectedScenario}
+          onTriggerSimulation={handleTriggerSimulation}
+          isSimulating={isSimulating}
+          backendHealth={backendHealth}
+        />
 
-          {/* Trigger Simulation Button */}
-          <button
-            onClick={handleTriggerSimulation}
-            disabled={isSimulating}
-            className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-md shadow-amber-500/20 border border-amber-400/40 disabled:opacity-50"
-          >
-            <Play className="h-3 w-3 fill-current" />
-            <span>{isSimulating ? "Simulating..." : "Trigger Wave"}</span>
-          </button>
+        {/* Page Content Container */}
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+          {/* Top 4 KPI Summary Metric Cards */}
+          <KpiMetrics scenario={selectedScenario} />
 
-          {/* Backend Status Indicator */}
-          <div className="flex items-center space-x-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card px-2.5 py-1 text-[11px] font-mono text-slate-600 dark:text-slate-400 shadow-sm">
-            <span className={`h-2 w-2 rounded-full ${backendHealth ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
-            <span className="hidden md:inline">{backendHealth ? "FastAPI Online" : "Offline"}</span>
-          </div>
-
-          {/* Light / Dark Mode Toggle Button */}
-          <ThemeToggle />
-        </div>
-      </header>
-
-      {/* Segmented Navigation Tab Bar */}
-      <div className="sticky top-16 z-40 flex w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate_obsidian-card/95 px-4 sm:px-6 backdrop-blur-md overflow-x-auto transition-colors duration-200">
-        <div className="flex space-x-1 py-2">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-xs font-bold transition whitespace-nowrap ${
-                  isActive
-                    ? "bg-cyan-500/10 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-500/40 shadow-sm"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${isActive ? "text-cyan-600 dark:text-cyan-400" : "text-slate-400"}`} />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+          {/* Active Visualization Tab View */}
+          {activeTab === "rag_arch" && <RagArchitectureView />}
+          {activeTab === "eews" && (
+            <EEWSView
+              scenario={selectedScenario}
+              faults={faults}
+              isSimulating={isSimulating}
+            />
+          )}
+          {activeTab === "psha" && (
+            <PSHAView
+              scenario={selectedScenario}
+              faults={faults}
+            />
+          )}
+          {activeTab === "copilot" && <CopilotView />}
+        </main>
       </div>
-
-      {/* Main Tab Content */}
-      <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
-        {activeTab === "rag_arch" && <RagArchitectureView />}
-        {activeTab === "eews" && (
-          <EEWSView
-            scenario={selectedScenario}
-            faults={faults}
-            isSimulating={isSimulating}
-          />
-        )}
-        {activeTab === "psha" && (
-          <PSHAView
-            scenario={selectedScenario}
-            faults={faults}
-          />
-        )}
-        {activeTab === "copilot" && <CopilotView />}
-      </main>
     </div>
   );
 }
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate_obsidian-900 text-cyan-600 dark:text-cyan-400 text-xs font-mono">Loading SeismoAgent-TW Dashboard...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-[#0b0f19] text-cyan-600 dark:text-cyan-400 text-xs font-mono">
+          Loading SeismoAgent-TW TailwindAdmin...
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );

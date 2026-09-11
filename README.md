@@ -28,14 +28,11 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
    - 45 nodes & 78 attributed edges linking 38 active faults, TEM PSHA 2025 Table 2 multi-structure rupture pairings (e.g. Shuanglienpo ID 2 + Hukou ID 4 $M_w\ 6.91$), regional campus digital twins (NCU Science B4, NCU Eng B5, NCU Library, HSP TSMC Fab), and municipal utility lifelines.
 3. **Physics-Informed GMPE Attenuation Model**:
    - Grounded in Taiwan crustal GMPE logic trees (Lin & Lee 2008 / Campbell & Bozorgnia 2014) to validate neural network predictions against theoretical $\pm 2.5\sigma$ confidence intervals.
-4. **Next.js 15 RAG Model Visualization Dashboard (Direct Entry at `/`)**:
-   - **Direct Dashboard Experience**: Accessible immediately at `/` (no landing page gatekeeping), featuring official NCU E-DREaM Lab × NVAITC branding in the top mission control bar.
-   - **Native Tailwind CSS Light / Dark Mode**: Built-in toggle (☀️ / 🌙) in the mission control header with persistent `localStorage` preference and full ergonomic styling across light and dark modes.
-   - **4 Core Visualization Modules**:
-     - **RAG Architecture (`?tab=rag_arch`)**: Pipeline flow visualizer with TT-SAM alert ingestion, Track A Reflex Engine (<5 ms), Track B Deliberative 4-agent reasoning, Lin & Lee GMPE physics validation, hybrid retrieval vector store, and real-time telemetry inspector.
-     - **EEWS (`?tab=eews`)**: Earthquake Early Warning System with millisecond S-wave countdown clock, interactive Leaflet GIS wavefront propagation, Track A SCADA interlocks, and facility digital twins.
-     - **PSHA (`?tab=psha`)**: Probabilistic Seismic Hazard Analysis displaying Taiwan's 38 active on-land fault traces, TEM PSHA 2025 Table 2 cascading rupture matrix, and Lin & Lee (2008) PGV attenuation curve.
-     - **Geotechnical AI Copilot (`?tab=copilot`)**: Full-height domain assistant with Server-Sent Events (SSE) streaming, quick-prompt chips, and strict TEM PSHA citations.
+4. **Next.js 15 TailwindAdmin Enterprise Dashboard (Direct Entry at `/`)**:
+   - **TailwindAdmin Architecture**: Modeled after modern enterprise ReactJS + Tailwind admin dashboards with a collapsible left sidebar, breadcrumb navigation, and clean card-based layout.
+   - **Collapsible Navigation Sidebar**: Left-hand drawer with NCU E-DREaM Lab brand identity, categorized menu items (RAG Architecture, Real-Time EEWS, TEM PSHA Hazard, AI Copilot), active scenario telemetry, and sub-millisecond reflex speed badges.
+   - **Top KPI Summary Metric Cards**: 4 executive analytical cards displaying Track A Reflex Latency ($0.009\text{ ms}$ / $99.8\%$ optimal), Track B Deliberation ($0.87\text{ ms}$ / 4-Agent swarm), Seismogenic Faults ($38$ structures / TEM PSHA 2025), and Campus Facility Health ($2.14\%$ drift / RED TAG alert).
+   - **Mission Control Top Bar**: Interactive scenario selector dropdown, "Trigger Wave" button, FastAPI online health pill, notification alert bell, and native **Tailwind CSS Light/Dark Mode switch** (☀️ / 🌙).
    - **100% Free GIS Basemaps**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager (Light), and OpenStreetMap—**no external API keys required**.
 
 ---
@@ -105,16 +102,21 @@ RAG_TEM/
 │   ├── frontend/                       # Next.js 15 + React 19 + Tailwind App Router
 │   │   ├── src/
 │   │   │   ├── app/
-│   │   │   │   ├── page.tsx            # E-DREaM Center institutional portal
-│   │   │   │   ├── dashboard/page.tsx  # 4-Module RAG visualization dashboard controller
-│   │   │   │   ├── layout.tsx          # Root layout & meta tags
-│   │   │   │   └── globals.css         # Theme tokens & styles
+│   │   │   │   ├── page.tsx            # TailwindAdmin direct RAG dashboard
+│   │   │   │   ├── dashboard/page.tsx  # Direct alias to page.tsx
+│   │   │   │   ├── layout.tsx          # Root shell layout with pre-paint theme script
+│   │   │   │   └── globals.css         # Light/Dark mode CSS tokens & styling
 │   │   │   ├── components/
-│   │   │   │   ├── dashboard/          # 4 Core RAG visualization modules
+│   │   │   │   ├── layout/             # TailwindAdmin enterprise shell
+│   │   │   │   │   ├── sidebar.tsx     # Collapsible left navigation drawer
+│   │   │   │   │   └── header.tsx      # Top bar with breadcrumb, controls & theme toggle
+│   │   │   │   ├── dashboard/          # 4 Core RAG visualization views & KPIs
+│   │   │   │   │   ├── kpi-metrics.tsx           # 4 Top summary KPI metric cards
 │   │   │   │   │   ├── rag-architecture-view.tsx # Dual-track pipeline visualizer
 │   │   │   │   │   ├── eews-view.tsx             # S-wave countdown clock, GIS & SCADA
 │   │   │   │   │   ├── psha-view.tsx             # 38 faults, cascading graph & GMPE curve
 │   │   │   │   │   └── copilot-view.tsx          # Domain geotechnical AI copilot with SSE
+│   │   │   │   ├── theme-toggle.tsx    # Native Tailwind Light/Dark mode switcher (☀️/🌙)
 │   │   │   │   └── mission-control/    # Interactive GIS, GMPE & digital twins primitives
 │   │   │   ├── hooks/                  # useRagStream hook (SSE streaming)
 │   │   │   ├── lib/                    # Zod schemas & API clients

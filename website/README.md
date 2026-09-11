@@ -10,20 +10,24 @@ The architecture is fully decoupled into a **Next.js 15 App Router frontend** an
 
 ```text
 website/
-├── frontend/                       # Next.js 15 + React 19 Direct RAG Dashboard
+├── frontend/                       # Next.js 15 + React 19 TailwindAdmin Direct Dashboard
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.tsx            # SeismoAgent-TW direct 4-module dashboard
+│   │   │   ├── page.tsx            # TailwindAdmin direct RAG dashboard
 │   │   │   ├── dashboard/page.tsx  # Direct alias/forward to `/`
 │   │   │   ├── layout.tsx          # Root shell layout with hydration-safe theme
 │   │   │   └── globals.css         # Light & Dark mode theme variables & styles
 │   │   ├── components/
-│   │   │   ├── theme-toggle.tsx    # Native Tailwind Light/Dark mode switcher (☀️/🌙)
-│   │   │   ├── dashboard/          # 4 Dedicated RAG visualization views
+│   │   │   ├── layout/             # TailwindAdmin enterprise shell
+│   │   │   │   ├── sidebar.tsx     # Collapsible left navigation drawer
+│   │   │   │   └── header.tsx      # Top bar with breadcrumb, controls & theme toggle
+│   │   │   ├── dashboard/          # 4 Dedicated RAG visualization views & KPIs
+│   │   │   │   ├── kpi-metrics.tsx # 4 Top summary KPI metric cards
 │   │   │   │   ├── rag-architecture-view.tsx # Reflex & Deliberative pipeline graph
 │   │   │   │   ├── eews-view.tsx             # S-wave countdown clock & GIS wavefronts
 │   │   │   │   ├── psha-view.tsx             # 38 faults, cascading graph & GMPE curve
 │   │   │   │   └── copilot-view.tsx          # Geotechnical AI copilot with SSE streaming
+│   │   │   ├── theme-toggle.tsx    # Native Tailwind Light/Dark mode switcher (☀️/🌙)
 │   │   │   └── mission-control/    # Interactive GIS, GMPE & digital twins primitives
 │   │   ├── hooks/                  # useRagStream hook (SSE streaming reader)
 │   │   ├── lib/                    # Zod validation & API client helpers
