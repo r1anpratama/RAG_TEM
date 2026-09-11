@@ -10,23 +10,25 @@ The architecture is fully decoupled into a **Next.js 15 App Router frontend** an
 
 ```text
 website/
-├── frontend/                       # Next.js 15 + React 19 Mission Control Interface
+├── frontend/                       # Next.js 15 + React 19 Institutional Portal & Dashboard
 │   ├── src/
-│   │   ├── app/                    # App Router (page.tsx, layout.tsx, globals.css)
-│   │   ├── components/mission-control/
-│   │   │   ├── control-header.tsx  # Scenario trigger, simulation status & triggers
-│   │   │   ├── alert-banner.tsx    # S-wave countdown clock & telemetry banner
-│   │   │   ├── gis-map.tsx         # Free Leaflet GIS basemaps with fault lines & wave fronts
-│   │   │   ├── digital-twins.tsx   # Facility structural drift & damage status cards
-│   │   │   ├── scada-panel.tsx     # Track A sub-millisecond machine interlocks
-│   │   │   ├── gmpe-curve.tsx      # Lin & Lee (2008) PGV attenuation chart
-│   │   │   ├── graph-preview.tsx   # Geo-GraphRAG multi-fault cascading ruptures
-│   │   │   └── copilot-drawer.tsx  # Slide-over SSE-streamed RAG copilot with citations
+│   │   ├── app/
+│   │   │   ├── page.tsx            # E-DREaM Center institutional homepage
+│   │   │   ├── dashboard/page.tsx  # 4-Module RAG visualization dashboard controller
+│   │   │   ├── layout.tsx          # Root shell layout
+│   │   │   └── globals.css         # Typography & Cyber Slate styling
+│   │   ├── components/
+│   │   │   ├── dashboard/          # 4 Dedicated RAG visualization views
+│   │   │   │   ├── rag-architecture-view.tsx # Reflex & Deliberative pipeline graph
+│   │   │   │   ├── eews-view.tsx             # S-wave countdown clock & GIS wavefronts
+│   │   │   │   ├── psha-view.tsx             # 38 faults, cascading graph & GMPE curve
+│   │   │   │   └── copilot-view.tsx          # Geotechnical AI copilot with SSE streaming
+│   │   │   └── mission-control/    # Interactive GIS, GMPE & digital twins primitives
 │   │   ├── hooks/                  # useRagStream hook (SSE streaming reader)
 │   │   ├── lib/                    # Zod validation & API client helpers
 │   │   └── types/                  # TypeScript interfaces for triage, faults & twins
 │   ├── .env.example                # NEXT_PUBLIC_API_URL=http://localhost:8000
-│   ├── tailwind.config.ts          # Geotechnical palette tokens (ink_black, stormy_teal, etc.)
+│   ├── tailwind.config.ts          # Cyber Slate & Modern Mission Control design system
 │   └── package.json                # Next.js 15, React 19, Lucide, Leaflet, Tailwind
 │
 └── backend/                        # FastAPI Application Server (SSE Streaming + Multi-Agent Triage)

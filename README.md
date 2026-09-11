@@ -28,14 +28,14 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
    - 45 nodes & 78 attributed edges linking 38 active faults, TEM PSHA 2025 Table 2 multi-structure rupture pairings (e.g. Shuanglienpo ID 2 + Hukou ID 4 $M_w\ 6.91$), regional campus digital twins (NCU Science B4, NCU Eng B5, NCU Library, HSP TSMC Fab), and municipal utility lifelines.
 3. **Physics-Informed GMPE Attenuation Model**:
    - Grounded in Taiwan crustal GMPE logic trees (Lin & Lee 2008 / Campbell & Bozorgnia 2014) to validate neural network predictions against theoretical $\pm 2.5\sigma$ confidence intervals.
-4. **Next.js 15 Mission Control Web Platform**:
-   - **100% Free GIS Basemap**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager, and OpenStreetMap—**no external API keys required**.
-   - **Dynamic S-Wave Countdown Clock**: High-visibility warning banner with real-time millisecond countdown to shear wave arrival.
-   - **Facility Digital Twins**: Live drift gauges, structural damage states (Green/Yellow/Red), and collapse probabilities for critical infrastructure.
-   - **Automated SCADA Interlocks**: Instant machine response monitoring with microsecond execution timestamps.
-   - **Attenuation Curve Analysis**: Interactive Lin & Lee (2008) PGV decay chart comparing observed and theoretical values.
-   - **Cascading Rupture Graph**: Visualizer for multi-fault rupture propagation and geotechnical dependencies.
-   - **Grounded Geotechnical Copilot**: Slide-over AI assistant with Server-Sent Events (SSE) streaming and TEM PSHA 2025 citations.
+4. **Next.js 15 Institutional Portal & RAG Dashboard**:
+   - **E-DREaM Center Portal (`/`)**: Emulates the official NCU E-DREaM Lab (`https://e-dream.tw/en/`), featuring institutional branding, the Sprout project research charter, 5 core divisions, enterprise partners, and quick entry into the RAG suites.
+   - **Interactive RAG Visualization Dashboard (`/dashboard`)**:
+     - **RAG Architecture (`?tab=rag_arch`)**: Pipeline flow visualizer with TT-SAM alert ingestion, Track A Reflex Engine (<5 ms), Track B Deliberative 4-agent reasoning, Lin & Lee GMPE physics validation, hybrid retrieval vector store, and real-time telemetry inspector.
+     - **EEWS (`?tab=eews`)**: Earthquake Early Warning System with millisecond S-wave countdown clock, interactive Leaflet GIS wavefront propagation, Track A SCADA interlocks, and facility digital twins.
+     - **PSHA (`?tab=psha`)**: Probabilistic Seismic Hazard Analysis displaying Taiwan's 38 active on-land fault traces, TEM PSHA 2025 Table 2 cascading rupture matrix, and Lin & Lee (2008) PGV attenuation curve.
+     - **Geotechnical AI Copilot (`?tab=copilot`)**: Full-height domain assistant with Server-Sent Events (SSE) streaming, quick-prompt chips, and strict TEM PSHA citations.
+   - **100% Free GIS Basemaps**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager, and OpenStreetMap—**no external API keys required**.
 
 ---
 
@@ -103,16 +103,18 @@ RAG_TEM/
 ├── website/                            # Modern Decoupled Web Platform
 │   ├── frontend/                       # Next.js 15 + React 19 + Tailwind App Router
 │   │   ├── src/
-│   │   │   ├── app/                    # App Router (page.tsx, layout.tsx, globals.css)
-│   │   │   ├── components/mission-control/
-│   │   │   │   ├── control-header.tsx  # Scenario trigger & system controls
-│   │   │   │   ├── alert-banner.tsx    # S-wave countdown clock & telemetry
-│   │   │   │   ├── gis-map.tsx         # Free Leaflet GIS basemaps & fault lines
-│   │   │   │   ├── digital-twins.tsx   # Facility structural drift & damage status
-│   │   │   │   ├── scada-panel.tsx     # Track A microsecond machine interlocks
-│   │   │   │   ├── gmpe-curve.tsx      # Lin & Lee (2008) attenuation chart
-│   │   │   │   ├── graph-preview.tsx   # Geo-GraphRAG rupture visualizer
-│   │   │   │   └── copilot-drawer.tsx  # Slide-over SSE-streamed RAG copilot
+│   │   │   ├── app/
+│   │   │   │   ├── page.tsx            # E-DREaM Center institutional portal
+│   │   │   │   ├── dashboard/page.tsx  # 4-Module RAG visualization dashboard controller
+│   │   │   │   ├── layout.tsx          # Root layout & meta tags
+│   │   │   │   └── globals.css         # Theme tokens & styles
+│   │   │   ├── components/
+│   │   │   │   ├── dashboard/          # 4 Core RAG visualization modules
+│   │   │   │   │   ├── rag-architecture-view.tsx # Dual-track pipeline visualizer
+│   │   │   │   │   ├── eews-view.tsx             # S-wave countdown clock, GIS & SCADA
+│   │   │   │   │   ├── psha-view.tsx             # 38 faults, cascading graph & GMPE curve
+│   │   │   │   │   └── copilot-view.tsx          # Domain geotechnical AI copilot with SSE
+│   │   │   │   └── mission-control/    # Interactive GIS, GMPE & digital twins primitives
 │   │   │   ├── hooks/                  # useRagStream hook (SSE streaming)
 │   │   │   ├── lib/                    # Zod schemas & API clients
 │   │   │   └── types/                  # TypeScript triage & map interfaces
