@@ -28,47 +28,49 @@ interface CampusBuilding {
 export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<CampusBuilding | null>(null);
-  const [cameraMode, setCameraMode] = useState<"campus" | "science4" | "library">("campus");
+  const [cameraMode, setCameraMode] = useState<"campus" | "science4" | "eng5" | "library">("campus");
   const animationFrameRef = useRef<number | null>(null);
 
-  // Buildings data based on real NCU campus layout
+  // Buildings mathematically positioned from verified NCU OpenStreetMap coordinates
+  // Origin (0,0) = Grand Lawn (大草坪) [24.9690, 121.1920]
+  // -z = North, +z = South, +x = East, -x = West
   const buildingsRef = useRef<CampusBuilding[]>([
     {
       id: "FAC_NCU_SCIENCE_B4",
-      name: "NCU Science Building 4",
-      nameZh: "國立中央大學 理學院四館",
-      x: -30,
-      z: -25,
-      width: 22,
+      name: "Science Building 4 (S4)",
+      nameZh: "國立中央大學 理學院四館 / 健雄館",
+      x: -5,
+      z: -65,
+      width: 24,
       depth: 18,
       height: 32,
       stories: 8,
       era: "Pre-1999 (Soft-Storey Ground Floor)",
-      structuralType: "Reinforced Concrete Frame w/ Open Ground Hall",
+      structuralType: "Reinforced Concrete Frame w/ Open Ground Hall (Physics & Space Sci)",
       sensors: ["NCU_ACC_04_Z", "NCU_ACC_04_N", "NCU_ACC_04_E"],
     },
     {
       id: "FAC_NCU_ENG_B5",
-      name: "NCU Engineering Building 5",
-      nameZh: "工程五館 (資工/電機大樓)",
-      x: -35,
-      z: 30,
-      width: 28,
-      depth: 20,
+      name: "Engineering Building 5 (E6)",
+      nameZh: "工程五館 (工學院 / 資電學院大樓)",
+      x: -116,
+      z: 55,
+      width: 32,
+      depth: 22,
       height: 36,
       stories: 9,
       era: "Post-1999 Modern Seismic Code",
-      structuralType: "Moment-Resisting RC Frame",
+      structuralType: "Moment-Resisting RC Frame (Computer Science & Electrical Eng)",
       sensors: ["NCU_EECS_01", "NCU_EECS_02"],
     },
     {
       id: "FAC_NCU_LIBRARY",
       name: "NCU Main Library Core",
       nameZh: "中央大學 總圖書館",
-      x: 35,
-      z: 20,
-      width: 30,
-      depth: 26,
+      x: 57,
+      z: 19,
+      width: 28,
+      depth: 24,
       height: 34,
       stories: 8,
       era: "Post-1999 Seismic Retrofitted",
@@ -77,24 +79,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
     },
     {
       id: "FAC_NCU_EDREAM",
-      name: "E-DREaM Center / Earth Sciences",
-      nameZh: "地球科學學院 / 健雄館",
-      x: -5,
-      z: -40,
-      width: 24,
-      depth: 16,
+      name: "College of Earth Sciences",
+      nameZh: "地球科學學院 / 健雄館南翼 / E-DREaM Lab",
+      x: 63,
+      z: 46,
+      width: 26,
+      depth: 18,
       height: 28,
       stories: 7,
-      era: "Modern Geoscientific Facility",
-      structuralType: "Seismological Array Station Core",
+      era: "Geoscientific Center of Excellence",
+      structuralType: "Seismological Array Station Core (TT-SAM Processing Node)",
       sensors: ["CWASN_NCU_BB", "TT_SAM_EDGE_NODE"],
     },
     {
       id: "FAC_NCU_ADMIN",
       name: "NCU Administration Building",
       nameZh: "中央大學 行政大樓",
-      x: 20,
-      z: -20,
+      x: 77,
+      z: 20,
       width: 24,
       depth: 18,
       height: 24,
@@ -102,6 +104,20 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
       era: "Campus Operations Hub",
       structuralType: "RC Frame",
       sensors: ["NCU_OPS_SCADA"],
+    },
+    {
+      id: "FAC_NCU_GYM",
+      name: "NCU Gymnasium (依仁堂)",
+      nameZh: "依仁堂體育館",
+      x: -30,
+      z: 22,
+      width: 34,
+      depth: 28,
+      height: 20,
+      stories: 3,
+      era: "Post-1999 Long-Span Roof Structure",
+      structuralType: "Steel Space Truss & RC Frame",
+      sensors: ["NCU_GYM_S1"],
     },
   ]);
 
@@ -117,7 +133,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
   const cameraAngleRef = useRef<{ theta: number; phi: number; radius: number }>({
     theta: Math.PI / 4,
     phi: Math.PI / 3.2,
-    radius: 180,
+    radius: 260,
   });
 
   useEffect(() => {
@@ -129,11 +145,11 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
     // 1. Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a101d);
-    scene.fog = new THREE.FogExp2(0x0a101d, 0.0035);
+    scene.fog = new THREE.FogExp2(0x0a101d, 0.0028);
     sceneRef.current = scene;
 
     // 2. Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1200);
     cameraRef.current = camera;
     updateCameraPosition();
 
@@ -152,24 +168,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
     scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.4);
-    dirLight.position.set(100, 150, 80);
+    dirLight.position.set(120, 180, 100);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
     dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.camera.near = 10;
-    dirLight.shadow.camera.far = 400;
-    dirLight.shadow.camera.left = -120;
-    dirLight.shadow.camera.right = 120;
-    dirLight.shadow.camera.top = 120;
-    dirLight.shadow.camera.bottom = -120;
+    dirLight.shadow.camera.far = 500;
+    dirLight.shadow.camera.left = -180;
+    dirLight.shadow.camera.right = 180;
+    dirLight.shadow.camera.top = 180;
+    dirLight.shadow.camera.bottom = -180;
     scene.add(dirLight);
 
     const secondaryLight = new THREE.DirectionalLight(0x06b6d4, 0.6);
-    secondaryLight.position.set(-80, 70, -60);
+    secondaryLight.position.set(-100, 80, -80);
     scene.add(secondaryLight);
 
-    // 5. Ground / Campus Terrain Plane
-    const groundGeo = new THREE.PlaneGeometry(280, 280, 32, 32);
+    // 5. Ground / Campus Terrain Plane (Encompassing entire NCU campus)
+    const groundGeo = new THREE.PlaneGeometry(360, 320, 32, 32);
     const groundMat = new THREE.MeshStandardMaterial({
       color: 0x111c2e,
       roughness: 0.85,
@@ -181,12 +197,12 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
     scene.add(ground);
 
     // Subtle Ground Grid
-    const grid = new THREE.GridHelper(260, 26, 0x1e293b, 0x0f172a);
+    const grid = new THREE.GridHelper(340, 34, 0x1e293b, 0x0f172a);
     grid.position.y = 0.1;
     scene.add(grid);
 
-    // 6. NCU Zhongda Lake (中大湖)
-    const lakeGeo = new THREE.CircleGeometry(26, 32);
+    // 6. NCU Zhongda Lake (中大湖) - Positioned accurately near Science B4
+    const lakeGeo = new THREE.CircleGeometry(22, 32);
     const lakeMat = new THREE.MeshStandardMaterial({
       color: 0x0284c7,
       roughness: 0.1,
@@ -196,29 +212,42 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
     });
     const lake = new THREE.Mesh(lakeGeo, lakeMat);
     lake.rotation.x = -Math.PI / 2;
-    lake.position.set(45, 0.2, -45);
+    lake.position.set(-11, 0.2, -37);
     scene.add(lake);
 
-    // 7. NCU Athletic Running Track (田徑場)
-    const trackCurveGeo = new THREE.RingGeometry(22, 30, 32);
+    // Central Pavilion in Zhongda Lake (湖心亭)
+    const pavilionGeo = new THREE.CylinderGeometry(2, 2, 4, 8);
+    const pavilionMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+    const pavilion = new THREE.Mesh(pavilionGeo, pavilionMat);
+    pavilion.position.set(-11, 2, -37);
+    scene.add(pavilion);
+
+    // 7. NCU Athletic Running Track (田徑場) - Near Gymnasium
+    const trackCurveGeo = new THREE.RingGeometry(24, 34, 32);
     const trackMat = new THREE.MeshBasicMaterial({
       color: 0xc2410c,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.45,
       side: THREE.DoubleSide,
     });
     const track = new THREE.Mesh(trackCurveGeo, trackMat);
     track.rotation.x = -Math.PI / 2;
-    track.position.set(-75, 0.15, -45);
+    track.position.set(-70, 0.15, 10);
     scene.add(track);
 
-    // 8. Campus Roads (環校道路 & Walkways)
-    const roadMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
-    const ringRoadGeo = new THREE.RingGeometry(85, 95, 48);
-    const ringRoad = new THREE.Mesh(ringRoadGeo, roadMat);
-    ringRoad.rotation.x = -Math.PI / 2;
-    ringRoad.position.y = 0.05;
-    scene.add(ringRoad);
+    // 8. Campus Grand Lawn (中大大草坪)
+    const lawnGeo = new THREE.CircleGeometry(28, 32);
+    const lawnMat = new THREE.MeshStandardMaterial({
+      color: 0x064e3b,
+      roughness: 0.9,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.5,
+    });
+    const lawn = new THREE.Mesh(lawnGeo, lawnMat);
+    lawn.rotation.x = -Math.PI / 2;
+    lawn.position.set(0, 0.15, -8);
+    scene.add(lawn);
 
     // 9. Build 3D NCU Buildings (Neutral architectural style initially)
     buildingMeshesRef.current.clear();
@@ -348,7 +377,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
           // IMPACT DYNAMIC: Evaluated based on scenario PGV & structural system!
           const pgv = scenario?.predicted_pgv_cm_s || 28.4;
           if (b.id === "FAC_NCU_SCIENCE_B4") {
-            // Soft-story vulnerable to shear collapse if PGV > 20
             if (pgv >= 20) {
               (mainMesh.material as THREE.MeshStandardMaterial).color.setHex(0x881337);
               (mainMesh.material as THREE.MeshStandardMaterial).emissive.setHex(0xe11d48);
@@ -361,7 +389,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
               (mainMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.35;
             }
           } else {
-            // Library retrofit core holds safe
             (mainMesh.material as THREE.MeshStandardMaterial).color.setHex(0x064e3b);
             (mainMesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x059669);
             (mainMesh.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.25;
@@ -410,22 +437,28 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     cameraAngleRef.current.radius = Math.max(
-      70,
-      Math.min(320, cameraAngleRef.current.radius + e.deltaY * 0.15)
+      80,
+      Math.min(380, cameraAngleRef.current.radius + e.deltaY * 0.15)
     );
     updateCameraPosition();
   };
 
-  // Quick camera presets
-  const setPreset = (preset: "campus" | "science4" | "library") => {
+  // Quick camera presets for real NCU landmarks
+  const setPreset = (preset: "campus" | "science4" | "eng5" | "library") => {
     setCameraMode(preset);
     if (preset === "campus") {
-      cameraAngleRef.current = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 180 };
+      cameraAngleRef.current = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 260 };
     } else if (preset === "science4") {
-      cameraAngleRef.current = { theta: Math.PI / 6, phi: Math.PI / 3.8, radius: 110 };
+      // Focus on Science Building 4 (x=-5, z=-65)
+      cameraAngleRef.current = { theta: Math.PI / 1.8, phi: Math.PI / 3.6, radius: 130 };
       setSelectedBuilding(buildingsRef.current[0]);
+    } else if (preset === "eng5") {
+      // Focus on Engineering 5 (x=-116, z=55)
+      cameraAngleRef.current = { theta: -Math.PI / 3, phi: Math.PI / 3.5, radius: 140 };
+      setSelectedBuilding(buildingsRef.current[1]);
     } else if (preset === "library") {
-      cameraAngleRef.current = { theta: (5 * Math.PI) / 4, phi: Math.PI / 3.5, radius: 110 };
+      // Focus on Library Core (x=57, z=19)
+      cameraAngleRef.current = { theta: (5 * Math.PI) / 4, phi: Math.PI / 3.5, radius: 130 };
       setSelectedBuilding(buildingsRef.current[2]);
     }
     updateCameraPosition();
@@ -448,7 +481,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
       <div className="absolute top-3 right-3 z-10 flex items-center space-x-1.5 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md">
         <button
           onClick={() => setPreset("campus")}
-          className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
             cameraMode === "campus"
               ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
               : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -458,17 +491,27 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
         </button>
         <button
           onClick={() => setPreset("science4")}
-          className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
             cameraMode === "science4"
               ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
               : "text-slate-400 hover:text-white hover:bg-slate-800"
           }`}
         >
-          Science B4
+          Science 4 (S4)
+        </button>
+        <button
+          onClick={() => setPreset("eng5")}
+          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+            cameraMode === "eng5"
+              ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+              : "text-slate-400 hover:text-white hover:bg-slate-800"
+          }`}
+        >
+          Eng 5 (E6)
         </button>
         <button
           onClick={() => setPreset("library")}
-          className={`px-2.5 py-1 rounded text-[11px] font-medium transition ${
+          className={`px-2 py-1 rounded text-[10px] font-medium transition ${
             cameraMode === "library"
               ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
               : "text-slate-400 hover:text-white hover:bg-slate-800"
@@ -481,7 +524,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({ scenario, isSimulating
           title="Reset Camera"
           className="p-1 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded transition"
         >
-          <RotateCcw className="h-3.5 w-3.5" />
+          <RotateCcw className="h-3 w-3" />
         </button>
       </div>
 

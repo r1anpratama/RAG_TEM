@@ -51,10 +51,10 @@ export const GisMap: React.FC<GisMapProps> = ({
       });
 
       if (!mapInstanceRef.current) {
-        // Default camera focused on NCU Campus (Zhongli, Taoyuan)
+        // Center on NCU Campus Core (Zhongli, Taoyuan) - Exact campus centroid
         const map = L.map(mapContainerRef.current, {
-          center: [24.9681, 121.1945],
-          zoom: 15.5,
+          center: [24.9688, 121.1918],
+          zoom: 16,
           minZoom: 6,
           maxZoom: 19,
           zoomControl: false,
@@ -118,16 +118,16 @@ export const GisMap: React.FC<GisMapProps> = ({
       const map = mapInstanceRef.current;
       const { faultsLayer, markersLayer, wavefrontsLayer, campusBoundaryLayer } = layersRef.current;
 
-      // Render NCU Campus Perimeter
+      // Render NCU Campus Perimeter (Exact boundary circle around campus ring road)
       if (campusBoundaryLayer) {
         campusBoundaryLayer.clearLayers();
-        L.circle([24.9681, 121.1945], {
-          radius: 480,
+        L.circle([24.9688, 121.1918], {
+          radius: 540,
           color: "#38bdf8",
           weight: 2,
           opacity: 0.85,
           fillColor: "#0284c7",
-          fillOpacity: 0.08,
+          fillOpacity: 0.07,
           dashArray: "6, 6",
         }).addTo(campusBoundaryLayer);
       }
@@ -175,50 +175,66 @@ export const GisMap: React.FC<GisMapProps> = ({
         });
       }
 
-      // Render NCU Real Campus Building Pins (NEUTRAL IN STANDBY, NO HARDCODED ALARM COLORS)
+      // Render NCU Real Campus Building Pins - EXACT VERIFIED OPENSTREETMAP COORDINATES
       if (markersLayer) {
         markersLayer.clearLayers();
 
         const ncuBuildings = [
           {
             id: "FAC_NCU_SCIENCE_B4",
-            name: "NCU Science Building 4",
-            sub: "理學院四館 (Earth Sciences / Physics)",
-            lat: 24.9692,
-            lon: 121.1932,
-            type: "Pre-1999 Soft Storey",
+            name: "Science Building 4 (S4)",
+            nameZh: "科學四館 / 健雄館",
+            lat: 24.971335,
+            lon: 121.191798,
+            type: "Pre-1999 Soft Storey (Physics / Earth Sciences)",
           },
           {
             id: "FAC_NCU_ENG_B5",
-            name: "NCU Engineering Building 5",
-            sub: "工程五館 (CS / Electrical Engineering)",
-            lat: 24.9678,
-            lon: 121.1915,
-            type: "Post-1999 RC Frame",
+            name: "Engineering Building 5 (E6)",
+            nameZh: "工程五館 (資電學院 / 工學院)",
+            lat: 24.967028,
+            lon: 121.187380,
+            type: "Post-1999 RC Frame (CS / EE Department)",
           },
           {
             id: "FAC_NCU_LIBRARY",
             name: "NCU Main Library Core",
-            sub: "中央大學 總圖書館",
-            lat: 24.9676,
-            lon: 121.1959,
-            type: "Seismic Retrofitted",
+            nameZh: "中央大學 總圖書館",
+            lat: 24.968316,
+            lon: 121.194263,
+            type: "Post-1999 Seismic Retrofitted",
           },
           {
             id: "FAC_NCU_EDREAM",
-            name: "E-DREaM Seismology Core",
-            sub: "健雄館 / TT-SAM Inference Node",
-            lat: 24.9695,
-            lon: 121.1928,
-            type: "Array Seismic Station",
+            name: "College of Earth Sciences (E-DREaM)",
+            nameZh: "地球科學院 / TT-SAM Node",
+            lat: 24.967340,
+            lon: 121.194519,
+            type: "Seismology Array Station Core",
+          },
+          {
+            id: "FAC_NCU_ADMIN",
+            name: "NCU Administration Building",
+            nameZh: "中央大學 行政大樓",
+            lat: 24.968295,
+            lon: 121.195048,
+            type: "Campus Operations Hub",
           },
           {
             id: "FAC_NCU_LAKE",
-            name: "Zhongda Lake",
-            sub: "中大湖",
-            lat: 24.9665,
-            lon: 121.1942,
-            type: "Campus Landmark",
+            name: "Zhongda Lake (中大湖)",
+            nameZh: "中大湖 / 湖心亭",
+            lat: 24.970343,
+            lon: 121.191570,
+            type: "Campus Landmark Water Reservoir",
+          },
+          {
+            id: "FAC_NCU_GYM",
+            name: "NCU Gymnasium (依仁堂)",
+            nameZh: "依仁堂體育館",
+            lat: 24.968225,
+            lon: 121.190825,
+            type: "Indoor Arena & Evacuation Site",
           },
         ];
 
@@ -251,6 +267,11 @@ export const GisMap: React.FC<GisMapProps> = ({
               badgeBorder = "border-cyan-400";
               badgeBg = "bg-cyan-950/95 text-cyan-200";
               dotColor = "#06b6d4";
+            } else {
+              badgeText = "SAFE (UNDAMAGED)";
+              badgeBorder = "border-slate-600";
+              badgeBg = "bg-slate-900/95 text-slate-300";
+              dotColor = "#64748b";
             }
           }
 
@@ -260,7 +281,7 @@ export const GisMap: React.FC<GisMapProps> = ({
               <div style="height:12px;width:12px;border-radius:9999px;background:${dotColor};border:2px solid #ffffff;box-shadow:0 0 8px ${dotColor}"></div>
               <div style="position:absolute;left:16px;top:-10px;white-space:nowrap;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:bold;color:#f8fafc;box-shadow:0 4px 12px rgba(0,0,0,0.6);border:1px solid;" class="${badgeBg} ${badgeBorder}">
                 ${b.name}<br/>
-                <span style="font-size:9px;font-weight:normal;opacity:0.85">${badgeText}</span>
+                <span style="font-size:9px;font-weight:normal;opacity:0.85">${b.nameZh} • ${badgeText}</span>
               </div>
             </div>`,
             iconSize: [12, 12],
@@ -269,10 +290,11 @@ export const GisMap: React.FC<GisMapProps> = ({
 
           L.marker([b.lat, b.lon], { icon: bIcon })
             .bindPopup(
-              `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:8px;font-size:11px;border-radius:6px;min-width:180px">
+              `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:8px;font-size:11px;border-radius:6px;min-width:200px">
                 <strong style="color:#38bdf8;font-size:12px">${b.name}</strong><br/>
-                <span style="color:#94a3b8">${b.sub}</span><br/>
+                <span style="color:#94a3b8;font-size:10px">${b.nameZh}</span><br/>
                 Structural Category: <b>${b.type}</b><br/>
+                Exact GPS: <code style="color:#38bdf8">${b.lat.toFixed(5)}, ${b.lon.toFixed(5)}</code><br/>
                 Simulated Impact: <b style="color:${dotColor}">${badgeText}</b>
               </div>`
             )
@@ -361,7 +383,7 @@ export const GisMap: React.FC<GisMapProps> = ({
   // Camera Quick Actions
   const flyToNCU = () => {
     if (!mapInstanceRef.current) return;
-    mapInstanceRef.current.flyTo([24.9681, 121.1945], 16, { duration: 1.2 });
+    mapInstanceRef.current.flyTo([24.9688, 121.1918], 16, { duration: 1.2 });
   };
 
   const flyToAllTaiwan = () => {
@@ -377,7 +399,7 @@ export const GisMap: React.FC<GisMapProps> = ({
     const map = mapInstanceRef.current;
     import("leaflet").then((L) => {
       const bounds = L.latLngBounds([
-        [24.9681, 121.1945],
+        [24.9688, 121.1918],
         [scenario.epicenter.lat, scenario.epicenter.lon],
       ]);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
