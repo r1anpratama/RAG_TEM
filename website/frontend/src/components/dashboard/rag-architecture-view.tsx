@@ -294,18 +294,19 @@ const NODES_REGISTRY: Record<string, NodeData> = {
   llm_optional: {
     id: "llm_optional",
     title: "Domain LLM",
-    subtitle: "Specialized Geotechnical Auxiliary LLM",
-    tech: "DeepSeek-R1-Distill / Qwen-2.5-Geotech",
+    subtitle: "Auxiliary LLM (Claude / ChatGPT)",
+    tech: "Claude / ChatGPT",
     category: "Reasoning",
-    role: "Secondary specialized foundation model for structural mechanics double-checking and code cross-validation.",
-    componentObjective: "Provides auxiliary model consensus on non-linear structural response parameters.",
-    inputData: "Structural mechanical verification code.",
-    outputArtifact: "Consensus verification score.",
-    spec: "OpenAI-compatible NIM Microservice",
-    hardware: "NVIDIA Hopper GPU",
+    role: "Secondary foundation model (Claude / ChatGPT) for structural mechanics double-checking and cross-validation.",
+    componentObjective: "Provides auxiliary model consensus and multi-LLM cross-validation on non-linear structural response parameters.",
+    inputData: "Structural mechanical verification code and seismic scenario context.",
+    outputArtifact: "Consensus verification score and validation report.",
+    spec: "Anthropic / OpenAI API Microservice",
+    hardware: "Cloud API / NVIDIA NIM Gateway",
     latencyTarget: "< 300 ms",
     samplePayload: {
       status: "STANDBY_AUXILIARY",
+      model_family: "Claude / ChatGPT",
       confidence: 0.981
     }
   },
