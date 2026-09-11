@@ -152,6 +152,7 @@ function DashboardContent() {
         <Header
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           activeTabLabel={getTabTitle()}
+          activeTab={activeTab}
           scenarios={scenarios}
           selectedScenario={selectedScenario}
           onSelectScenario={setSelectedScenario}
@@ -162,8 +163,8 @@ function DashboardContent() {
 
         {/* Page Content Container */}
         <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
-          {/* Top 4 KPI Summary Metric Cards */}
-          <KpiMetrics scenario={selectedScenario} />
+          {/* Top 4 KPI Summary Metric Cards - Hidden on RAG Architecture page */}
+          {activeTab !== "rag_arch" && <KpiMetrics scenario={selectedScenario} />}
 
           {/* Active Visualization Tab View */}
           {activeTab === "rag_arch" && <RagArchitectureView />}
