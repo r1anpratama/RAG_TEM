@@ -1204,10 +1204,10 @@ export const RagArchitectureView: React.FC = () => {
                       filter={selectedNode === "reranking" ? "url(#glow-green)" : undefined}
                     />
                     <path d="M 20 28 L 40 28 M 24 34 L 36 34 M 27 40 L 33 40" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" />
-                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                    <text x="74" y="30" textAnchor="start" fill="#f8fafc" className="text-[11px] font-bold">
                       NeMo Retriever
                     </text>
-                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                    <text x="74" y="44" textAnchor="start" fill="#86efac" className="text-[10px] font-semibold">
                       Reranking
                     </text>
                   </g>
@@ -1270,11 +1270,11 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "llm_optional" ? "2.5" : "1.5"}
                       filter={selectedNode === "llm_optional" ? "url(#glow-green)" : undefined}
                     />
-                    <text x="30" y="39" textAnchor="middle" fill="#76b900" className="font-mono text-[11px] font-bold">
-                      LLM
+                    <text x="30" y="31" textAnchor="middle" fill="#76b900" className="font-mono text-[10px] font-bold">
+                      Domain
                     </text>
-                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
-                      Domain LLM
+                    <text x="30" y="44" textAnchor="middle" fill="#76b900" className="font-mono text-[10px] font-bold">
+                      LLM
                     </text>
                   </g>
 
