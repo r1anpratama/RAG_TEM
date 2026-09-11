@@ -161,8 +161,8 @@ function DashboardContent() {
           backendHealth={backendHealth}
         />
 
-        {/* Page Content Container */}
-        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+        {/* Page Content Container - Full screen width utilization */}
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 w-full">
           {/* Top 4 KPI Summary Metric Cards - Hidden on RAG Architecture page */}
           {activeTab !== "rag_arch" && <KpiMetrics scenario={selectedScenario} />}
 

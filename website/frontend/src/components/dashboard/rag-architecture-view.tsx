@@ -18,6 +18,7 @@ import {
   RotateCcw,
   ArrowRight,
   Maximize2,
+  Minimize2,
   HelpCircle,
   FolderArchive,
   Terminal,
@@ -26,7 +27,9 @@ import {
   Radio,
   FileCode2,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 
 interface NodeData {
@@ -54,26 +57,26 @@ const NODES_REGISTRY: Record<string, NodeData> = {
   user: {
     id: "user",
     title: "Client Operator / User",
-    subtitle: "Seismic Field Engineer / SCADA Ingress",
-    tech: "WebSocket / REST API",
+    subtitle: "Emergency Commander / SCADA Ingress",
+    tech: "Secure WebSocket / TLS 1.3 REST API",
     category: "Entity",
     role: "Submits seismic emergency queries, triggers simulation scenarios, and inspects real-time physical damage estimates.",
-    spec: "Secure TLS 1.3 Client session with Bearer Token auth",
+    spec: "Session Auth Bearer Token, Client Ingress Validation",
     hardware: "Edge Device / Web Client",
     latencyTarget: "< 1.0 ms",
     samplePayload: {
       user_id: "NCU_DISASTER_CMD_01",
       query: "Assess M6.91 Shuanglienpo-Hukou cascading PGA & drift ratio for NCU Science Building 4",
-      timestamp_utc: "2026-09-11T02:20:00Z"
+      timestamp_utc: "2026-09-11T02:25:00Z"
     }
   },
   guardrails_in: {
     id: "guardrails_in",
     title: "NeMo Guardrails (Input)",
-    subtitle: "Input Safety, Jailbreak & Topical Rails",
+    subtitle: "Input Safety, Jailbreak & Topical Rail",
     tech: "NVIDIA NeMo Guardrails (Colang / Python Critic)",
     category: "Guardrail",
-    role: "Validates incoming query for adversarial prompt injection, out-of-domain scope, and sensitive infrastructure safety policies.",
+    role: "Validates incoming query for prompt injection, out-of-domain scope, and sensitive critical infrastructure safety guidelines.",
     spec: "Deterministic Rule Matching + Micro-LLM Input Classifier",
     hardware: "NVIDIA TensorRT-LLM (Low-latency)",
     latencyTarget: "< 2.0 ms",
@@ -106,7 +109,7 @@ const NODES_REGISTRY: Record<string, NodeData> = {
     subtitle: "Real-Time Query Vector Encoding",
     tech: "NV-Embed-QA / NVIDIA NeMo Retriever NIM",
     category: "Retrieval",
-    role: "Encodes structured query into dense 1024-dimensional vector space optimized for scientific and geotechnical document retrieval.",
+    role: "Encodes structured query into dense 1024-dimensional vector space optimized for scientific and geotechnical literature search.",
     spec: "NV-Embed-QA 4096 context, Cosine Similarity normalized",
     hardware: "NVIDIA TensorRT Inference Engine",
     latencyTarget: "< 3.0 ms",
@@ -378,25 +381,25 @@ export const RagArchitectureView: React.FC = () => {
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simulationStep, setSimulationStep] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
-  const [activePipeline, setActivePipeline] = useState<"retrieval" | "extraction">("retrieval");
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([
     {
       id: 1,
-      time: "10:20:01.104",
+      time: "10:25:01.104",
       step: "SYSTEM_READY",
       status: "INFO",
       message: "NVIDIA NeMo Multimodal Agentic RAG pipeline initialized in FP8 mode."
     },
     {
       id: 2,
-      time: "10:20:01.108",
+      time: "10:25:01.108",
       step: "CUVS_INIT",
       status: "SUCCESS",
       message: "cuVS CAGRA index loaded 1,248 document vectors into GPU memory."
     },
     {
       id: 3,
-      time: "10:20:01.112",
+      time: "10:25:01.112",
       step: "GUARDRAIL_READY",
       status: "SUCCESS",
       message: "NeMo Guardrails active with zero-hallucination factual rail enforcement."
@@ -417,7 +420,6 @@ export const RagArchitectureView: React.FC = () => {
   const startSimulation = () => {
     setIsSimulating(true);
     setSimulationStep(1);
-    setActivePipeline("retrieval");
 
     // Add initial start log
     const now = new Date();
@@ -499,11 +501,11 @@ export const RagArchitectureView: React.FC = () => {
   const selected = NODES_REGISTRY[selectedNode] || NODES_REGISTRY.nemotron_super;
 
   return (
-    <div className="flex flex-col space-y-4 w-full">
+    <div className={`flex flex-col space-y-4 w-full transition-all duration-200 ${isFullscreen ? "fixed inset-0 z-50 bg-[#070d17] p-6 overflow-y-auto" : ""}`}>
       {/* Top Header & Simulation Controls Toolbar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
         <div className="flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#76b900]/15 border border-[#76b900]/40 text-[#76b900] shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#76b900]/15 border border-[#76b900]/40 text-[#76b900] shadow-sm">
             <Cpu className="h-5 w-5" />
           </div>
           <div>
@@ -516,20 +518,20 @@ export const RagArchitectureView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Interactive dual-pipeline workflow: Real-Time Retrieval (Top) & Multimodal Document Ingestion (Bottom)
+              Interactive dual-pipeline workflow: Real-Time Retrieval (Top) &amp; Multimodal Document Ingestion (Bottom)
             </p>
           </div>
         </div>
 
-        {/* Live Simulation Controls */}
-        <div className="flex items-center space-x-2">
+        {/* Live Simulation & Canvas Controls */}
+        <div className="flex flex-wrap items-center gap-2">
           {!isSimulating ? (
             <button
               onClick={startSimulation}
               className="flex items-center space-x-1.5 bg-gradient-to-r from-[#76b900] to-emerald-600 hover:from-[#6ca900] hover:to-emerald-500 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md shadow-[#76b900]/20 cursor-pointer"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
-              <span>Simulate End-to-End Query Flow</span>
+              <span>Simulate End-to-End Flow</span>
             </button>
           ) : (
             <button
@@ -537,7 +539,7 @@ export const RagArchitectureView: React.FC = () => {
               className="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md cursor-pointer"
             >
               <Pause className="h-3.5 w-3.5 fill-current" />
-              <span>Pause Simulation</span>
+              <span>Pause</span>
             </button>
           )}
 
@@ -566,29 +568,39 @@ export const RagArchitectureView: React.FC = () => {
               </button>
             ))}
           </div>
+
+          {/* Fullscreen Toggle */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="flex items-center space-x-1 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium px-2.5 py-2 rounded-xl transition cursor-pointer"
+            title={isFullscreen ? "Exit Fullscreen Canvas" : "Expand to Fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            <span className="hidden md:inline">{isFullscreen ? "Exit" : "Expand"}</span>
+          </button>
         </div>
       </div>
 
-      {/* Main Interactive Stage: Left Diagram Canvas + Right Node Inspector */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
-        {/* SVG Diagram Canvas (8 cols on xl) */}
-        <div className="xl:col-span-8 flex flex-col space-y-4">
+      {/* Main Interactive Stage: Full Width Layout utilizing all screen space */}
+      <div className="grid grid-cols-1 2xl:grid-cols-12 gap-4 items-start w-full">
+        {/* SVG Diagram Canvas (8 cols on 2xl, full width on xl and below) */}
+        <div className="2xl:col-span-8 flex flex-col space-y-4 w-full">
           <div className="relative w-full rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070d17] overflow-hidden shadow-xl p-3 sm:p-5">
-            {/* Diagram Background Grid Pattern */}
+            {/* Background High-Tech Dot Matrix */}
             <div 
-              className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none"
+              className="absolute inset-0 opacity-[0.04] dark:opacity-[0.08] pointer-events-none"
               style={{
-                backgroundImage: "radial-gradient(#76b900 1px, transparent 1px)",
-                backgroundSize: "24px 24px"
+                backgroundImage: "radial-gradient(#76b900 1.5px, transparent 1.5px)",
+                backgroundSize: "28px 28px"
               }}
             />
 
-            {/* SVG Architectural Canvas */}
+            {/* SVG Architectural Canvas (viewBox: 1200 x 640 - spacious and collision-free) */}
             <div className="w-full overflow-x-auto">
               <svg
-                viewBox="0 0 980 620"
-                className="w-full min-w-[780px] h-auto select-none"
-                style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.15))" }}
+                viewBox="0 0 1200 640"
+                className="w-full min-w-[900px] h-auto select-none"
+                style={{ filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.18))" }}
               >
                 <defs>
                   {/* Arrow markers */}
@@ -628,7 +640,7 @@ export const RagArchitectureView: React.FC = () => {
                     <path d="M 0 1 L 8 5 L 0 9 z" fill="#94a3b8" />
                   </marker>
 
-                  {/* Node Glow Filters */}
+                  {/* Glow Filters */}
                   <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="6" result="blur" />
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -638,7 +650,7 @@ export const RagArchitectureView: React.FC = () => {
                     <feComposite in="SourceGraphic" in2="blur" operator="over" />
                   </filter>
 
-                  {/* Gradient fills for nodes */}
+                  {/* Gradients */}
                   <linearGradient id="grad-user" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0%" stopColor="#0284c7" />
                     <stop offset="100%" stopColor="#0369a1" />
@@ -665,7 +677,7 @@ export const RagArchitectureView: React.FC = () => {
                 {/* ========================================================================= */}
                 <g id="retrieval-swimlane">
                   <text
-                    x="20"
+                    x="24"
                     y="32"
                     fill="#94a3b8"
                     className="font-mono text-[11px] font-bold tracking-widest uppercase"
@@ -673,10 +685,10 @@ export const RagArchitectureView: React.FC = () => {
                     RETRIEVAL PIPELINE
                   </text>
 
-                  {/* SVG CONNECTING WIRES (Orthogonal Clean Layout) */}
+                  {/* SVG CONNECTING WIRES */}
                   {/* Wire 1: User to Guardrails In (through Query pill) */}
                   <path
-                    d="M 115 250 L 150 250 L 230 250"
+                    d="M 110 245 L 150 245 L 235 245"
                     fill="none"
                     stroke={simulationStep === 1 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 1 ? "2.5" : "1.5"}
@@ -685,7 +697,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 2: Guardrails In to Query Processing */}
                   <path
-                    d="M 290 250 L 390 250"
+                    d="M 295 245 L 410 245"
                     fill="none"
                     stroke={simulationStep === 2 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 2 ? "2.5" : "1.5"}
@@ -694,7 +706,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 3: Query Processing to Retriever Embedding */}
                   <path
-                    d="M 450 250 L 550 250"
+                    d="M 470 245 L 610 245"
                     fill="none"
                     stroke={simulationStep === 3 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 3 ? "2.5" : "1.5"}
@@ -703,16 +715,16 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 4: Retriever Embedding to cuVS Store */}
                   <path
-                    d="M 610 250 L 710 250"
+                    d="M 670 245 L 850 245"
                     fill="none"
                     stroke={simulationStep === 4 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 4 ? "2.5" : "1.5"}
                     markerEnd="url(#arrow-solid)"
                   />
 
-                  {/* Wire 5: cuVS Store UP to Reranking */}
+                  {/* Wire 5: cuVS Store UP to Reranking (Clean vertical ascent) */}
                   <path
-                    d="M 785 210 L 785 175"
+                    d="M 940 200 L 940 178"
                     fill="none"
                     stroke={simulationStep === 5 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 5 ? "2.5" : "1.5"}
@@ -721,7 +733,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 6: Reranking to Nemotron Super 49B (Solid Left) */}
                   <path
-                    d="M 755 145 L 615 145"
+                    d="M 910 145 L 670 145"
                     fill="none"
                     stroke={simulationStep === 6 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 6 ? "2.5" : "1.5"}
@@ -730,37 +742,37 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 7: Reranking to Nemotron Nano 8B (Dashed Up & Left) */}
                   <path
-                    d="M 785 115 L 785 65 L 715 65"
+                    d="M 940 110 L 940 50 L 815 50"
                     fill="none"
                     stroke="#64748b"
                     strokeWidth="1.5"
-                    strokeDasharray="4,4"
+                    strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                   />
 
                   {/* Wire 8: Nemotron Nano 8B to Nemotron Super 49B (Dashed Left & Down) */}
                   <path
-                    d="M 655 65 L 585 65 L 585 115"
+                    d="M 745 50 L 640 50 L 640 110"
                     fill="none"
                     stroke="#64748b"
                     strokeWidth="1.5"
-                    strokeDasharray="4,4"
+                    strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                   />
 
                   {/* Wire 9: LLM Optional to Reflection (Dashed Vertical Down) */}
                   <path
-                    d="M 420 85 L 420 115"
+                    d="M 440 85 L 440 115"
                     fill="none"
                     stroke="#64748b"
                     strokeWidth="1.5"
-                    strokeDasharray="4,4"
+                    strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                   />
 
                   {/* Wire 10: Nemotron Super 49B to Reflection */}
                   <path
-                    d="M 555 145 L 450 145"
+                    d="M 610 145 L 470 145"
                     fill="none"
                     stroke={simulationStep === 7 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 7 ? "2.5" : "1.5"}
@@ -769,18 +781,18 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 11: Reflection to Query Processing (Bidirectional Loop) */}
                   <path
-                    d="M 420 175 L 420 220"
+                    d="M 440 178 L 440 212"
                     fill="none"
                     stroke={simulationStep === 8 ? "#eab308" : "#64748b"}
                     strokeWidth={simulationStep === 8 ? "2.5" : "1.5"}
-                    strokeDasharray="4,4"
+                    strokeDasharray="5,5"
                     markerEnd="url(#arrow-dashed)"
                     markerStart="url(#arrow-dashed)"
                   />
 
                   {/* Wire 12: Reflection to Guardrails Out */}
                   <path
-                    d="M 390 145 L 290 145"
+                    d="M 410 145 L 295 145"
                     fill="none"
                     stroke={simulationStep === 9 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 9 ? "2.5" : "1.5"}
@@ -789,7 +801,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire 13: Guardrails Out to User (through Response pill, down to User) */}
                   <path
-                    d="M 230 145 L 140 145 L 85 145 L 85 215"
+                    d="M 235 145 L 140 145 L 80 145 L 80 215"
                     fill="none"
                     stroke={simulationStep === 10 ? "#76b900" : "#475569"}
                     strokeWidth={simulationStep === 10 ? "2.5" : "1.5"}
@@ -799,33 +811,33 @@ export const RagArchitectureView: React.FC = () => {
                   {/* ACTIVE PACKET SIMULATION PARTICLE */}
                   {isSimulating && (
                     <circle
-                      r="6"
+                      r="7"
                       fill="#76b900"
                       filter="url(#glow-pulse)"
                       className="animate-ping"
                       cx={
-                        simulationStep === 1 ? 175 :
-                        simulationStep === 2 ? 260 :
-                        simulationStep === 3 ? 420 :
-                        simulationStep === 4 ? 585 :
-                        simulationStep === 5 ? 785 :
-                        simulationStep === 6 ? 785 :
-                        simulationStep === 7 ? 585 :
-                        simulationStep === 8 ? 420 :
-                        simulationStep === 9 ? 260 :
-                        simulationStep === 10 ? 85 : 85
+                        simulationStep === 1 ? 160 :
+                        simulationStep === 2 ? 265 :
+                        simulationStep === 3 ? 440 :
+                        simulationStep === 4 ? 640 :
+                        simulationStep === 5 ? 940 :
+                        simulationStep === 6 ? 940 :
+                        simulationStep === 7 ? 640 :
+                        simulationStep === 8 ? 440 :
+                        simulationStep === 9 ? 265 :
+                        simulationStep === 10 ? 80 : 80
                       }
                       cy={
-                        simulationStep === 1 ? 250 :
-                        simulationStep === 2 ? 250 :
-                        simulationStep === 3 ? 250 :
-                        simulationStep === 4 ? 250 :
-                        simulationStep === 5 ? 250 :
+                        simulationStep === 1 ? 245 :
+                        simulationStep === 2 ? 245 :
+                        simulationStep === 3 ? 245 :
+                        simulationStep === 4 ? 245 :
+                        simulationStep === 5 ? 245 :
                         simulationStep === 6 ? 145 :
                         simulationStep === 7 ? 145 :
                         simulationStep === 8 ? 145 :
                         simulationStep === 9 ? 145 :
-                        simulationStep === 10 ? 250 : 250
+                        simulationStep === 10 ? 245 : 245
                       }
                     />
                   )}
@@ -834,7 +846,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 1. USER NODE */}
                   <g
-                    transform="translate(55, 220)"
+                    transform="translate(50, 215)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("user")}
                   >
@@ -852,24 +864,24 @@ export const RagArchitectureView: React.FC = () => {
                       fill="#ffffff"
                     />
                     <circle cx="30" cy="24" r="7" fill="#ffffff" />
-                    <text x="30" y="72" textAnchor="middle" fill="#f8fafc" className="text-[12px] font-bold">
+                    <text x="30" y="74" textAnchor="middle" fill="#f8fafc" className="text-[12px] font-bold">
                       User
                     </text>
                   </g>
 
                   {/* Query Pill */}
-                  <g transform="translate(155, 238)">
+                  <g transform="translate(150, 233)">
                     <rect
                       x="0"
                       y="0"
-                      width="54"
+                      width="58"
                       height="24"
                       rx="12"
                       fill="#0f172a"
                       stroke="#334155"
                       strokeWidth="1"
                     />
-                    <text x="27" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
+                    <text x="29" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
                       &gt;_ Query
                     </text>
                   </g>
@@ -879,21 +891,21 @@ export const RagArchitectureView: React.FC = () => {
                     <rect
                       x="0"
                       y="0"
-                      width="66"
+                      width="68"
                       height="24"
                       rx="12"
                       fill="#0f172a"
                       stroke="#334155"
                       strokeWidth="1"
                     />
-                    <text x="33" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
+                    <text x="34" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
                       ... Response
                     </text>
                   </g>
 
                   {/* 2. NeMo Guardrails (Input) */}
                   <g
-                    transform="translate(230, 218)"
+                    transform="translate(235, 211)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("guardrails_in")}
                   >
@@ -904,7 +916,6 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "guardrails_in" ? "2.5" : "1.5"}
                       filter={selectedNode === "guardrails_in" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Layered inner symbol */}
                     <path d="M 18 26 L 30 19 L 42 26 L 30 33 Z" fill="#22c55e" opacity="0.8" />
                     <path d="M 18 34 L 30 27 L 42 34 L 30 41 Z" fill="#22c55e" opacity="0.6" />
                     <path d="M 18 42 L 30 35 L 42 42 L 30 49 Z" fill="#22c55e" opacity="0.4" />
@@ -918,7 +929,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 3. Query Processing (Yellow) */}
                   <g
-                    transform="translate(390, 218)"
+                    transform="translate(410, 211)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("query_proc")}
                   >
@@ -929,7 +940,6 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "query_proc" ? "2.5" : "1.5"}
                       filter={selectedNode === "query_proc" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Gear / Process icon */}
                     <circle cx="30" cy="34" r="10" fill="none" stroke="#eab308" strokeWidth="3" strokeDasharray="4,2" />
                     <circle cx="30" cy="34" r="4" fill="#eab308" />
                     <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
@@ -942,7 +952,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 4. NeMo Retriever Embedding (Query) */}
                   <g
-                    transform="translate(555, 218)"
+                    transform="translate(610, 211)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("retriever_embed_query")}
                   >
@@ -953,7 +963,6 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "retriever_embed_query" ? "2.5" : "1.5"}
                       filter={selectedNode === "retriever_embed_query" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Embedding node layers */}
                     <circle cx="30" cy="34" r="12" fill="none" stroke="#22c55e" strokeWidth="1.5" />
                     <circle cx="24" cy="28" r="2.5" fill="#76b900" />
                     <circle cx="36" cy="28" r="2.5" fill="#76b900" />
@@ -966,16 +975,16 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 5. Vector Database Object Store cuVS */}
+                  {/* 5. Vector Database Object Store cuVS (Spacious Clean Chassis) */}
                   <g
-                    transform="translate(710, 210)"
+                    transform="translate(855, 205)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("cuvs_store")}
                   >
                     <rect
                       x="0"
                       y="0"
-                      width="150"
+                      width="170"
                       height="80"
                       rx="12"
                       fill="#1e1003"
@@ -983,29 +992,30 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "cuvs_store" ? "2.5" : "1.5"}
                       filter={selectedNode === "cuvs_store" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Left Box: Graph Vector */}
-                    <rect x="12" y="14" width="55" height="42" rx="8" fill="#ea580c" fillOpacity="0.85" />
-                    <circle cx="40" cy="27" r="3" fill="#fff" />
-                    <circle cx="26" cy="45" r="3" fill="#fff" />
-                    <circle cx="53" cy="45" r="3" fill="#fff" />
-                    <line x1="40" y1="27" x2="26" y2="45" stroke="#fff" strokeWidth="1.5" />
-                    <line x1="40" y1="27" x2="53" y2="45" stroke="#fff" strokeWidth="1.5" />
-                    <line x1="26" y1="45" x2="53" y2="45" stroke="#fff" strokeWidth="1.5" />
-
-                    {/* Right Box: Database Cylinders */}
-                    <rect x="82" y="14" width="55" height="42" rx="8" fill="#c2410c" fillOpacity="0.85" />
-                    <ellipse cx="110" cy="25" rx="14" ry="4.5" fill="#fed7aa" />
-                    <ellipse cx="110" cy="35" rx="14" ry="4.5" fill="#fed7aa" />
-                    <ellipse cx="110" cy="45" rx="14" ry="4.5" fill="#fed7aa" />
-
-                    <text x="75" y="70" textAnchor="middle" fill="#fdba74" className="font-mono text-[9px] font-bold uppercase tracking-wider">
+                    {/* Header Label inside chassis */}
+                    <text x="85" y="16" textAnchor="middle" fill="#fdba74" className="font-mono text-[9px] font-bold uppercase tracking-wider">
                       Vector DB &amp; Object Store (cuVS)
                     </text>
+
+                    {/* Left Box: Graph Vector */}
+                    <rect x="15" y="24" width="62" height="46" rx="8" fill="#ea580c" fillOpacity="0.85" />
+                    <circle cx="46" cy="36" r="3" fill="#fff" />
+                    <circle cx="30" cy="56" r="3" fill="#fff" />
+                    <circle cx="62" cy="56" r="3" fill="#fff" />
+                    <line x1="46" y1="36" x2="30" y2="56" stroke="#fff" strokeWidth="1.5" />
+                    <line x1="46" y1="36" x2="62" y2="56" stroke="#fff" strokeWidth="1.5" />
+                    <line x1="30" y1="56" x2="62" y2="56" stroke="#fff" strokeWidth="1.5" />
+
+                    {/* Right Box: Database Cylinders */}
+                    <rect x="93" y="24" width="62" height="46" rx="8" fill="#c2410c" fillOpacity="0.85" />
+                    <ellipse cx="124" cy="36" rx="16" ry="5" fill="#fed7aa" />
+                    <ellipse cx="124" cy="47" rx="16" ry="5" fill="#fed7aa" />
+                    <ellipse cx="124" cy="58" rx="16" ry="5" fill="#fed7aa" />
                   </g>
 
                   {/* 6. NeMo Retriever Reranking (Above cuVS) */}
                   <g
-                    transform="translate(755, 110)"
+                    transform="translate(910, 111)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("reranking")}
                   >
@@ -1027,7 +1037,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 7. Llama Nemotron Nano 8B v1 (Top Right Optional) */}
                   <g
-                    transform="translate(655, 30)"
+                    transform="translate(750, 16)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("nemotron_nano")}
                   >
@@ -1047,9 +1057,9 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 8. Llama Nemotron Super 49B (Core Reasoning) */}
+                  {/* 8. Llama Nemotron Super 49B (Core Deliberative Reasoning) */}
                   <g
-                    transform="translate(555, 110)"
+                    transform="translate(610, 111)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("nemotron_super")}
                   >
@@ -1060,7 +1070,6 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "nemotron_super" ? "3" : "2"}
                       filter={selectedNode === "nemotron_super" ? "url(#glow-green)" : undefined}
                     />
-                    {/* Super Neural Network Motif */}
                     <circle cx="30" cy="34" r="13" fill="none" stroke="#76b900" strokeWidth="1.5" />
                     <circle cx="30" cy="34" r="4" fill="#76b900" />
                     <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
@@ -1071,9 +1080,9 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 9. Domain LLM (Optional - Top Center) */}
+                  {/* 9. Domain LLM (Optional - Top Center, Clean single label) */}
                   <g
-                    transform="translate(390, 30)"
+                    transform="translate(410, 16)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("llm_optional")}
                   >
@@ -1084,7 +1093,7 @@ export const RagArchitectureView: React.FC = () => {
                       strokeWidth={selectedNode === "llm_optional" ? "2.5" : "1.5"}
                       filter={selectedNode === "llm_optional" ? "url(#glow-green)" : undefined}
                     />
-                    <text x="30" y="38" textAnchor="middle" fill="#76b900" className="font-mono text-[10px] font-bold">
+                    <text x="30" y="38" textAnchor="middle" fill="#76b900" className="font-mono text-[11px] font-bold">
                       LLM
                     </text>
                     <text x="30" y="80" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-bold">
@@ -1095,9 +1104,9 @@ export const RagArchitectureView: React.FC = () => {
                     </text>
                   </g>
 
-                  {/* 10. Reflection Agent (Yellow Document with gear) */}
+                  {/* 10. Reflection Agent (Yellow Document) */}
                   <g
-                    transform="translate(390, 110)"
+                    transform="translate(410, 111)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("reflection")}
                   >
@@ -1122,7 +1131,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 11. NeMo Guardrails (Output) */}
                   <g
-                    transform="translate(230, 110)"
+                    transform="translate(235, 111)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("guardrails_out")}
                   >
@@ -1146,21 +1155,21 @@ export const RagArchitectureView: React.FC = () => {
                 </g>
 
                 {/* ========================================================================= */}
-                {/* 2. PIPELINE DIVIDER (Dashed Horizontal Line) */}
+                {/* 2. PIPELINE DIVIDER (Generously Spaced Dashed Horizontal Line) */}
                 {/* ========================================================================= */}
                 <g id="pipeline-divider">
                   <line
                     x1="20"
-                    y1="340"
-                    x2="960"
-                    y2="340"
+                    y1="350"
+                    x2="1180"
+                    y2="350"
                     stroke="#475569"
                     strokeWidth="1.5"
                     strokeDasharray="6,6"
                   />
                   <text
-                    x="20"
-                    y="365"
+                    x="24"
+                    y="375"
                     fill="#94a3b8"
                     className="font-mono text-[11px] font-bold tracking-widest uppercase"
                   >
@@ -1174,19 +1183,20 @@ export const RagArchitectureView: React.FC = () => {
                 <g id="extraction-swimlane">
                   {/* Wire E1: Docs to Extraction Models (Top Branch) */}
                   <path
-                    d="M 145 490 L 220 440 L 390 440"
+                    d="M 160 485 L 230 430 L 410 430"
                     fill="none"
                     stroke="#475569"
                     strokeWidth="1.5"
                     markerEnd="url(#arrow-solid)"
                   />
-                  <text x="235" y="425" fill="#94a3b8" className="text-[9px] font-medium text-center">
+                  {/* Clean Label placed above horizontal path without touching node */}
+                  <text x="320" y="418" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
                     Pages as Images, Infographics, Charts, Tables
                   </text>
 
                   {/* Wire E2: Docs to Nemotron Parse (Bottom Branch) */}
                   <path
-                    d="M 145 520 L 220 560 L 390 560"
+                    d="M 160 535 L 230 555 L 410 555"
                     fill="none"
                     stroke="#475569"
                     strokeWidth="1.5"
@@ -1195,71 +1205,75 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* Wire E3: Extraction Models to Ingestion Embedding */}
                   <path
-                    d="M 450 440 L 610 440 L 610 515 L 755 515"
+                    d="M 470 430 L 680 430 L 680 515 L 910 515"
                     fill="none"
                     stroke="#475569"
                     strokeWidth="1.5"
                     markerEnd="url(#arrow-solid)"
                   />
-                  <text x="510" y="433" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
+                  <text x="575" y="420" textAnchor="middle" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
                     -Text-
                   </text>
 
                   {/* Wire E4: Nemotron Parse to Ingestion Embedding */}
                   <path
-                    d="M 450 560 L 660 560 L 755 530"
+                    d="M 470 555 L 720 555 L 910 530"
                     fill="none"
                     stroke="#475569"
                     strokeWidth="1.5"
                     markerEnd="url(#arrow-solid)"
                   />
-                  <text x="500" y="552" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
+                  <text x="595" y="546" textAnchor="middle" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
                     -Text and Metadata-
                   </text>
 
-                  {/* Wire E5: Ingestion Embedding UP into cuVS Vector Store (DIRECT VERTICAL) */}
+                  {/* Wire E5: Ingestion Embedding UP into cuVS Vector Store (DIRECT VERTICAL ASCENT) */}
                   <path
-                    d="M 785 480 L 785 295"
+                    d="M 940 485 L 940 290"
                     fill="none"
                     stroke="#22c55e"
-                    strokeWidth="2"
+                    strokeWidth="2.5"
                     markerEnd="url(#arrow-green)"
                   />
-                  <text x="795" y="400" fill="#86efac" className="font-mono text-[9px] font-bold">
+                  {/* Label on the right of the vertical line with plenty of clearance */}
+                  <text x="955" y="390" fill="#86efac" className="font-mono text-[10px] font-bold">
                     Into cuVS
                   </text>
 
                   {/* 1. Multimodal Enterprise Documents (Orange Card) */}
                   <g
-                    transform="translate(55, 475)"
+                    transform="translate(65, 470)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("docs")}
                   >
                     <rect
                       x="0"
                       y="0"
-                      width="80"
-                      height="65"
-                      rx="10"
+                      width="95"
+                      height="80"
+                      rx="12"
                       fill="#2e1605"
                       stroke={selectedNode === "docs" ? "#f97316" : "#ea580c"}
                       strokeWidth={selectedNode === "docs" ? "2.5" : "1.5"}
                       filter={selectedNode === "docs" ? "url(#glow-green)" : undefined}
                     />
-                    <rect x="25" y="15" width="30" height="34" rx="4" fill="#ea580c" />
-                    <circle cx="34" cy="26" r="3" fill="#fff" />
-                    <path d="M 28 42 L 36 34 L 44 42 Z" fill="#fed7aa" />
-                    <text x="40" y="80" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                    <rect x="30" y="16" width="35" height="40" rx="6" fill="#ea580c" />
+                    <circle cx="41" cy="28" r="3.5" fill="#fff" />
+                    <path d="M 34 46 L 44 36 L 54 46 Z" fill="#fed7aa" />
+                    <text x="47" y="70" textAnchor="middle" fill="#fdba74" className="font-mono text-[8px] font-bold uppercase">
+                      TEM PSHA 2025
+                    </text>
+                    <text x="47" y="98" textAnchor="middle" fill="#f8fafc" className="text-[11px] font-bold">
                       Multimodal
                     </text>
-                    <text x="40" y="92" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-medium">
+                    <text x="47" y="112" textAnchor="middle" fill="#94a3b8" className="text-[10px] font-medium">
                       Enterprise Docs
                     </text>
                   </g>
 
                   {/* 2. NeMo Retriever Extraction Models */}
                   <g
-                    transform="translate(390, 405)"
+                    transform="translate(410, 396)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("extraction_models")}
                   >
@@ -1282,7 +1296,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 3. Nemotron Parse */}
                   <g
-                    transform="translate(390, 525)"
+                    transform="translate(410, 521)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("nemotron_parse")}
                   >
@@ -1304,7 +1318,7 @@ export const RagArchitectureView: React.FC = () => {
 
                   {/* 4. NeMo Retriever Embedding (Docs) */}
                   <g
-                    transform="translate(755, 485)"
+                    transform="translate(910, 486)"
                     className="cursor-pointer"
                     onClick={() => setSelectedNode("retriever_embed_docs")}
                   >
@@ -1332,7 +1346,7 @@ export const RagArchitectureView: React.FC = () => {
           </div>
 
           {/* Real-Time Telemetry Log Stream (Professional Live Console) */}
-          <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#080e1a] text-slate-200 shadow-md overflow-hidden">
+          <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#080e1a] text-slate-200 shadow-md overflow-hidden w-full">
             <div className="flex items-center justify-between px-4 py-2.5 bg-[#0e1726] border-b border-slate-800">
               <div className="flex items-center space-x-2">
                 <Terminal className="h-4 w-4 text-[#76b900]" />
@@ -1355,7 +1369,7 @@ export const RagArchitectureView: React.FC = () => {
 
             <div
               ref={logContainerRef}
-              className="h-40 overflow-y-auto p-3 font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800"
+              className="h-44 overflow-y-auto p-3 font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800"
             >
               {telemetryLogs.map((log) => (
                 <div key={log.id} className="flex items-start space-x-2.5 leading-relaxed">
@@ -1380,8 +1394,8 @@ export const RagArchitectureView: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Node Inspector Drawer (4 cols on xl) */}
-        <div className="xl:col-span-4 flex flex-col space-y-4">
+        {/* Right Node Inspector Drawer (4 cols on 2xl, full width stacked on smaller screens) */}
+        <div className="2xl:col-span-4 flex flex-col space-y-4 w-full">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-5 shadow-lg">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
               <div className="flex items-center space-x-2">
