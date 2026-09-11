@@ -37,7 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "eews",
-      label: "Real-Time EEWS",
+      label: "Earthquake Early Warning",
       icon: Activity,
       badge: "Live",
       desc: "S-wave countdown and SCADA interlocks",

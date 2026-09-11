@@ -13,7 +13,7 @@ import { Scenario, FaultTrace } from "@/types/triage";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get("tab") as "rag_arch" | "eews" | "psha" | "copilot") || "rag_arch";
+  const initialTab = (searchParams.get("tab") as "rag_arch" | "eews" | "psha" | "copilot") || "eews";
 
   const [activeTab, setActiveTab] = useState<"rag_arch" | "eews" | "psha" | "copilot">(initialTab);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -121,7 +121,7 @@ function DashboardContent() {
       case "rag_arch":
         return "1. RAG Architecture Blueprint";
       case "eews":
-        return "2. Real-Time EEWS & Wavefronts";
+        return "2. Earthquake Early Warning";
       case "psha":
         return "3. TEM PSHA Hazard Evaluation";
       case "copilot":
