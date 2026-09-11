@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SeismoAgent-TW | RAG Model Dashboard",
+  title: "Prototype | RAG Model Dashboard",
   description:
     "Decoupled Agentic RAG for Seismic Hazard & Real-Time Emergency Triage in Taiwan - NCU E-DREaM Lab x NVAITC",
 };

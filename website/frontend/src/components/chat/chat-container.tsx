@@ -51,7 +51,7 @@ export function ChatContainer({ messages, onSelectPrompt }: ChatContainerProps) 
           <Sparkles className="h-6 w-6" />
         </div>
         <h2 className="text-xl font-bold text-white mb-2">
-          SeismoAgent-TW &amp; RAG Knowledge Platform
+          Prototype &amp; RAG Knowledge Platform
         </h2>
         <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-md mb-8 leading-relaxed">
           Decoupled RAG system grounded with Taiwan tectonic catalogs, TEM probability models, and emergency triage guidelines.

@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="flex flex-col truncate">
                 <span className="text-xs font-black tracking-wider text-slate-900 dark:text-white uppercase truncate">
-                  SeismoAgent-TW
+                  Prototype
                 </span>
                 <span className="text-[10px] font-mono text-cyan-700 dark:text-cyan-400 truncate">
                   E-DREaM Lab x NVAITC

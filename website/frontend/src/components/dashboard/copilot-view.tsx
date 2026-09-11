@@ -42,7 +42,7 @@ export const CopilotView: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-              <span>SeismoAgent-TW Geotechnical Copilot</span>
+              <span>Prototype Geotechnical Copilot</span>
               <span className="rounded bg-cyan-500/15 px-2 py-0.5 text-[10px] font-mono text-cyan-400 border border-cyan-500/30 font-semibold">
                 TEM PSHA 2025 Grounded
               </span>

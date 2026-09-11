@@ -193,7 +193,7 @@ export default function DashboardPage() {
     <Suspense
       fallback={
         <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-[#0b0f19] text-cyan-600 dark:text-cyan-400 text-xs font-mono">
-          Loading SeismoAgent-TW TailwindAdmin...
+          Loading Prototype TailwindAdmin...
         </div>
       }
     >

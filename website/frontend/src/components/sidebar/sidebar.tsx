@@ -67,7 +67,7 @@ export function Sidebar({ onNewChat, onOpenUpload, refreshTrigger }: SidebarProp
               ST
             </div>
             <div className="overflow-hidden">
-              <h1 className="text-xs font-semibold text-zinc-100 truncate">SeismoAgent-TW</h1>
+              <h1 className="text-xs font-semibold text-zinc-100 truncate">Prototype</h1>
               <p className="text-[10px] text-zinc-500 truncate">RAG Decoupled Architecture</p>
             </div>
           </div>

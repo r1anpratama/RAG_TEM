@@ -34,7 +34,7 @@ export const ControlHeader: React.FC<ControlHeaderProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <h1 className="text-sm font-bold tracking-wider text-slate-100 uppercase">
-              SeismoAgent-TW
+              Prototype
             </h1>
             <span className="rounded-md bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold text-cyan-400 border border-cyan-500/30 tracking-wide">
               MISSION CONTROL v2.0

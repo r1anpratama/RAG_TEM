@@ -666,7 +666,7 @@ export const RagArchitectureView: React.FC = () => {
             <div className="space-y-3">
               <div>
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-                  Role in SeismoAgent-TW
+                  Role in Prototype
                 </label>
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
                   {selected.role}

@@ -44,7 +44,7 @@ export const CopilotDrawer: React.FC<CopilotDrawerProps> = ({
           </div>
           <div>
             <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider">
-              SeismoAgent-TW AI Copilot
+              Prototype AI Copilot
             </h3>
             <p className="text-[10px] text-slate-400">
               Streaming RAG with Ground Truth Citation

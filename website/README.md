@@ -1,6 +1,6 @@
-# SeismoAgent-TW Web Platform (`website/`)
+# Prototype Web Platform (`website/`)
 
-This directory contains the production web interfaces and web services for the **SeismoAgent-TW** earthquake modeling, multi-agent triage, and RAG platform.
+This directory contains the production web interfaces and web services for the **Prototype** earthquake modeling, multi-agent triage, and RAG platform.
 
 The architecture is fully decoupled into a **Next.js 15 App Router frontend** and a **FastAPI backend**.
 

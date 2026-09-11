@@ -1,4 +1,4 @@
-# SeismoAgent-TW Frontend (Next.js 15 App Router)
+# Prototype Frontend (Next.js 15 App Router)
 
 Modern, mission-critical seismic emergency triage dashboard built with **Next.js 15 (App Router)**, **React 19**, **Tailwind CSS**, **Lucide Icons**, and **Zod**.
 
