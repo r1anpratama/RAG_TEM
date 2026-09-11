@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   User, 
   Bot, 
@@ -14,706 +14,1472 @@ import {
   ShieldCheck, 
   CheckCircle, 
   Play, 
+  Pause,
   RotateCcw,
   ArrowRight,
   Maximize2,
   HelpCircle,
   FolderArchive,
-  Image as ImageIcon
+  Terminal,
+  Activity,
+  Zap,
+  Radio,
+  FileCode2,
+  ExternalLink,
+  ChevronRight
 } from "lucide-react";
+
+interface NodeData {
+  id: string;
+  title: string;
+  subtitle: string;
+  tech: string;
+  category: "Retrieval" | "Extraction" | "Storage" | "Reasoning" | "Guardrail" | "Entity";
+  role: string;
+  spec: string;
+  hardware: string;
+  latencyTarget: string;
+  samplePayload: Record<string, any>;
+}
+
+interface TelemetryLog {
+  id: number;
+  time: string;
+  step: string;
+  status: "INFO" | "SUCCESS" | "WARN" | "EXEC";
+  message: string;
+}
+
+const NODES_REGISTRY: Record<string, NodeData> = {
+  user: {
+    id: "user",
+    title: "Client Operator / User",
+    subtitle: "Seismic Field Engineer / SCADA Ingress",
+    tech: "WebSocket / REST API",
+    category: "Entity",
+    role: "Submits seismic emergency queries, triggers simulation scenarios, and inspects real-time physical damage estimates.",
+    spec: "Secure TLS 1.3 Client session with Bearer Token auth",
+    hardware: "Edge Device / Web Client",
+    latencyTarget: "< 1.0 ms",
+    samplePayload: {
+      user_id: "NCU_DISASTER_CMD_01",
+      query: "Assess M6.91 Shuanglienpo-Hukou cascading PGA & drift ratio for NCU Science Building 4",
+      timestamp_utc: "2026-09-11T02:20:00Z"
+    }
+  },
+  guardrails_in: {
+    id: "guardrails_in",
+    title: "NeMo Guardrails (Input)",
+    subtitle: "Input Safety, Jailbreak & Topical Rails",
+    tech: "NVIDIA NeMo Guardrails (Colang / Python Critic)",
+    category: "Guardrail",
+    role: "Validates incoming query for adversarial prompt injection, out-of-domain scope, and sensitive infrastructure safety policies.",
+    spec: "Deterministic Rule Matching + Micro-LLM Input Classifier",
+    hardware: "NVIDIA TensorRT-LLM (Low-latency)",
+    latencyTarget: "< 2.0 ms",
+    samplePayload: {
+      input_passed: true,
+      jailbreak_score: 0.00,
+      topic_classification: "TAIWAN_SEISMOLOGY_EMERGENCY",
+      action: "ALLOW_INGRESS"
+    }
+  },
+  query_proc: {
+    id: "query_proc",
+    title: "Query Processing",
+    subtitle: "Decomposition & Spatial-Graph Entity Matcher",
+    tech: "LangChain / NeMo Query Decomposer + NetworkX",
+    category: "Retrieval",
+    role: "Extracts seismogenic fault IDs, target campus facilities, coordinates, and resolves multi-fault rupture pairs via GeoGraph.",
+    spec: "Spatial Entity Normalization against 38 Active Faults Catalog",
+    hardware: "CPU / Tensor Core",
+    latencyTarget: "< 5.0 ms",
+    samplePayload: {
+      extracted_faults: ["Shuanglienpo Fault (ID #2)", "Hukou Fault (ID #3)"],
+      target_facility: "NCU Science Building 4",
+      calc_intent: "GMPE_CRUSTAL_LIN_LEE_2008"
+    }
+  },
+  retriever_embed_query: {
+    id: "retriever_embed_query",
+    title: "NeMo Retriever Embedding (Query)",
+    subtitle: "Real-Time Query Vector Encoding",
+    tech: "NV-Embed-QA / NVIDIA NeMo Retriever NIM",
+    category: "Retrieval",
+    role: "Encodes structured query into dense 1024-dimensional vector space optimized for scientific and geotechnical document retrieval.",
+    spec: "NV-Embed-QA 4096 context, Cosine Similarity normalized",
+    hardware: "NVIDIA TensorRT Inference Engine",
+    latencyTarget: "< 3.0 ms",
+    samplePayload: {
+      embedding_dim: 1024,
+      norm: 1.000,
+      prefix: "query: ",
+      tokens_processed: 28
+    }
+  },
+  cuvs_store: {
+    id: "cuvs_store",
+    title: "Vector Database & Object Store (cuVS)",
+    subtitle: "GPU-Accelerated Vector Index & Document Chunks",
+    tech: "NVIDIA cuVS CAGRA + MinIO / Parquet Storage",
+    category: "Storage",
+    role: "Houses indexed TEM PSHA 2025 embeddings, borehole stratigraphic logs, and fault alignment tables with microsecond ANN graph search.",
+    spec: "cuVS CAGRA Graph Index (C-API / Python bindings), < 0.01ms probe",
+    hardware: "NVIDIA CUDA / High-Bandwidth GPU VRAM",
+    latencyTarget: "< 0.01 ms",
+    samplePayload: {
+      index_type: "CAGRA_GRAPH",
+      total_vectors: 1248,
+      nearest_chunks: [
+        { chunk_id: "TEM-P042-C0084", distance: 0.124 },
+        { chunk_id: "TEM-P043-C0085", distance: 0.141 },
+        { chunk_id: "BOR-NCU-B4-01", distance: 0.189 }
+      ]
+    }
+  },
+  reranking: {
+    id: "reranking",
+    title: "NeMo Retriever Reranking",
+    subtitle: "Cross-Encoder Relevance Scoring",
+    tech: "NVIDIA NeMo Retriever Reranking NIM",
+    category: "Retrieval",
+    role: "Scores retrieved chunk candidates against query with deep attention cross-encoder, filtering out irrelevant literature noise.",
+    spec: "Precision Cross-Encoder (Top-K Reordering from 12 to 3 chunks)",
+    hardware: "NVIDIA TensorRT-LLM FP16",
+    latencyTarget: "< 8.0 ms",
+    samplePayload: {
+      input_candidates: 12,
+      top_k_selected: 3,
+      top_score: 0.942,
+      selected_sources: ["TEM PSHA 2025 Table 2", "Lin & Lee (2008) Coefficients"]
+    }
+  },
+  nemotron_super: {
+    id: "nemotron_super",
+    title: "Llama Nemotron Super 49B",
+    subtitle: "Deliberative Multi-Agent Reasoning",
+    tech: "NVIDIA Llama-3.1-Nemotron-70B / Super 49B (TensorRT-LLM)",
+    category: "Reasoning",
+    role: "Executes deep physics reasoning, solves multi-segment fault rupture mechanics, calculates building drift ratio (2.14%), and synthesizes emergency triage.",
+    spec: "FP8 TensorRT-LLM inference, 128k context, Speculative Decoding",
+    hardware: "NVIDIA Hopper / Blackwell (H100/H200/B200)",
+    latencyTarget: "0.85 - 1.2 s",
+    samplePayload: {
+      reasoning_track: "Track B Deliberative",
+      predicted_pgv: 72.4,
+      structural_drift_pct: 2.14,
+      safety_tag: "RED TAG (IMMEDIATE EVACUATION)",
+      reinforcement_grounding: "100% Physics Verified"
+    }
+  },
+  nemotron_nano: {
+    id: "nemotron_nano",
+    title: "Llama Nemotron Nano 8B v1 (Optional)",
+    subtitle: "Low-Latency Reflex Summarizer",
+    tech: "Llama-3.1-Nemotron-Nano-8B (FP4/FP8 TensorRT-LLM)",
+    category: "Reasoning",
+    role: "Lightweight sub-10ms model for immediate SCADA telemetry extraction and short warning bulletin generation before full 49B deliberation finishes.",
+    spec: "Quantized FP8 / FP4 Engine, 8k window",
+    hardware: "NVIDIA L40S / Jetson AGX Orin",
+    latencyTarget: "< 25.0 ms",
+    samplePayload: {
+      quick_summary: "High hazard alert: Mw 6.91 near NCU. SCADA elevator and gas interlocks fired.",
+      tokens_per_sec: 142.5
+    }
+  },
+  llm_optional: {
+    id: "llm_optional",
+    title: "Domain LLM (Optional)",
+    subtitle: "Specialized Geotechnical Auxiliary LLM",
+    tech: "DeepSeek-R1-Distill / Qwen-2.5-Geotech",
+    category: "Reasoning",
+    role: "Secondary specialized foundation model for structural mechanics double-checking and code cross-validation.",
+    spec: "OpenAI-compatible NIM Microservice",
+    hardware: "NVIDIA Hopper GPU",
+    latencyTarget: "< 300 ms",
+    samplePayload: {
+      status: "STANDBY_AUXILIARY",
+      confidence: 0.981
+    }
+  },
+  reflection: {
+    id: "reflection",
+    title: "Reflection Agent",
+    subtitle: "Factual Critique & Self-Correction Loop",
+    tech: "SafetyCriticWorker + NeMo Self-Correction Loop",
+    category: "Guardrail",
+    role: "Performs adversarial cross-checking of all generated parameters against ground-truth catalogs. Loops back to Query Processing if numerical inconsistency is detected.",
+    spec: "Zero Hallucination Guarantee: Slip Rate, Dip, Mw exact match",
+    hardware: "Deterministic Rule Critic + TensorRT Micro-Agent",
+    latencyTarget: "< 4.0 ms",
+    samplePayload: {
+      hallucination_detected: false,
+      fault_verified: "Shuanglienpo (Slip: 1.5mm/yr, Dip: 45°)",
+      loop_action: "CERTIFIED_PROCEED"
+    }
+  },
+  guardrails_out: {
+    id: "guardrails_out",
+    title: "NeMo Guardrails (Output)",
+    subtitle: "Factual Consistency & Output Sanitization",
+    tech: "NVIDIA NeMo Guardrails Output Safety Rail",
+    category: "Guardrail",
+    role: "Final safety filter ensuring response adheres to civil defense formatting, zero PII leakage, and verified geotechnical citation stamps.",
+    spec: "Output Rail Validator + Format Enforcement",
+    hardware: "TensorRT-LLM",
+    latencyTarget: "< 2.0 ms",
+    samplePayload: {
+      output_verified: true,
+      citations_attached: 3,
+      red_tag_approved: true
+    }
+  },
+  docs: {
+    id: "docs",
+    title: "Multimodal Enterprise Documents",
+    subtitle: "TEM PSHA 2025, Fault Catalogs, Boreholes",
+    tech: "PDF / Excel / GeoJSON / Stratigraphic Boreholes",
+    category: "Extraction",
+    role: "Source corpus comprising TEM PSHA 2025 draft report, 38 on-land seismogenic structures, geological cross-sections, and NCREE borehole logs.",
+    spec: "Multi-page technical reports containing vector maps and data tables",
+    hardware: "Object Store / Local Storage",
+    latencyTarget: "Offline / Batch",
+    samplePayload: {
+      primary_document: "TEM PSHA2025-draft.pdf",
+      total_pages: 142,
+      fault_tables: 38,
+      borehole_logs: 12
+    }
+  },
+  extraction_models: {
+    id: "extraction_models",
+    title: "NeMo Retriever Extraction Models",
+    subtitle: "Visual Document Feature Extraction",
+    tech: "NVIDIA NeMo Multimodal Extraction NIM (LayoutLM / OCR)",
+    category: "Extraction",
+    role: "Parses complex figures, hazard curves, fault alignment maps, and structural damage photographs into clean visual embeddings and tabular text.",
+    spec: "High-resolution OCR + Table transformer layout preservation",
+    hardware: "NVIDIA GPU Vision Pipeline",
+    latencyTarget: "~ 45 ms / page",
+    samplePayload: {
+      extracted_elements: ["Hazard Curve Figure 4.2", "PGA Contour Map", "GMPE Regression Table"],
+      output_stream: "Clean Structured Text"
+    }
+  },
+  nemotron_parse: {
+    id: "nemotron_parse",
+    title: "Nemotron Parse",
+    subtitle: "Document Parser & Hierarchy Extractor",
+    tech: "NVIDIA Nemotron Parse NIM",
+    category: "Extraction",
+    role: "Converts dense scientific PDF pages into semantic markdown, preserving heading hierarchies, footnote citations, and mathematical equations.",
+    spec: "Nemotron-Parse-v1 (Markdown + JSON Metadata output)",
+    hardware: "NVIDIA TensorRT-LLM Inference",
+    latencyTarget: "~ 30 ms / page",
+    samplePayload: {
+      format: "GitHub Flavored Markdown",
+      equations_parsed: 14,
+      metadata_keys: ["author", "seismic_zone", "version_year"]
+    }
+  },
+  retriever_embed_docs: {
+    id: "retriever_embed_docs",
+    title: "NeMo Retriever Embedding (Ingestion)",
+    subtitle: "Chunk Vectorization & Upsert to cuVS",
+    tech: "NV-Embed-QA / NeMo Retriever NIM",
+    category: "Extraction",
+    role: "Vectorizes extracted text chunks and rich metadata into high-dimensional vectors and streams them directly into the cuVS CAGRA index.",
+    spec: "Batch Embedding Ingestion, 1024-dim, FP16",
+    hardware: "NVIDIA CUDA Acceleration",
+    latencyTarget: "~ 12 ms / batch",
+    samplePayload: {
+      chunks_embedded: 1248,
+      target_index: "cuVS_CAGRA_TEM_2025",
+      upsert_status: "SYNCHRONIZED"
+    }
+  }
+};
+
+const SIMULATION_PIPELINE_STEPS = [
+  {
+    step: 1,
+    node: "user",
+    title: "Step 1: User Query Ingress",
+    log: "User initiates seismic hazard query for NCU Science Building 4 via secure WebSocket.",
+    status: "INFO"
+  },
+  {
+    step: 2,
+    node: "guardrails_in",
+    title: "Step 2: NeMo Guardrails Input Validation",
+    log: "NeMo Guardrails passes query: Jailbreak score 0.00, topic matched to Taiwan seismology.",
+    status: "SUCCESS"
+  },
+  {
+    step: 3,
+    node: "query_proc",
+    title: "Step 3: Query Decomposition & Graph Matching",
+    log: "Resolved target entities: Shuanglienpo Fault (ID #2) + Hukou Fault (ID #3) multi-rupture scenario.",
+    status: "INFO"
+  },
+  {
+    step: 4,
+    node: "retriever_embed_query",
+    title: "Step 4: NeMo Retriever Embedding",
+    log: "Generated 1024-dim dense query embedding using NV-Embed-QA in 0.003 ms.",
+    status: "EXEC"
+  },
+  {
+    step: 5,
+    node: "cuvs_store",
+    title: "Step 5: cuVS CAGRA GPU Vector Search",
+    log: "cuVS GPU index probed 1,248 vectors: 12 candidate chunks retrieved in 0.009 ms.",
+    status: "SUCCESS"
+  },
+  {
+    step: 6,
+    node: "reranking",
+    title: "Step 6: NeMo Retriever Cross-Encoder Reranking",
+    log: "Cross-encoder re-ranked chunks -> Top-3 TEM PSHA 2025 literature chunks selected (Top Score: 0.942).",
+    status: "EXEC"
+  },
+  {
+    step: 7,
+    node: "nemotron_super",
+    title: "Step 7: Llama Nemotron Super 49B Deliberation",
+    log: "Nemotron Super 49B calculated Lin & Lee GMPE: PGV=72.4 cm/s, Drift=2.14% (RED TAG evacuation).",
+    status: "EXEC"
+  },
+  {
+    step: 8,
+    node: "reflection",
+    title: "Step 8: Reflection Agent Critique Loop",
+    log: "Safety Critic cross-checked parameters against Table 2 catalog: 0.0% Hallucination verified.",
+    status: "SUCCESS"
+  },
+  {
+    step: 9,
+    node: "guardrails_out",
+    title: "Step 9: NeMo Guardrails Output Certification",
+    log: "Output safety filters verified: citations attached, emergency protocol confirmed.",
+    status: "SUCCESS"
+  },
+  {
+    step: 10,
+    node: "user",
+    title: "Step 10: Response Delivery to Client",
+    log: "Response package transmitted to operator dashboard. End-to-end deliberative loop: 0.864s.",
+    status: "INFO"
+  }
+];
 
 export const RagArchitectureView: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<string>("nemotron_super");
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simulationStep, setSimulationStep] = useState<number>(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const [activePipeline, setActivePipeline] = useState<"retrieval" | "extraction">("retrieval");
+  const [telemetryLogs, setTelemetryLogs] = useState<TelemetryLog[]>([
+    {
+      id: 1,
+      time: "10:20:01.104",
+      step: "SYSTEM_READY",
+      status: "INFO",
+      message: "NVIDIA NeMo Multimodal Agentic RAG pipeline initialized in FP8 mode."
+    },
+    {
+      id: 2,
+      time: "10:20:01.108",
+      step: "CUVS_INIT",
+      status: "SUCCESS",
+      message: "cuVS CAGRA index loaded 1,248 document vectors into GPU memory."
+    },
+    {
+      id: 3,
+      time: "10:20:01.112",
+      step: "GUARDRAIL_READY",
+      status: "SUCCESS",
+      message: "NeMo Guardrails active with zero-hallucination factual rail enforcement."
+    }
+  ]);
 
-  const triggerSimulation = () => {
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  const simulationTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto scroll logs
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [telemetryLogs]);
+
+  // Handle Simulation Loop
+  const startSimulation = () => {
     setIsSimulating(true);
     setSimulationStep(1);
-    const steps = [
-      "user",
-      "guardrails_in",
-      "query_proc",
-      "retriever_embed_query",
-      "cuvs_store",
-      "reranking",
-      "nemotron_super",
-      "reflection",
-      "guardrails_out",
-      "user_response"
-    ];
-    
-    let current = 0;
-    const interval = setInterval(() => {
-      current++;
-      if (current < steps.length) {
-        setSimulationStep(current + 1);
-        setSelectedNode(steps[current]);
-      } else {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsSimulating(false);
-          setSimulationStep(0);
-        }, 1500);
+    setActivePipeline("retrieval");
+
+    // Add initial start log
+    const now = new Date();
+    const timeStr = now.toTimeString().split(" ")[0] + "." + String(now.getMilliseconds()).padStart(3, "0");
+    setTelemetryLogs((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        time: timeStr,
+        step: "SIM_START",
+        status: "INFO",
+        message: "▶ Initiated End-to-End Query & Retrieval Simulation packet."
       }
-    }, 900);
+    ]);
+
+    let stepIndex = 0;
+    const intervalMs = 1200 / playbackSpeed;
+
+    const runNextStep = () => {
+      if (stepIndex < SIMULATION_PIPELINE_STEPS.length) {
+        const currentData = SIMULATION_PIPELINE_STEPS[stepIndex];
+        setSimulationStep(currentData.step);
+        setSelectedNode(currentData.node);
+
+        const stepTime = new Date();
+        const stepTimeStr = stepTime.toTimeString().split(" ")[0] + "." + String(stepTime.getMilliseconds()).padStart(3, "0");
+
+        setTelemetryLogs((prev) => [
+          ...prev.slice(-25),
+          {
+            id: Date.now() + stepIndex,
+            time: stepTimeStr,
+            step: currentData.title.split(":")[0],
+            status: currentData.status as any,
+            message: currentData.log
+          }
+        ]);
+
+        stepIndex++;
+        simulationTimerRef.current = setTimeout(runNextStep, intervalMs);
+      } else {
+        setIsSimulating(false);
+        setSimulationStep(0);
+        setSelectedNode("nemotron_super");
+        const endTime = new Date();
+        const endTimeStr = endTime.toTimeString().split(" ")[0] + "." + String(endTime.getMilliseconds()).padStart(3, "0");
+        setTelemetryLogs((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 999,
+            time: endTimeStr,
+            step: "SIM_COMPLETE",
+            status: "SUCCESS",
+            message: "✔ End-to-End Simulation completed successfully. All guardrails passed."
+          }
+        ]);
+      }
+    };
+
+    simulationTimerRef.current = setTimeout(runNextStep, 400);
   };
 
-  const nodesInfo: { 
-    [key: string]: { 
-      title: string; 
-      layer: string;
-      tech: string;
-      role: string; 
-      spec: string;
-      payload: string;
-    } 
-  } = {
-    user: {
-      title: "User / Emergency Triage Officer",
-      layer: "Client Interface",
-      tech: "Next.js 15 + React 19 Frontend",
-      role: "Submits seismic triage queries, scenario parameters (e.g. Mw 6.91 Shuanglienpo rupture), or structural safety inquiries for critical infrastructure.",
-      spec: "Web client / REST & SSE Stream",
-      payload: '{\n  "query": "Evaluate Shuanglienpo Mw 6.91 cascading rupture and NCU Science B4 drift",\n  "timestamp": "2026-09-11T10:04:00Z"\n}',
-    },
-    guardrails_in: {
-      title: "NeMo Guardrails (Input Validation)",
-      layer: "Retrieval Pipeline",
-      tech: "NVIDIA NeMo Guardrails (Colang 2.0 / Self-Check Rails)",
-      role: "Filters prompt injection, enforces domain grounding strictly to Taiwan seismotectonics, and ensures query safety compliance before LLM execution.",
-      spec: "Input Safety & Jailbreak Defense (< 2ms latency)",
-      payload: '{\n  "allowed": true,\n  "topic": "Taiwan_Geotechnical_PSHA",\n  "sanitized_query": "Evaluate Shuanglienpo Mw 6.91 cascading rupture..."\n}',
-    },
-    query_proc: {
-      title: "Query Processing & Entity Parsing",
-      layer: "Retrieval Pipeline",
-      tech: "NeMo Query Decomposition & HyDE Generator",
-      role: "Extracts seismogenic fault IDs (#2 Shuanglienpo), spatial target coordinates (NCU B4: 24.968, 121.192), and generates hypothetical embeddings.",
-      spec: "Bidirectional loop with Reflection Agent for iterative refinement",
-      payload: '{\n  "fault_entities": ["Shuanglienpo (#2)", "Hukou (#3)"],\n  "target_asset": "NCU_SCIENCE_B4",\n  "regime": "Crustal_Reverse"\n}',
-    },
-    retriever_embed_query: {
-      title: "NeMo Retriever Embedding (Query)",
-      layer: "Retrieval Pipeline",
-      tech: "NVIDIA nv-embed-v2 / NeMo Retriever Microservice",
-      role: "Encodes the parsed geotechnical question into a dense 4096-dimensional vector representation optimized for cross-domain scientific retrieval.",
-      spec: "Dense 4096-dim TensorRT-LLM FP8 Inference",
-      payload: '{\n  "embedding_dim": 4096,\n  "token_count": 18,\n  "model": "nvidia/nv-embed-v2"\n}',
-    },
-    cuvs_store: {
-      title: "Vector Database & Object Store (cuVS)",
-      layer: "Accelerated Storage Layer",
-      tech: "NVIDIA cuVS (CAGRA / IVF-PQ GPU ANN) + S3 Object Storage",
-      role: "Performs million-scale nearest-neighbor vector similarity search with microsecond latency over TEM PSHA 2025 fault graphs and borehole datasets.",
-      spec: "GPU-accelerated vector index (cuVS) with high recall (>99%)",
-      payload: '{\n  "indexed_nodes": 45,\n  "attributed_edges": 78,\n  "vector_search_latency_ms": 1.4,\n  "top_k_retrieved": 5\n}',
-    },
-    reranking: {
-      title: "NeMo Retriever Reranking",
-      layer: "Retrieval Pipeline",
-      tech: "NVIDIA NeMo Retriever Reranking (Cross-Encoder / Nemotron-4B)",
-      role: "Re-scores retrieved candidate chunks from TEM PSHA 2025 Table 2, ensuring multi-fault rupture interaction context ranks highest before reasoning.",
-      spec: "Cross-Attentive Reranking Score >= 0.88 Threshold",
-      payload: '{\n  "ranked_documents": [\n    {"doc_id": "TEM_PSHA_2025_TAB2", "score": 0.962},\n    {"doc_id": "LIN_LEE_2008_CRUSTAL_GMPE", "score": 0.914}\n  ]\n}',
-    },
-    nemotron_super: {
-      title: "Llama Nemotron Super 49B",
-      layer: "Retrieval Pipeline (Core Reasoning)",
-      tech: "NVIDIA Llama-3.1-Nemotron-70B / Super 49B (TensorRT-LLM)",
-      role: "Executes multi-agent deliberative reasoning, calculates structural inter-story drift ratio (2.14%), and synthesizes physics-grounded emergency triage directives.",
-      spec: "FP8 TensorRT-LLM Acceleration on NVIDIA GPU",
-      payload: '{\n  "reasoning_track": "Track B Deliberative",\n  "predicted_pgv": 72.4,\n  "drift_ratio_pct": 2.14,\n  "triage_recommendation": "IMMEDIATE EVACUATION (RED)"\n}',
-    },
-    nemotron_nano: {
-      title: "Llama Nemotron Nano 8B v1 (Optional)",
-      layer: "Speculative & Auxiliary Worker",
-      tech: "NVIDIA Nemotron-Mini-4B / Nano-8B",
-      role: "Assists with speculative decoding speedup, JSON schema sanitization, and lightweight sub-task parallelization.",
-      spec: "Ultra-low latency edge/auxiliary inference",
-      payload: '{\n  "role": "Speculative Draft & JSON Validator",\n  "throughput_tokens_per_sec": 140\n}',
-    },
-    reflection: {
-      title: "Reflection & Physics GMPE Verifier",
-      layer: "Retrieval Pipeline",
-      tech: "Autonomous Agentic Reflection Loop",
-      role: "Critiques candidate triage outputs against Lin & Lee (2008) theoretical attenuation curves within +/- 2.5 sigma bounds. Triggers re-query if violated.",
-      spec: "Zero-Hallucination Physics Grounding Enforcement",
-      payload: '{\n  "physics_check": "PASSED",\n  "observed_pgv": 72.4,\n  "gmpe_median": 76.1,\n  "z_score": -0.12,\n  "within_2_5_sigma": true\n}',
-    },
-    llm_optional: {
-      title: "LLM (Optional Second Opinion)",
-      layer: "Advisory Verifier",
-      tech: "Ensemble LLM / Domain Foundation Model",
-      role: "Provides independent cross-validation for complex cascading ruptures (e.g. Shuanglienpo ID 2 triggering Hukou ID 3).",
-      spec: "Consensus evaluation for high-stakes municipal decisions",
-      payload: '{\n  "consensus_agreement": 0.98,\n  "fault_cascade_valid": true\n}',
-    },
-    guardrails_out: {
-      title: "NeMo Guardrails (Output Verification)",
-      layer: "Retrieval Pipeline (Egress)",
-      tech: "NVIDIA NeMo Guardrails (Self-Check Output Rails)",
-      role: "Final safety rail ensuring responses contain exact citations to TEM PSHA 2025 and contain zero fabricated statistics before user transmission.",
-      spec: "Fact-checking against retrieved source tokens (0.0% Hallucination)",
-      payload: '{\n  "fact_check_score": 1.0,\n  "citations_verified": ["TEM PSHA 2025 Table 2", "Lin & Lee 2008"],\n  "output_approved": true\n}',
-    },
-    multimodal_docs: {
-      title: "Multimodal Enterprise Documents",
-      layer: "Extraction Pipeline (Ingestion)",
-      tech: "Raw Data Catalogs & Seismic Blueprints",
-      role: "Taiwan active fault catalogs, TEM PSHA 2025 PDF reports, CWA seismic waveform records, and university building engineering schematics.",
-      spec: "Multi-format ingest: PDF, TIFF, GeoJSON, Excel, SEG-Y",
-      payload: '{\n  "ingested_sources": [\n    "TEM_PSHA_2025_Report.pdf",\n    "Taiwan_38_Active_Faults.xlsx",\n    "NCU_Building_Blueprints.dwg"\n  ]\n}',
-    },
-    extraction_models: {
-      title: "NeMo Retriever Extraction Models",
-      layer: "Extraction Pipeline",
-      tech: "NVIDIA NeMo Visual Language Models (VLM) for Extraction",
-      role: "Extracts diagrams, fault strike/dip infographics, geological cross-sections, and seismic hazard contour maps directly from scanned page images.",
-      spec: "Multimodal visual reasoning for tabular & chart data",
-      payload: '{\n  "visual_elements_extracted": 38,\n  "chart_types": ["Hazard Curve", "Cross Section", "Fault Map"]\n}',
-    },
-    nemotron_parse: {
-      title: "Nemotron Parse",
-      layer: "Extraction Pipeline",
-      tech: "NVIDIA Nemotron-Parse (Specialized Document Parser)",
-      role: "High-accuracy layout analysis converting complex scientific tables (e.g. Table 2 multi-rupture probabilities) into structured Markdown and JSON.",
-      spec: "Document Layout Decomposition & Table Extraction",
-      payload: '{\n  "tables_parsed": 12,\n  "accuracy_rate": 0.994,\n  "output_format": "structured_markdown_with_tables"\n}',
-    },
-    retriever_embed_doc: {
-      title: "NeMo Retriever Embedding (Document)",
-      layer: "Extraction Pipeline",
-      tech: "NVIDIA nv-embed-v2 (GPU Batch Pipeline)",
-      role: "Transforms extracted texts, tables, and visual descriptions into dense semantic vectors and uploads them directly into the cuVS index.",
-      spec: "Batch throughput > 10,000 chunks/min on NVIDIA GPU",
-      payload: '{\n  "total_chunks_indexed": 348,\n  "embedding_target": "cuVS_vector_db",\n  "storage_status": "COMMITTED"\n}',
-    },
+  const pauseSimulation = () => {
+    if (simulationTimerRef.current) {
+      clearTimeout(simulationTimerRef.current);
+    }
+    setIsSimulating(false);
   };
 
-  const selected = nodesInfo[selectedNode] || nodesInfo["nemotron_super"];
+  const resetSimulation = () => {
+    if (simulationTimerRef.current) {
+      clearTimeout(simulationTimerRef.current);
+    }
+    setIsSimulating(false);
+    setSimulationStep(0);
+    setSelectedNode("nemotron_super");
+  };
 
-  // Render an NVIDIA Green Cube Network Node Icon
-  const NvidiaNodeIcon = ({ active }: { active?: boolean }) => (
-    <div className={`relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-300 ${
-      active 
-        ? "bg-[#76b900]/25 text-[#76b900] ring-2 ring-[#76b900] shadow-[0_0_15px_rgba(118,185,0,0.5)]" 
-        : "bg-[#76b900]/15 text-[#76b900] dark:bg-[#76b900]/10 border border-[#76b900]/30 hover:border-[#76b900] hover:bg-[#76b900]/20"
-    }`}>
-      {/* NVIDIA Iconic Hex-Cube shape */}
-      <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M12 2L2 7l10 5 10-5-10-5z" />
-        <path d="M2 17l10 5 10-5" />
-        <path d="M2 12l10 5 10-5" />
-      </svg>
-    </div>
-  );
+  const selected = NODES_REGISTRY[selectedNode] || NODES_REGISTRY.nemotron_super;
 
   return (
-    <div className="flex flex-col space-y-6">
-      {/* Top Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] p-5 shadow-sm dark:shadow-md gap-4 transition-colors duration-200">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="rounded bg-[#76b900]/15 px-2 py-0.5 text-[10px] font-mono font-bold text-[#76b900] border border-[#76b900]/30 uppercase tracking-wider">
-              NVIDIA NeMo Reference Architecture
-            </span>
-            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-              NCU E-DREaM Lab × NVAITC
-            </span>
+    <div className="flex flex-col space-y-4 w-full">
+      {/* Top Header & Simulation Controls Toolbar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-[#0f172a] p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
+        <div className="flex items-center space-x-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#76b900]/15 border border-[#76b900]/40 text-[#76b900] shadow-sm">
+            <Cpu className="h-5 w-5" />
           </div>
-          <h2 className="text-base font-bold text-slate-900 dark:text-white mt-1">
-            Multimodal Agentic RAG Workflow Architecture
-          </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-            Enterprise seismic hazard intelligence powered by NeMo Retriever, Nemotron Parse, cuVS Vector Store, and Llama Nemotron reasoning.
-          </p>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                NVIDIA NeMo Multimodal Agentic RAG Architecture
+              </h2>
+              <span className="rounded bg-[#76b900]/15 px-2 py-0.5 text-[10px] font-mono font-bold text-[#76b900] border border-[#76b900]/30">
+                ENTERPRISE WORKFLOW
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Interactive dual-pipeline workflow: Real-Time Retrieval (Top) & Multimodal Document Ingestion (Bottom)
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2.5">
+        {/* Live Simulation Controls */}
+        <div className="flex items-center space-x-2">
+          {!isSimulating ? (
+            <button
+              onClick={startSimulation}
+              className="flex items-center space-x-1.5 bg-gradient-to-r from-[#76b900] to-emerald-600 hover:from-[#6ca900] hover:to-emerald-500 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md shadow-[#76b900]/20 cursor-pointer"
+            >
+              <Play className="h-3.5 w-3.5 fill-current" />
+              <span>Simulate End-to-End Query Flow</span>
+            </button>
+          ) : (
+            <button
+              onClick={pauseSimulation}
+              className="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md cursor-pointer"
+            >
+              <Pause className="h-3.5 w-3.5 fill-current" />
+              <span>Pause Simulation</span>
+            </button>
+          )}
+
           <button
-            onClick={triggerSimulation}
-            disabled={isSimulating}
-            className="flex items-center space-x-1.5 rounded-xl bg-[#76b900] hover:bg-[#68a400] text-slate-950 font-bold px-3.5 py-2 text-xs transition shadow-md shadow-[#76b900]/20 disabled:opacity-50"
+            onClick={resetSimulation}
+            className="flex items-center space-x-1 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium px-2.5 py-2 rounded-xl transition cursor-pointer"
+            title="Reset Simulation State"
           >
-            <Play className="h-3.5 w-3.5 fill-current" />
-            <span>{isSimulating ? `Tracing Step ${simulationStep}/10...` : "Simulate RAG Flow"}</span>
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Reset</span>
           </button>
+
+          {/* Speed Toggle */}
+          <div className="flex items-center bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1 text-[11px] font-mono">
+            {[1, 2].map((spd) => (
+              <button
+                key={spd}
+                onClick={() => setPlaybackSpeed(spd)}
+                className={`px-2 py-0.5 rounded-lg transition ${
+                  playbackSpeed === spd
+                    ? "bg-[#76b900] text-slate-950 font-bold"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                {spd}x
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Visualizer Area */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        {/* Workflow Diagram Canvas */}
-        <div className="xl:col-span-8 flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0b0f19] p-5 shadow-sm dark:shadow-xl overflow-x-auto relative">
-          {/* Simulation status pill */}
-          {isSimulating && (
-            <div className="absolute top-4 right-4 z-20 flex items-center space-x-2 bg-slate-900/90 text-[#76b900] border border-[#76b900]/40 px-3 py-1 rounded-full text-[11px] font-mono shadow-lg animate-pulse">
-              <span className="h-2 w-2 rounded-full bg-[#76b900] animate-ping"></span>
-              <span>Active Signal: {selected.title}</span>
-            </div>
-          )}
+      {/* Main Interactive Stage: Left Diagram Canvas + Right Node Inspector */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+        {/* SVG Diagram Canvas (8 cols on xl) */}
+        <div className="xl:col-span-8 flex flex-col space-y-4">
+          <div className="relative w-full rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#070d17] overflow-hidden shadow-xl p-3 sm:p-5">
+            {/* Diagram Background Grid Pattern */}
+            <div 
+              className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none"
+              style={{
+                backgroundImage: "radial-gradient(#76b900 1px, transparent 1px)",
+                backgroundSize: "24px 24px"
+              }}
+            />
 
-          {/* ========================================================================= */}
-          {/* SECTION 1: RETRIEVAL PIPELINE (TOP SWIMLANE) */}
-          {/* ========================================================================= */}
-          <div className="mb-8 relative">
-            <div className="flex items-center space-x-2 mb-4">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-slate-100 font-mono">
-                Retrieval Pipeline
-              </span>
-              <span className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>
-            </div>
-
-            {/* Diagram Row 1 (Top Level: User -> Guardrails -> Query Processing -> Embedding -> cuVS) */}
-            <div className="flex items-center justify-between min-w-[760px] relative py-4">
-              {/* User Node */}
-              <div 
-                onClick={() => setSelectedNode("user")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "user" ? "scale-105" : ""}`}
+            {/* SVG Architectural Canvas */}
+            <div className="w-full overflow-x-auto">
+              <svg
+                viewBox="0 0 980 620"
+                className="w-full min-w-[780px] h-auto select-none"
+                style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.15))" }}
               >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-full transition-all ${
-                  selectedNode === "user"
-                    ? "bg-blue-600 text-white ring-4 ring-blue-500/30 shadow-lg shadow-blue-500/30"
-                    : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-2 border-blue-500/40 hover:bg-blue-500/25"
-                }`}>
-                  <User className="h-6 w-6" />
-                </div>
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  User
-                </span>
-              </div>
+                <defs>
+                  {/* Arrow markers */}
+                  <marker
+                    id="arrow-solid"
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b" />
+                  </marker>
 
-              {/* Connecting badge: Query Arrow Right */}
-              <div className="flex flex-col items-center px-1">
-                <span className="flex items-center space-x-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 text-[9px] font-mono text-slate-700 dark:text-slate-300">
-                  <span className="font-bold text-blue-500">&gt;_</span>
-                  <span>Query</span>
-                </span>
-                <div className="w-12 h-0.5 bg-slate-300 dark:bg-slate-700 relative my-1">
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-                </div>
-              </div>
+                  <marker
+                    id="arrow-green"
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="7"
+                    markerHeight="7"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1 L 9 5 L 0 9 z" fill="#76b900" />
+                  </marker>
 
-              {/* NeMo Guardrails (Input) */}
-              <div 
-                onClick={() => setSelectedNode("guardrails_in")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "guardrails_in" ? "scale-105" : ""}`}
-              >
-                <NvidiaNodeIcon active={selectedNode === "guardrails_in"} />
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  NeMo Guardrails
-                </span>
-                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono">
-                  Optional
-                </span>
-              </div>
+                  <marker
+                    id="arrow-dashed"
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="#94a3b8" />
+                  </marker>
 
-              {/* Arrow */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-              </div>
+                  {/* Node Glow Filters */}
+                  <filter id="glow-green" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="6" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                  <filter id="glow-pulse" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="8" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
 
-              {/* Query Processing */}
-              <div 
-                onClick={() => setSelectedNode("query_proc")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "query_proc" ? "scale-105" : ""}`}
-              >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                  selectedNode === "query_proc"
-                    ? "bg-amber-500 text-white ring-4 ring-amber-500/30 shadow-lg shadow-amber-500/30"
-                    : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/25"
-                }`}>
-                  <Settings className="h-5 w-5 animate-spin-slow" />
-                </div>
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  Query
-                </span>
-                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  Processing
-                </span>
-              </div>
+                  {/* Gradient fills for nodes */}
+                  <linearGradient id="grad-user" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#0284c7" />
+                    <stop offset="100%" stopColor="#0369a1" />
+                  </linearGradient>
 
-              {/* Arrow */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-              </div>
+                  <linearGradient id="grad-green-node" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#16291a" />
+                    <stop offset="100%" stopColor="#0b170f" />
+                  </linearGradient>
 
-              {/* NeMo Retriever Embedding (Query) */}
-              <div 
-                onClick={() => setSelectedNode("retriever_embed_query")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "retriever_embed_query" ? "scale-105" : ""}`}
-              >
-                <NvidiaNodeIcon active={selectedNode === "retriever_embed_query"} />
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  NeMo Retriever
-                </span>
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
-                  Embedding
-                </span>
-              </div>
+                  <linearGradient id="grad-yellow-node" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#2c2208" />
+                    <stop offset="100%" stopColor="#191304" />
+                  </linearGradient>
 
-              {/* Arrow */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-              </div>
+                  <linearGradient id="grad-orange-node" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#2e1605" />
+                    <stop offset="100%" stopColor="#1a0b02" />
+                  </linearGradient>
+                </defs>
 
-              {/* Vector Database & Object Store (cuVS) */}
-              <div 
-                onClick={() => setSelectedNode("cuvs_store")}
-                className={`cursor-pointer flex flex-col items-center p-2.5 rounded-xl border transition-all ${
-                  selectedNode === "cuvs_store"
-                    ? "border-orange-500 bg-orange-500/15 ring-2 ring-orange-500/40 shadow-lg shadow-orange-500/20"
-                    : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-orange-500/50"
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <div className="flex flex-col items-center p-1.5 rounded-lg bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/40">
-                    <Database className="h-5 w-5" />
-                  </div>
-                  <div className="flex flex-col items-center p-1.5 rounded-lg bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/40">
-                    <HardDrive className="h-5 w-5" />
-                  </div>
-                </div>
-                <div className="mt-1.5 text-center">
-                  <span className="block text-[10px] font-bold text-slate-900 dark:text-white leading-tight">
-                    Vector Database Object Store
-                  </span>
-                  <span className="text-[9px] font-mono font-black text-orange-600 dark:text-orange-400 uppercase tracking-wide">
-                    cuVS
-                  </span>
-                </div>
-              </div>
-            </div>
+                {/* ========================================================================= */}
+                {/* 1. RETRIEVAL PIPELINE (TOP SWIMLANE) */}
+                {/* ========================================================================= */}
+                <g id="retrieval-swimlane">
+                  <text
+                    x="20"
+                    y="32"
+                    fill="#94a3b8"
+                    className="font-mono text-[11px] font-bold tracking-widest uppercase"
+                  >
+                    RETRIEVAL PIPELINE
+                  </text>
 
-            {/* Diagram Row 2 (Upper Feedback & Reasoning Loop: Reranking -> Nemotron Super / Nano -> Reflection -> Output Guardrails -> User Response) */}
-            <div className="flex items-center justify-between min-w-[760px] relative mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60">
-              {/* Left return: Response arriving back to User */}
-              <div className="flex items-center space-x-2 pl-4">
-                <span className="flex items-center space-x-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 text-[9px] font-mono text-slate-700 dark:text-slate-300">
-                  <span className="font-bold text-emerald-500">&bull;&bull;&bull;</span>
-                  <span>Response</span>
-                </span>
-                <div className="w-10 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[5px] border-r-slate-400 dark:border-r-slate-600"></div>
-                </div>
-              </div>
+                  {/* SVG CONNECTING WIRES (Orthogonal Clean Layout) */}
+                  {/* Wire 1: User to Guardrails In (through Query pill) */}
+                  <path
+                    d="M 115 250 L 150 250 L 230 250"
+                    fill="none"
+                    stroke={simulationStep === 1 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 1 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* NeMo Guardrails (Output) */}
-              <div 
-                onClick={() => setSelectedNode("guardrails_out")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "guardrails_out" ? "scale-105" : ""}`}
-              >
-                <NvidiaNodeIcon active={selectedNode === "guardrails_out"} />
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                  NeMo Guardrails
-                </span>
-                <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono">
-                  Optional
-                </span>
-              </div>
+                  {/* Wire 2: Guardrails In to Query Processing */}
+                  <path
+                    d="M 290 250 L 390 250"
+                    fill="none"
+                    stroke={simulationStep === 2 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 2 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* Arrow left from Reflection to Guardrails */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[5px] border-r-slate-400 dark:border-r-slate-600"></div>
-              </div>
+                  {/* Wire 3: Query Processing to Retriever Embedding */}
+                  <path
+                    d="M 450 250 L 550 250"
+                    fill="none"
+                    stroke={simulationStep === 3 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 3 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* Reflection & Optional LLM Node */}
-              <div className="flex flex-col items-center">
-                {/* Optional LLM above Reflection */}
-                <div 
-                  onClick={() => setSelectedNode("llm_optional")}
-                  className={`cursor-pointer flex flex-col items-center mb-2 group transition-transform ${selectedNode === "llm_optional" ? "scale-105" : ""}`}
-                >
-                  <NvidiaNodeIcon active={selectedNode === "llm_optional"} />
-                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200">
-                    LLM
-                  </span>
-                  <span className="text-[8px] text-slate-400 font-mono">
-                    Optional
-                  </span>
-                  <div className="w-0.5 h-3 border-l-2 border-dashed border-slate-400 dark:border-slate-600 mt-1"></div>
-                </div>
+                  {/* Wire 4: Retriever Embedding to cuVS Store */}
+                  <path
+                    d="M 610 250 L 710 250"
+                    fill="none"
+                    stroke={simulationStep === 4 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 4 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-                {/* Reflection Node */}
-                <div 
-                  onClick={() => setSelectedNode("reflection")}
-                  className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "reflection" ? "scale-105" : ""}`}
-                >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                    selectedNode === "reflection"
-                      ? "bg-amber-500 text-white ring-4 ring-amber-500/30 shadow-lg shadow-amber-500/30"
-                      : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/25"
-                  }`}>
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <span className="mt-1 text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    Reflection
-                  </span>
-                </div>
-              </div>
+                  {/* Wire 5: cuVS Store UP to Reranking */}
+                  <path
+                    d="M 785 210 L 785 175"
+                    fill="none"
+                    stroke={simulationStep === 5 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 5 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* Arrow left from Nemotron Super 49B to Reflection */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[5px] border-r-slate-400 dark:border-r-slate-600"></div>
-              </div>
+                  {/* Wire 6: Reranking to Nemotron Super 49B (Solid Left) */}
+                  <path
+                    d="M 755 145 L 615 145"
+                    fill="none"
+                    stroke={simulationStep === 6 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 6 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* Llama Nemotron Super 49B + Nano 8B Box */}
-              <div className="flex flex-col items-center">
-                {/* Llama Nemotron Nano 8B v1 (Optional) */}
-                <div 
-                  onClick={() => setSelectedNode("nemotron_nano")}
-                  className={`cursor-pointer flex flex-col items-center mb-2 group transition-transform ${selectedNode === "nemotron_nano" ? "scale-105" : ""}`}
-                >
-                  <NvidiaNodeIcon active={selectedNode === "nemotron_nano"} />
-                  <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 text-center">
-                    Llama Nemotron Nano 8B v1
-                  </span>
-                  <span className="text-[8px] text-slate-400 font-mono">
-                    Optional
-                  </span>
-                  <div className="w-0.5 h-3 border-l-2 border-dashed border-slate-400 dark:border-slate-600 mt-1"></div>
-                </div>
+                  {/* Wire 7: Reranking to Nemotron Nano 8B (Dashed Up & Left) */}
+                  <path
+                    d="M 785 115 L 785 65 L 715 65"
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="1.5"
+                    strokeDasharray="4,4"
+                    markerEnd="url(#arrow-dashed)"
+                  />
 
-                {/* Llama Nemotron Super 49B */}
-                <div 
-                  onClick={() => setSelectedNode("nemotron_super")}
-                  className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "nemotron_super" ? "scale-105" : ""}`}
-                >
-                  <NvidiaNodeIcon active={selectedNode === "nemotron_super"} />
-                  <span className="mt-1 text-[11px] font-bold text-slate-800 dark:text-slate-200 text-center">
-                    Llama Nemotron
-                  </span>
-                  <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
-                    Super 49B
-                  </span>
-                </div>
-              </div>
+                  {/* Wire 8: Nemotron Nano 8B to Nemotron Super 49B (Dashed Left & Down) */}
+                  <path
+                    d="M 655 65 L 585 65 L 585 115"
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="1.5"
+                    strokeDasharray="4,4"
+                    markerEnd="url(#arrow-dashed)"
+                  />
 
-              {/* Arrow left from Reranking to Super 49B */}
-              <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-r-[5px] border-r-slate-400 dark:border-r-slate-600"></div>
-              </div>
+                  {/* Wire 9: LLM Optional to Reflection (Dashed Vertical Down) */}
+                  <path
+                    d="M 420 85 L 420 115"
+                    fill="none"
+                    stroke="#64748b"
+                    strokeWidth="1.5"
+                    strokeDasharray="4,4"
+                    markerEnd="url(#arrow-dashed)"
+                  />
 
-              {/* NeMo Retriever Reranking */}
-              <div 
-                onClick={() => setSelectedNode("reranking")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "reranking" ? "scale-105" : ""}`}
-              >
-                <NvidiaNodeIcon active={selectedNode === "reranking"} />
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 text-center">
-                  NeMo Retriever
-                </span>
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
-                  Reranking
-                </span>
-              </div>
-            </div>
-          </div>
+                  {/* Wire 10: Nemotron Super 49B to Reflection */}
+                  <path
+                    d="M 555 145 L 450 145"
+                    fill="none"
+                    stroke={simulationStep === 7 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 7 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-          {/* ========================================================================= */}
-          {/* DASHED HORIZONTAL PIPELINE DIVIDER */}
-          {/* ========================================================================= */}
-          <div className="relative my-6">
-            <div className="border-t-2 border-dashed border-slate-300 dark:border-slate-700 w-full"></div>
-            <div className="absolute -top-3 left-0 bg-white dark:bg-[#0b0f19] pr-3 text-[10px] font-mono uppercase font-bold text-slate-400 dark:text-slate-400">
-              Extraction Pipeline
-            </div>
-          </div>
+                  {/* Wire 11: Reflection to Query Processing (Bidirectional Loop) */}
+                  <path
+                    d="M 420 175 L 420 220"
+                    fill="none"
+                    stroke={simulationStep === 8 ? "#eab308" : "#64748b"}
+                    strokeWidth={simulationStep === 8 ? "2.5" : "1.5"}
+                    strokeDasharray="4,4"
+                    markerEnd="url(#arrow-dashed)"
+                    markerStart="url(#arrow-dashed)"
+                  />
 
-          {/* ========================================================================= */}
-          {/* SECTION 2: EXTRACTION PIPELINE (BOTTOM SWIMLANE) */}
-          {/* ========================================================================= */}
-          <div className="pt-2 min-w-[760px]">
-            <div className="flex items-center justify-between py-4">
-              {/* Multimodal Enterprise Documents */}
-              <div 
-                onClick={() => setSelectedNode("multimodal_docs")}
-                className={`cursor-pointer flex flex-col items-center p-3 rounded-xl border transition-all ${
-                  selectedNode === "multimodal_docs"
-                    ? "border-orange-500 bg-orange-500/15 ring-2 ring-orange-500/40 shadow-lg shadow-orange-500/20"
-                    : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:border-orange-500/50"
-                }`}
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/40">
-                  <FolderArchive className="h-5 w-5" />
-                </div>
-                <span className="mt-1.5 text-[11px] font-bold text-slate-900 dark:text-white text-center max-w-[120px] leading-tight">
-                  Multimodal Enterprise Documents
-                </span>
-              </div>
+                  {/* Wire 12: Reflection to Guardrails Out */}
+                  <path
+                    d="M 390 145 L 290 145"
+                    fill="none"
+                    stroke={simulationStep === 9 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 9 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-              {/* Branch Arrows leading out to Extraction Models and Nemotron Parse */}
-              <div className="flex flex-col space-y-6">
-                {/* Branch 1 label */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 max-w-[110px] text-right leading-tight">
-                    Pages as Images, Infographics, Charts, Tables
-                  </span>
-                  <div className="w-8 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-                  </div>
-                </div>
+                  {/* Wire 13: Guardrails Out to User (through Response pill, down to User) */}
+                  <path
+                    d="M 230 145 L 140 145 L 85 145 L 85 215"
+                    fill="none"
+                    stroke={simulationStep === 10 ? "#76b900" : "#475569"}
+                    strokeWidth={simulationStep === 10 ? "2.5" : "1.5"}
+                    markerEnd="url(#arrow-solid)"
+                  />
 
-                {/* Branch 2 line */}
-                <div className="flex items-center justify-end space-x-2">
-                  <div className="w-16 h-0.5 bg-slate-300 dark:bg-slate-700 relative">
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-slate-400 dark:border-l-slate-600"></div>
-                  </div>
-                </div>
-              </div>
+                  {/* ACTIVE PACKET SIMULATION PARTICLE */}
+                  {isSimulating && (
+                    <circle
+                      r="6"
+                      fill="#76b900"
+                      filter="url(#glow-pulse)"
+                      className="animate-ping"
+                      cx={
+                        simulationStep === 1 ? 175 :
+                        simulationStep === 2 ? 260 :
+                        simulationStep === 3 ? 420 :
+                        simulationStep === 4 ? 585 :
+                        simulationStep === 5 ? 785 :
+                        simulationStep === 6 ? 785 :
+                        simulationStep === 7 ? 585 :
+                        simulationStep === 8 ? 420 :
+                        simulationStep === 9 ? 260 :
+                        simulationStep === 10 ? 85 : 85
+                      }
+                      cy={
+                        simulationStep === 1 ? 250 :
+                        simulationStep === 2 ? 250 :
+                        simulationStep === 3 ? 250 :
+                        simulationStep === 4 ? 250 :
+                        simulationStep === 5 ? 250 :
+                        simulationStep === 6 ? 145 :
+                        simulationStep === 7 ? 145 :
+                        simulationStep === 8 ? 145 :
+                        simulationStep === 9 ? 145 :
+                        simulationStep === 10 ? 250 : 250
+                      }
+                    />
+                  )}
 
-              {/* Center Extraction Processing Nodes */}
-              <div className="flex flex-col space-y-5">
-                {/* NeMo Retriever Extraction Models */}
-                <div 
-                  onClick={() => setSelectedNode("extraction_models")}
-                  className={`cursor-pointer flex items-center space-x-3 p-2.5 rounded-xl border transition-all ${
-                    selectedNode === "extraction_models"
-                      ? "border-[#76b900] bg-[#76b900]/15 ring-2 ring-[#76b900]/40"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] hover:border-[#76b900]/50"
-                  }`}
-                >
-                  <NvidiaNodeIcon active={selectedNode === "extraction_models"} />
-                  <div>
-                    <span className="block text-[11px] font-bold text-slate-900 dark:text-white">
+                  {/* --- NODES IN RETRIEVAL SWIMLANE --- */}
+
+                  {/* 1. USER NODE */}
+                  <g
+                    transform="translate(55, 220)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("user")}
+                  >
+                    <circle
+                      cx="30"
+                      cy="30"
+                      r="28"
+                      fill="url(#grad-user)"
+                      stroke={selectedNode === "user" ? "#38bdf8" : "#0284c7"}
+                      strokeWidth={selectedNode === "user" ? "3" : "1.5"}
+                      filter={selectedNode === "user" ? "url(#glow-green)" : undefined}
+                    />
+                    <path
+                      d="M 20 44 C 20 37, 40 37, 40 44 Z"
+                      fill="#ffffff"
+                    />
+                    <circle cx="30" cy="24" r="7" fill="#ffffff" />
+                    <text x="30" y="72" textAnchor="middle" fill="#f8fafc" className="text-[12px] font-bold">
+                      User
+                    </text>
+                  </g>
+
+                  {/* Query Pill */}
+                  <g transform="translate(155, 238)">
+                    <rect
+                      x="0"
+                      y="0"
+                      width="54"
+                      height="24"
+                      rx="12"
+                      fill="#0f172a"
+                      stroke="#334155"
+                      strokeWidth="1"
+                    />
+                    <text x="27" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
+                      &gt;_ Query
+                    </text>
+                  </g>
+
+                  {/* Response Pill */}
+                  <g transform="translate(145, 133)">
+                    <rect
+                      x="0"
+                      y="0"
+                      width="66"
+                      height="24"
+                      rx="12"
+                      fill="#0f172a"
+                      stroke="#334155"
+                      strokeWidth="1"
+                    />
+                    <text x="33" y="16" textAnchor="middle" fill="#94a3b8" className="font-mono text-[10px] font-semibold">
+                      ... Response
+                    </text>
+                  </g>
+
+                  {/* 2. NeMo Guardrails (Input) */}
+                  <g
+                    transform="translate(230, 218)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("guardrails_in")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "guardrails_in" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "guardrails_in" ? "2.5" : "1.5"}
+                      filter={selectedNode === "guardrails_in" ? "url(#glow-green)" : undefined}
+                    />
+                    {/* Layered inner symbol */}
+                    <path d="M 18 26 L 30 19 L 42 26 L 30 33 Z" fill="#22c55e" opacity="0.8" />
+                    <path d="M 18 34 L 30 27 L 42 34 L 30 41 Z" fill="#22c55e" opacity="0.6" />
+                    <path d="M 18 42 L 30 35 L 42 42 L 30 49 Z" fill="#22c55e" opacity="0.4" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      NeMo Guardrails
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                      Optional
+                    </text>
+                  </g>
+
+                  {/* 3. Query Processing (Yellow) */}
+                  <g
+                    transform="translate(390, 218)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("query_proc")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#251a05"
+                      stroke={selectedNode === "query_proc" ? "#facc15" : "#eab308"}
+                      strokeWidth={selectedNode === "query_proc" ? "2.5" : "1.5"}
+                      filter={selectedNode === "query_proc" ? "url(#glow-green)" : undefined}
+                    />
+                    {/* Gear / Process icon */}
+                    <circle cx="30" cy="34" r="10" fill="none" stroke="#eab308" strokeWidth="3" strokeDasharray="4,2" />
+                    <circle cx="30" cy="34" r="4" fill="#eab308" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Query
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Processing
+                    </text>
+                  </g>
+
+                  {/* 4. NeMo Retriever Embedding (Query) */}
+                  <g
+                    transform="translate(555, 218)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("retriever_embed_query")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "retriever_embed_query" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "retriever_embed_query" ? "2.5" : "1.5"}
+                      filter={selectedNode === "retriever_embed_query" ? "url(#glow-green)" : undefined}
+                    />
+                    {/* Embedding node layers */}
+                    <circle cx="30" cy="34" r="12" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                    <circle cx="24" cy="28" r="2.5" fill="#76b900" />
+                    <circle cx="36" cy="28" r="2.5" fill="#76b900" />
+                    <circle cx="30" cy="40" r="2.5" fill="#76b900" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
                       NeMo Retriever
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                      Embedding
+                    </text>
+                  </g>
+
+                  {/* 5. Vector Database Object Store cuVS */}
+                  <g
+                    transform="translate(710, 210)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("cuvs_store")}
+                  >
+                    <rect
+                      x="0"
+                      y="0"
+                      width="150"
+                      height="80"
+                      rx="12"
+                      fill="#1e1003"
+                      stroke={selectedNode === "cuvs_store" ? "#f97316" : "#ea580c"}
+                      strokeWidth={selectedNode === "cuvs_store" ? "2.5" : "1.5"}
+                      filter={selectedNode === "cuvs_store" ? "url(#glow-green)" : undefined}
+                    />
+                    {/* Left Box: Graph Vector */}
+                    <rect x="12" y="14" width="55" height="42" rx="8" fill="#ea580c" fillOpacity="0.85" />
+                    <circle cx="40" cy="27" r="3" fill="#fff" />
+                    <circle cx="26" cy="45" r="3" fill="#fff" />
+                    <circle cx="53" cy="45" r="3" fill="#fff" />
+                    <line x1="40" y1="27" x2="26" y2="45" stroke="#fff" strokeWidth="1.5" />
+                    <line x1="40" y1="27" x2="53" y2="45" stroke="#fff" strokeWidth="1.5" />
+                    <line x1="26" y1="45" x2="53" y2="45" stroke="#fff" strokeWidth="1.5" />
+
+                    {/* Right Box: Database Cylinders */}
+                    <rect x="82" y="14" width="55" height="42" rx="8" fill="#c2410c" fillOpacity="0.85" />
+                    <ellipse cx="110" cy="25" rx="14" ry="4.5" fill="#fed7aa" />
+                    <ellipse cx="110" cy="35" rx="14" ry="4.5" fill="#fed7aa" />
+                    <ellipse cx="110" cy="45" rx="14" ry="4.5" fill="#fed7aa" />
+
+                    <text x="75" y="70" textAnchor="middle" fill="#fdba74" className="font-mono text-[9px] font-bold uppercase tracking-wider">
+                      Vector DB &amp; Object Store (cuVS)
+                    </text>
+                  </g>
+
+                  {/* 6. NeMo Retriever Reranking (Above cuVS) */}
+                  <g
+                    transform="translate(755, 110)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("reranking")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "reranking" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "reranking" ? "2.5" : "1.5"}
+                      filter={selectedNode === "reranking" ? "url(#glow-green)" : undefined}
+                    />
+                    <path d="M 22 28 L 38 28 M 22 34 L 34 34 M 22 40 L 30 40" stroke="#76b900" strokeWidth="2.5" strokeLinecap="round" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      NeMo Retriever
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                      Reranking
+                    </text>
+                  </g>
+
+                  {/* 7. Llama Nemotron Nano 8B v1 (Top Right Optional) */}
+                  <g
+                    transform="translate(655, 30)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("nemotron_nano")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "nemotron_nano" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "nemotron_nano" ? "2.5" : "1.5"}
+                      filter={selectedNode === "nemotron_nano" ? "url(#glow-green)" : undefined}
+                    />
+                    <circle cx="30" cy="34" r="8" fill="none" stroke="#22c55e" strokeWidth="2" />
+                    <text x="30" y="80" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-bold">
+                      Llama Nemotron
+                    </text>
+                    <text x="30" y="90" textAnchor="middle" fill="#94a3b8" className="text-[8px] font-medium">
+                      Nano 8B v1 (Optional)
+                    </text>
+                  </g>
+
+                  {/* 8. Llama Nemotron Super 49B (Core Reasoning) */}
+                  <g
+                    transform="translate(555, 110)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("nemotron_super")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0e2314"
+                      stroke={selectedNode === "nemotron_super" ? "#76b900" : "#4ade80"}
+                      strokeWidth={selectedNode === "nemotron_super" ? "3" : "2"}
+                      filter={selectedNode === "nemotron_super" ? "url(#glow-green)" : undefined}
+                    />
+                    {/* Super Neural Network Motif */}
+                    <circle cx="30" cy="34" r="13" fill="none" stroke="#76b900" strokeWidth="1.5" />
+                    <circle cx="30" cy="34" r="4" fill="#76b900" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Llama Nemotron
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#86efac" className="text-[9px] font-semibold">
+                      Super 49B
+                    </text>
+                  </g>
+
+                  {/* 9. Domain LLM (Optional - Top Center) */}
+                  <g
+                    transform="translate(390, 30)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("llm_optional")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "llm_optional" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "llm_optional" ? "2.5" : "1.5"}
+                      filter={selectedNode === "llm_optional" ? "url(#glow-green)" : undefined}
+                    />
+                    <text x="30" y="38" textAnchor="middle" fill="#76b900" className="font-mono text-[10px] font-bold">
+                      LLM
+                    </text>
+                    <text x="30" y="80" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-bold">
+                      LLM
+                    </text>
+                    <text x="30" y="90" textAnchor="middle" fill="#94a3b8" className="text-[8px] font-medium">
+                      Optional
+                    </text>
+                  </g>
+
+                  {/* 10. Reflection Agent (Yellow Document with gear) */}
+                  <g
+                    transform="translate(390, 110)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("reflection")}
+                  >
+                    <rect
+                      x="8"
+                      y="4"
+                      width="44"
+                      height="58"
+                      rx="6"
+                      fill="#261b05"
+                      stroke={selectedNode === "reflection" ? "#facc15" : "#eab308"}
+                      strokeWidth={selectedNode === "reflection" ? "2.5" : "1.5"}
+                      filter={selectedNode === "reflection" ? "url(#glow-green)" : undefined}
+                    />
+                    <path d="M 18 16 L 36 16 M 18 24 L 32 24" stroke="#facc15" strokeWidth="2" strokeLinecap="round" />
+                    <circle cx="34" cy="42" r="8" fill="#eab308" opacity="0.9" />
+                    <circle cx="34" cy="42" r="3" fill="#18181b" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Reflection
+                    </text>
+                  </g>
+
+                  {/* 11. NeMo Guardrails (Output) */}
+                  <g
+                    transform="translate(230, 110)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("guardrails_out")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "guardrails_out" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "guardrails_out" ? "2.5" : "1.5"}
+                      filter={selectedNode === "guardrails_out" ? "url(#glow-green)" : undefined}
+                    />
+                    <path d="M 18 26 L 30 19 L 42 26 L 30 33 Z" fill="#22c55e" opacity="0.8" />
+                    <path d="M 18 34 L 30 27 L 42 34 L 30 41 Z" fill="#22c55e" opacity="0.6" />
+                    <path d="M 18 42 L 30 35 L 42 42 L 30 49 Z" fill="#22c55e" opacity="0.4" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      NeMo Guardrails
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                      Optional
+                    </text>
+                  </g>
+                </g>
+
+                {/* ========================================================================= */}
+                {/* 2. PIPELINE DIVIDER (Dashed Horizontal Line) */}
+                {/* ========================================================================= */}
+                <g id="pipeline-divider">
+                  <line
+                    x1="20"
+                    y1="340"
+                    x2="960"
+                    y2="340"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    strokeDasharray="6,6"
+                  />
+                  <text
+                    x="20"
+                    y="365"
+                    fill="#94a3b8"
+                    className="font-mono text-[11px] font-bold tracking-widest uppercase"
+                  >
+                    EXTRACTION PIPELINE
+                  </text>
+                </g>
+
+                {/* ========================================================================= */}
+                {/* 3. EXTRACTION PIPELINE (BOTTOM SWIMLANE) */}
+                {/* ========================================================================= */}
+                <g id="extraction-swimlane">
+                  {/* Wire E1: Docs to Extraction Models (Top Branch) */}
+                  <path
+                    d="M 145 490 L 220 440 L 390 440"
+                    fill="none"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow-solid)"
+                  />
+                  <text x="235" y="425" fill="#94a3b8" className="text-[9px] font-medium text-center">
+                    Pages as Images, Infographics, Charts, Tables
+                  </text>
+
+                  {/* Wire E2: Docs to Nemotron Parse (Bottom Branch) */}
+                  <path
+                    d="M 145 520 L 220 560 L 390 560"
+                    fill="none"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow-solid)"
+                  />
+
+                  {/* Wire E3: Extraction Models to Ingestion Embedding */}
+                  <path
+                    d="M 450 440 L 610 440 L 610 515 L 755 515"
+                    fill="none"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow-solid)"
+                  />
+                  <text x="510" y="433" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
+                    -Text-
+                  </text>
+
+                  {/* Wire E4: Nemotron Parse to Ingestion Embedding */}
+                  <path
+                    d="M 450 560 L 660 560 L 755 530"
+                    fill="none"
+                    stroke="#475569"
+                    strokeWidth="1.5"
+                    markerEnd="url(#arrow-solid)"
+                  />
+                  <text x="500" y="552" fill="#cbd5e1" className="font-mono text-[9px] font-semibold">
+                    -Text and Metadata-
+                  </text>
+
+                  {/* Wire E5: Ingestion Embedding UP into cuVS Vector Store (DIRECT VERTICAL) */}
+                  <path
+                    d="M 785 480 L 785 295"
+                    fill="none"
+                    stroke="#22c55e"
+                    strokeWidth="2"
+                    markerEnd="url(#arrow-green)"
+                  />
+                  <text x="795" y="400" fill="#86efac" className="font-mono text-[9px] font-bold">
+                    Into cuVS
+                  </text>
+
+                  {/* 1. Multimodal Enterprise Documents (Orange Card) */}
+                  <g
+                    transform="translate(55, 475)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("docs")}
+                  >
+                    <rect
+                      x="0"
+                      y="0"
+                      width="80"
+                      height="65"
+                      rx="10"
+                      fill="#2e1605"
+                      stroke={selectedNode === "docs" ? "#f97316" : "#ea580c"}
+                      strokeWidth={selectedNode === "docs" ? "2.5" : "1.5"}
+                      filter={selectedNode === "docs" ? "url(#glow-green)" : undefined}
+                    />
+                    <rect x="25" y="15" width="30" height="34" rx="4" fill="#ea580c" />
+                    <circle cx="34" cy="26" r="3" fill="#fff" />
+                    <path d="M 28 42 L 36 34 L 44 42 Z" fill="#fed7aa" />
+                    <text x="40" y="80" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      Multimodal
+                    </text>
+                    <text x="40" y="92" textAnchor="middle" fill="#f8fafc" className="text-[9px] font-medium">
+                      Enterprise Docs
+                    </text>
+                  </g>
+
+                  {/* 2. NeMo Retriever Extraction Models */}
+                  <g
+                    transform="translate(390, 405)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("extraction_models")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "extraction_models" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "extraction_models" ? "2.5" : "1.5"}
+                      filter={selectedNode === "extraction_models" ? "url(#glow-green)" : undefined}
+                    />
+                    <rect x="20" y="24" width="20" height="20" rx="3" fill="none" stroke="#76b900" strokeWidth="1.5" />
+                    <circle cx="26" cy="30" r="2" fill="#76b900" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      NeMo Retriever
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
                       Extraction Models
-                    </span>
-                  </div>
-                </div>
+                    </text>
+                  </g>
 
-                {/* Nemotron Parse */}
-                <div 
-                  onClick={() => setSelectedNode("nemotron_parse")}
-                  className={`cursor-pointer flex items-center space-x-3 p-2.5 rounded-xl border transition-all ${
-                    selectedNode === "nemotron_parse"
-                      ? "border-[#76b900] bg-[#76b900]/15 ring-2 ring-[#76b900]/40"
-                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] hover:border-[#76b900]/50"
-                  }`}
-                >
-                  <NvidiaNodeIcon active={selectedNode === "nemotron_parse"} />
-                  <div>
-                    <span className="block text-[11px] font-bold text-slate-900 dark:text-white">
+                  {/* 3. Nemotron Parse */}
+                  <g
+                    transform="translate(390, 525)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("nemotron_parse")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "nemotron_parse" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "nemotron_parse" ? "2.5" : "1.5"}
+                      filter={selectedNode === "nemotron_parse" ? "url(#glow-green)" : undefined}
+                    />
+                    <path d="M 22 28 L 38 28 M 22 34 L 38 34 M 22 40 L 32 40" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
                       Nemotron Parse
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
                       Document Parser
-                    </span>
-                  </div>
+                    </text>
+                  </g>
+
+                  {/* 4. NeMo Retriever Embedding (Docs) */}
+                  <g
+                    transform="translate(755, 485)"
+                    className="cursor-pointer"
+                    onClick={() => setSelectedNode("retriever_embed_docs")}
+                  >
+                    <polygon
+                      points="30,0 60,17 60,51 30,68 0,51 0,17"
+                      fill="#0a1a10"
+                      stroke={selectedNode === "retriever_embed_docs" ? "#76b900" : "#22c55e"}
+                      strokeWidth={selectedNode === "retriever_embed_docs" ? "2.5" : "1.5"}
+                      filter={selectedNode === "retriever_embed_docs" ? "url(#glow-green)" : undefined}
+                    />
+                    <circle cx="30" cy="34" r="12" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                    <circle cx="24" cy="28" r="2.5" fill="#76b900" />
+                    <circle cx="36" cy="28" r="2.5" fill="#76b900" />
+                    <circle cx="30" cy="40" r="2.5" fill="#76b900" />
+                    <text x="30" y="82" textAnchor="middle" fill="#f8fafc" className="text-[10px] font-bold">
+                      NeMo Retriever
+                    </text>
+                    <text x="30" y="94" textAnchor="middle" fill="#94a3b8" className="text-[9px] font-medium">
+                      Embedding
+                    </text>
+                  </g>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          {/* Real-Time Telemetry Log Stream (Professional Live Console) */}
+          <div className="flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-[#080e1a] text-slate-200 shadow-md overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-[#0e1726] border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <Terminal className="h-4 w-4 text-[#76b900]" />
+                <span className="font-mono text-xs font-bold text-white tracking-wide">
+                  SYSTEM TELEMETRY STREAM &amp; TRACE LOGS
+                </span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-400">
+                <span>Active Step: {simulationStep ? `Step ${simulationStep}/10` : "Idle (Standby)"}</span>
+                <span>|</span>
+                <button
+                  onClick={() => setTelemetryLogs([])}
+                  className="hover:text-white transition cursor-pointer"
+                >
+                  Clear Logs
+                </button>
+              </div>
+            </div>
+
+            <div
+              ref={logContainerRef}
+              className="h-40 overflow-y-auto p-3 font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800"
+            >
+              {telemetryLogs.map((log) => (
+                <div key={log.id} className="flex items-start space-x-2.5 leading-relaxed">
+                  <span className="text-slate-500 shrink-0 text-[10px]">{log.time}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[10px] font-bold shrink-0 ${
+                      log.status === "SUCCESS"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                        : log.status === "EXEC"
+                        ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
+                        : log.status === "WARN"
+                        ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                        : "bg-slate-700/40 text-slate-300 border border-slate-700"
+                    }`}
+                  >
+                    {log.step}
+                  </span>
+                  <span className="text-slate-300 flex-1">{log.message}</span>
                 </div>
-              </div>
-
-              {/* Transition labels */}
-              <div className="flex flex-col space-y-8">
-                <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  Text
-                </span>
-                <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                  Text and Metadata
-                </span>
-              </div>
-
-              {/* NeMo Retriever Embedding (Document) */}
-              <div 
-                onClick={() => setSelectedNode("retriever_embed_doc")}
-                className={`cursor-pointer flex flex-col items-center group transition-transform ${selectedNode === "retriever_embed_doc" ? "scale-105" : ""}`}
-              >
-                <NvidiaNodeIcon active={selectedNode === "retriever_embed_doc"} />
-                <span className="mt-1.5 text-[11px] font-bold text-slate-800 dark:text-slate-200 text-center">
-                  NeMo Retriever
-                </span>
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono">
-                  Embedding
-                </span>
-              </div>
-
-              {/* Upward Line pointing up into cuVS */}
-              <div className="flex flex-col items-center justify-center pr-8">
-                <div className="h-14 border-r-2 border-slate-300 dark:border-slate-700 relative">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-b-[5px] border-b-slate-400 dark:border-b-slate-600"></div>
-                </div>
-                <span className="text-[9px] font-mono text-[#76b900] font-bold mt-1">
-                  Into cuVS
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Node Specification Inspector & Telemetry */}
+        {/* Right Node Inspector Drawer (4 cols on xl) */}
         <div className="xl:col-span-4 flex flex-col space-y-4">
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] p-5 shadow-sm dark:shadow-md transition-colors duration-200">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
-              <span className="text-[11px] font-mono font-bold text-[#76b900] uppercase tracking-wider flex items-center space-x-1.5">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>NVIDIA Node Inspector</span>
-              </span>
-              <span className="rounded bg-slate-100 dark:bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
-                {selected.layer}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-5 shadow-lg">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-4">
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-4 w-4 text-[#76b900]" />
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  NVIDIA Node Inspector
+                </span>
+              </div>
+              <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-mono font-bold text-slate-600 dark:text-slate-300">
+                {selected.category}
               </span>
             </div>
 
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-              {selected.title}
-            </h3>
-            <p className="text-xs font-mono text-[#76b900] font-semibold mb-3">
-              {selected.tech}
-            </p>
+            {/* Node Title & Subtitle */}
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                {selected.title}
+              </h3>
+              <p className="text-xs font-mono text-[#76b900] font-semibold">
+                {selected.tech}
+              </p>
+            </div>
 
-            <div className="space-y-3">
+            {/* Role in Prototype */}
+            <div className="space-y-3.5 text-xs">
               <div>
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
                   Role in Prototype
                 </label>
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 leading-relaxed">
                   {selected.role}
-                </p>
+                </div>
               </div>
 
+              {/* Hardware Acceleration & Latency */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                  <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
+                    Target Latency
+                  </span>
+                  <span className="font-mono text-xs font-bold text-[#76b900]">
+                    {selected.latencyTarget}
+                  </span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                  <span className="text-[9px] font-mono uppercase text-slate-500 dark:text-slate-400 block">
+                    Execution Layer
+                  </span>
+                  <span className="font-mono text-[11px] font-bold text-cyan-600 dark:text-cyan-400 truncate block">
+                    {selected.hardware}
+                  </span>
+                </div>
+              </div>
+
+              {/* Architectural Spec */}
               <div>
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-                  NVIDIA Architecture Specification
+                  Architecture Specification
                 </label>
-                <div className="rounded-xl bg-slate-100 dark:bg-slate-900 p-2.5 font-mono text-[11px] text-cyan-700 dark:text-cyan-300 border border-slate-200 dark:border-slate-800">
+                <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 font-mono text-[11px] text-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
                   {selected.spec}
                 </div>
               </div>
 
+              {/* Sample Telemetry JSON Packet */}
               <div>
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-1">
-                  Sample JSON Data Packet
+                  Sample Telemetry Data Packet
                 </label>
-                <pre className="rounded-xl bg-slate-950 p-3 font-mono text-[10px] text-emerald-400 overflow-x-auto border border-slate-800 max-h-40">
-                  {selected.payload}
+                <pre className="p-3 rounded-xl bg-[#060b13] text-[#76b900] font-mono text-[10px] overflow-x-auto border border-slate-800/80 max-h-48 scrollbar-thin">
+                  {JSON.stringify(selected.samplePayload, null, 2)}
                 </pre>
               </div>
             </div>
           </div>
 
-          {/* Quick Benchmark Specs */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] p-4 shadow-sm dark:shadow-md space-y-2">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              NVIDIA Hardware Acceleration
+          {/* NVIDIA Hardware Acceleration Badge Card */}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-4 shadow-sm text-xs">
+            <h4 className="font-mono text-xs font-bold text-slate-900 dark:text-white uppercase mb-3 flex items-center space-x-2">
+              <Zap className="h-3.5 w-3.5 text-[#76b900]" />
+              <span>NVIDIA AI Enterprise Stack</span>
             </h4>
-            <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-700 dark:text-slate-300">
-              <div className="rounded-lg bg-slate-50 dark:bg-slate-900/60 p-2 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400 block">Inference Engine</span>
-                <span className="font-bold text-[#76b900]">TensorRT-LLM</span>
+            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 block text-[9px]">INFERENCE</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">TensorRT-LLM</span>
               </div>
-              <div className="rounded-lg bg-slate-50 dark:bg-slate-900/60 p-2 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400 block">Vector Index</span>
-                <span className="font-bold text-orange-500">cuVS CAGRA</span>
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 block text-[9px]">VECTOR INDEX</span>
+                <span className="text-slate-800 dark:text-slate-200 font-bold">cuVS CAGRA</span>
               </div>
-              <div className="rounded-lg bg-slate-50 dark:bg-slate-900/60 p-2 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400 block">Precision</span>
-                <span className="font-bold text-cyan-600 dark:text-cyan-400">FP8 / FP16</span>
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 block text-[9px]">PRECISION</span>
+                <span className="text-[#76b900] font-bold">FP8 / FP4</span>
               </div>
-              <div className="rounded-lg bg-slate-50 dark:bg-slate-900/60 p-2 border border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400 block">Guardrails Latency</span>
-                <span className="font-bold text-emerald-600 dark:text-emerald-400">&lt; 2.0 ms</span>
+              <div className="p-2 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                <span className="text-slate-500 block text-[9px]">GUARDRAIL LATENCY</span>
+                <span className="text-emerald-500 font-bold">&lt; 2.0 ms</span>
               </div>
             </div>
           </div>
