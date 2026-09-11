@@ -98,11 +98,13 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
                 scenario={scenario}
                 selectedFaultId={2}
                 isSimulating={isSimulating}
+                onSwitchTo3D={() => setActiveCampusView("3d_campus")}
               />
             ) : (
               <NCU3DCampus
                 scenario={scenario}
                 isSimulating={isSimulating}
+                onBackToGis={() => setActiveCampusView("gis")}
               />
             )}
           </div>

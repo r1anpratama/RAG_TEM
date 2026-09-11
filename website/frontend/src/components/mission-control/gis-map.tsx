@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { FaultTrace, Scenario } from "@/types/triage";
-import { Layers, Map as MapIcon, Info, ChevronDown, ChevronUp, Crosshair, Globe, Zap, Compass } from "lucide-react";
+import { Layers, Map as MapIcon, Info, ChevronDown, ChevronUp, Crosshair, Globe, Zap, Box } from "lucide-react";
 
 interface GisMapProps {
   faults: FaultTrace[];
@@ -10,6 +10,7 @@ interface GisMapProps {
   selectedFaultId?: number | null;
   onSelectFault?: (fault: FaultTrace) => void;
   isSimulating?: boolean;
+  onSwitchTo3D?: () => void;
 }
 
 type BasemapStyle = "satellite" | "esri_dark" | "carto_dark" | "osm";
@@ -20,12 +21,12 @@ export const GisMap: React.FC<GisMapProps> = ({
   selectedFaultId,
   onSelectFault,
   isSimulating = false,
+  onSwitchTo3D,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const [activeBasemap, setActiveBasemap] = useState<BasemapStyle>("satellite");
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
-  const [is3DTilt, setIs3DTilt] = useState<boolean>(false);
   const tileLayersRef = useRef<{ [key: string]: any }>({});
   const layersRef = useRef<{
     faultsLayer?: any;
@@ -117,6 +118,9 @@ export const GisMap: React.FC<GisMapProps> = ({
 
       const map = mapInstanceRef.current;
       const { faultsLayer, markersLayer, wavefrontsLayer, campusBoundaryLayer } = layersRef.current;
+
+      // Invalidate size once to ensure full tile coverage
+      map.invalidateSize();
 
       // Render NCU Campus Perimeter (Exact boundary circle around campus ring road)
       if (campusBoundaryLayer) {
@@ -239,7 +243,6 @@ export const GisMap: React.FC<GisMapProps> = ({
         ];
 
         ncuBuildings.forEach((b) => {
-          // Dynamic status ONLY when simulating; otherwise clean neutral architectural styling
           let badgeText = "STANDBY (MONITORED)";
           let badgeBorder = "border-cyan-500/40";
           let badgeBg = "bg-slate-900/95";
@@ -451,19 +454,17 @@ export const GisMap: React.FC<GisMapProps> = ({
             <span className="hidden md:inline">All Taiwan</span>
           </button>
 
-          {/* 3D Perspective Tilt Button */}
-          <button
-            onClick={() => setIs3DTilt(!is3DTilt)}
-            className={`flex items-center space-x-1 rounded px-2 py-1 text-[10px] font-bold border transition ${
-              is3DTilt
-                ? "bg-indigo-600 text-white border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
-            }`}
-            title="Toggle 3D Perspective Drone Pitch"
-          >
-            <Compass className="h-3 w-3" />
-            <span>3D Tilt</span>
-          </button>
+          {/* Dedicated Button to Switch to 3D Campus Digital Twin */}
+          {onSwitchTo3D && (
+            <button
+              onClick={onSwitchTo3D}
+              className="flex items-center space-x-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 text-[10px] font-bold border border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.4)] transition ml-1"
+              title="Open Full Interactive NCU 3D Campus WebGL Twin"
+            >
+              <Box className="h-3 w-3" />
+              <span>3D Campus Twin</span>
+            </button>
+          )}
 
           {/* Basemap Switcher Toolbar */}
           <div className="flex items-center space-x-0.5 rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 ml-1">
@@ -501,15 +502,11 @@ export const GisMap: React.FC<GisMapProps> = ({
         </div>
       </div>
 
-      {/* Map DOM mount container with optional 3D Tilt perspective */}
-      <div className="relative flex-1 w-full overflow-hidden [perspective:900px]">
+      {/* Map DOM mount container - Clean 2D Leaflet with full tile visibility (No broken CSS 3D pitch!) */}
+      <div className="relative flex-1 w-full h-full overflow-hidden">
         <div
           ref={mapContainerRef}
-          className={`h-full w-full ${
-            is3DTilt
-              ? "origin-bottom scale-[1.08] [transform:rotateX(38deg)] shadow-2xl transition-transform duration-500 ease-out"
-              : "transition-transform duration-500 ease-out"
-          }`}
+          className="h-full w-full"
         />
 
         {/* Floating Collapsible Legend */}
