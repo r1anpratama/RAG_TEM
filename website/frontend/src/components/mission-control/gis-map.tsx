@@ -299,8 +299,8 @@ export const GisMap: React.FC<GisMapProps> = ({
         const ncuBuildings = [
           {
             id: "FAC_NCU_SCIENCE_B4",
-            name: "Science Building 4 (S4)",
-            nameZh: "科學四館 / 健雄館",
+            name: "Edream Centre (健雄館 / S4)",
+            nameZh: "E-DREaM 跨領域中心 / 健雄館",
             lat: 24.971335,
             lon: 121.191798,
             type: "Pre-1999 Soft Storey (Earth Sciences / Physics)",

@@ -205,11 +205,11 @@ function createSignPlaqueTexture(): THREE.CanvasTexture | null {
   ctx.font = "bold 36px 'Microsoft JhengHei', 'PingFang TC', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("國立中央大學 理學院四館", 256, 48);
+  ctx.fillText("國立中央大學 E-DREaM 中心", 256, 48);
 
   ctx.fillStyle = "#93c5fd";
   ctx.font = "bold 20px 'Segoe UI', sans-serif";
-  ctx.fillText("SCIENCE BUILDING 4 (S4)", 256, 92);
+  ctx.fillText("EDREAM CENTRE (健雄館)", 256, 92);
 
   const texture = new THREE.CanvasTexture(canvas);
   return texture;
@@ -478,7 +478,7 @@ export function createDetailedScience4Building(): {
   mainMeshes.push(lintel);
   addEdges(lintel, porticoGroup);
 
-  // Chinese Inscription Sign Plaque: "國立中央大學 理學院四館"
+  // Chinese Inscription Sign Plaque: "國立中央大學 E-DREaM 中心"
   const plaqueMat = signTexture
     ? new THREE.MeshStandardMaterial({ map: signTexture, roughness: 0.3, metalness: 0.4 })
     : new THREE.MeshStandardMaterial({ color: 0x3b2d20, roughness: 0.4 });

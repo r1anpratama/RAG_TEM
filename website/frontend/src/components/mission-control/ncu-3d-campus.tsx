@@ -74,21 +74,21 @@ interface ArchitecturalHotspot {
 
 export const CWA_INTENSITY_PALETTE: Record<
   string,
-  { hex: number; css: string; labelId: string; pga: string; pgv: string; textDark?: boolean }
+  { hex: number; css: string; labelEn: string; pga: string; pgv: string; textDark?: boolean }
 > = {
-  "0": { hex: 0x94a3b8, css: "#94a3b8", labelId: "Intensitas 0 (Mikro / Tidak Dirasakan)", pga: "< 0.8 Gal", pgv: "< 0.2 cm/s" },
-  "1": { hex: 0x60a5fa, css: "#60a5fa", labelId: "Intensitas 1 (Sangat Ringan)", pga: "0.8 - 2.5 Gal", pgv: "0.2 - 0.7 cm/s" },
-  "2": { hex: 0x4ade80, css: "#4ade80", labelId: "Intensitas 2 (Ringan / Minor)", pga: "2.5 - 8.0 Gal", pgv: "0.7 - 1.9 cm/s" },
-  "3": { hex: 0xfacc15, css: "#facc15", labelId: "Intensitas 3 (Sedang / Light)", pga: "8.0 - 25 Gal", pgv: "1.03 cm/s (2012 Daxi)", textDark: true },
-  "4": { hex: 0xfb923c, css: "#fb923c", labelId: "Intensitas 4 (Kuat / Moderate)", pga: "25 - 80 Gal", pgv: "1.9 - 5.7 cm/s" },
-  "5-": { hex: 0xf87171, css: "#f87171", labelId: "Intensitas 5- (Kuat Ringan / Strong)", pga: "80 - 140 Gal", pgv: "5.7 - 15 cm/s" },
-  "5+": { hex: 0xef4444, css: "#ef4444", labelId: "Intensitas 5+ (Kuat Berat / Strong)", pga: "140 - 250 Gal", pgv: "15 - 30 cm/s" },
-  "6-": { hex: 0xdc2626, css: "#dc2626", labelId: "Intensitas 6- (Sangat Kuat / Very Strong)", pga: "250 - 440 Gal", pgv: "30 - 50 cm/s" },
-  "6+": { hex: 0x991b1b, css: "#991b1b", labelId: "Intensitas 6+ (Sangat Kuat / Extreme)", pga: "440 - 800 Gal", pgv: "50 - 80 cm/s" },
-  "7": { hex: 0x7f1d1d, css: "#7f1d1d", labelId: "Intensitas 7 (Bencana Dahsyat / Severe)", pga: "> 800 Gal", pgv: "> 80 cm/s" },
+  "0": { hex: 0x94a3b8, css: "#94a3b8", labelEn: "Intensity 0 (Micro / Unfelt)", pga: "< 0.8 Gal", pgv: "< 0.2 cm/s" },
+  "1": { hex: 0x60a5fa, css: "#60a5fa", labelEn: "Intensity 1 (Very Light)", pga: "0.8 - 2.5 Gal", pgv: "0.2 - 0.7 cm/s" },
+  "2": { hex: 0x4ade80, css: "#4ade80", labelEn: "Intensity 2 (Minor / Light)", pga: "2.5 - 8.0 Gal", pgv: "0.7 - 1.9 cm/s" },
+  "3": { hex: 0xfacc15, css: "#facc15", labelEn: "Intensity 3 (Moderate / Light)", pga: "8.0 - 25 Gal", pgv: "1.03 cm/s (2012 Daxi)", textDark: true },
+  "4": { hex: 0xfb923c, css: "#fb923c", labelEn: "Intensity 4 (Moderate-Strong)", pga: "25 - 80 Gal", pgv: "1.9 - 5.7 cm/s" },
+  "5-": { hex: 0xf87171, css: "#f87171", labelEn: "Intensity 5- (Strong)", pga: "80 - 140 Gal", pgv: "5.7 - 15 cm/s" },
+  "5+": { hex: 0xef4444, css: "#ef4444", labelEn: "Intensity 5+ (Very Strong)", pga: "140 - 250 Gal", pgv: "15 - 30 cm/s" },
+  "6-": { hex: 0xdc2626, css: "#dc2626", labelEn: "Intensity 6- (Severe / Near-Fault)", pga: "250 - 440 Gal", pgv: "30 - 50 cm/s" },
+  "6+": { hex: 0x991b1b, css: "#991b1b", labelEn: "Intensity 6+ (Extreme)", pga: "440 - 800 Gal", pgv: "50 - 80 cm/s" },
+  "7": { hex: 0x7f1d1d, css: "#7f1d1d", labelEn: "Intensity 7 (Violent / Catastrophic)", pga: "> 800 Gal", pgv: "> 80 cm/s" },
 };
 
-const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
+const EDREAM_CENTRE_HOTSPOTS: ArchitecturalHotspot[] = [
   {
     id: "dome",
     nameZh: "健雄天文觀測圓頂 (8F)",
@@ -97,12 +97,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 15.5,
     category: "astronomy",
     tag: "GEODESIC ROTUNDA",
-    details: "Dilengkapi teleskop optik 24-inci, motor azimuth rotunda drum, dan telemetri mikrotremor triaksial untuk analisis dinamika lantai teratas (8F).",
+    details: "Equipped with a 24-inch optical telescope, motorized azimuth rotunda drum, and triaxial microtremor telemetry for roof-level (8F) vibration diagnostics.",
     specs: [
-      { label: "Diameter", value: "10.8 meter" },
-      { label: "Lantai", value: "Lantai 8 (Atap Utama)" },
-      { label: "Struktur", value: "Geodesic Steel & Glass" },
-      { label: "Sensor Getaran", value: "NCU_DOME_VIB01 (0.012g)" },
+      { label: "Diameter", value: "10.8 meters" },
+      { label: "Storey Level", value: "Level 8 (Roof Crown)" },
+      { label: "Structure", value: "Geodesic Steel & Glass" },
+      { label: "Vibration Sensor", value: "NCU_DOME_VIB01 (0.012g)" },
     ],
   },
   {
@@ -113,12 +113,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 24.5,
     category: "energy",
     tag: "CLEAN ENERGY MICROGRID",
-    details: "Panel surya monokristalin efisiensi tinggi miring 23.5° ke selatan pada atap sayap selatan S4.",
+    details: "High-efficiency monocrystalline solar array tilted 23.5° south atop the Edream Centre south wing roof deck.",
     specs: [
-      { label: "Kapasitas", value: "48 kW Peak" },
-      { label: "Elevasi", value: "Lantai 8 (+32m)" },
-      { label: "Kemiringan", value: "23.5° Selatan" },
-      { label: "Koneksi", value: "NCU Substation B" },
+      { label: "Capacity", value: "48 kW Peak" },
+      { label: "Elevation", value: "8F Roof (+32m)" },
+      { label: "Tilt Angle", value: "23.5° South" },
+      { label: "Microgrid Tie", value: "NCU Substation B" },
     ],
   },
   {
@@ -129,12 +129,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 21.0,
     category: "structural",
     tag: "CORE SHEAR ZONE",
-    details: "Kubah kaca melengkung di atas atrium sentral. Memuat ruang mesin lift berkecepatan tinggi dan sensor drift inti geser beton.",
+    details: "Curved tempered-glass barrel vault skylight over the central atrium core. Houses the high-speed traction elevator machinery and core drift sensors.",
     specs: [
-      { label: "Tipe Inti", value: "RC Shear Wall Core" },
-      { label: "Lantai Teratas", value: "Lantai 8 Ruang Mesin" },
-      { label: "Baseline IDR", value: "0.04% (Normal)" },
-      { label: "Sambungan", value: "Seismic Expansion Joints" },
+      { label: "Core Type", value: "RC Shear Wall Core" },
+      { label: "Upper Storey", value: "Level 8 Penthouse" },
+      { label: "Baseline IDR", value: "0.04% (Nominal)" },
+      { label: "Seismic Expansion", value: "Full Perimeter Expansion Joint" },
     ],
   },
   {
@@ -145,12 +145,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 28.5,
     category: "mechanical",
     tag: "CENTRAL HVAC PLANT",
-    details: "Menara pendingin ganda dengan peredam getaran spring-neoprene untuk meredam resonansi mesin non-struktural saat eksitasi gempa.",
+    details: "Dual centrifugal chiller towers equipped with spring-neoprene vibration isolators to damp non-structural mechanical resonances during ground shaking.",
     specs: [
-      { label: "Kapasitas", value: "2x 150 Ton Chiller" },
-      { label: "Isolasi Getar", value: "Spring Damping (98.4%)" },
-      { label: "Katup Otomatis", value: "Seismic Flow Trip SCADA" },
-      { label: "Elevasi", value: "Atap Mekanikal 8F" },
+      { label: "Capacity", value: "2x 150 Ton Chillers" },
+      { label: "Isolation Damping", value: "Spring Damping (98.4%)" },
+      { label: "Auto Shutoff", value: "Seismic Flow Trip SCADA" },
+      { label: "Location", value: "8F Mechanical Roof Deck" },
     ],
   },
   {
@@ -161,12 +161,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 46.5,
     category: "structural",
     tag: "FACULTY LABS",
-    details: "Teras laboratorium bertingkat simetris untuk lab optik kuantum fisika dan instrumentasi sounding atmosfer antariksa NCU.",
+    details: "Symmetrical recessed research terraces accommodating photonics, physics labs, and space science atmospheric sounding instrumentation.",
     specs: [
-      { label: "Tingkat Lantai", value: "Lantai 4F, 5F, 6F" },
-      { label: "Balustrade", value: "Tempered Glass & Baja" },
-      { label: "Pemantauan Drift", value: "Sensor LVDT Real-Time" },
-      { label: "Okupansi", value: "Lab Riset Pascasarjana" },
+      { label: "Floor Levels", value: "Levels 4F, 5F, 6F" },
+      { label: "Balustrade", value: "Tempered Safety Glass & Steel" },
+      { label: "Drift Telemetry", value: "Real-Time LVDT Gauges" },
+      { label: "Occupancy", value: "Graduate Research Labs" },
     ],
   },
   {
@@ -177,12 +177,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 73.0,
     category: "sensor",
     tag: "SOFT-STOREY CRITICAL",
-    details: "Portico batu travertine 2 lantai. Zona evaluasi kritis ASCE 41-17: aula terbuka lantai 1 menunjukkan kontras kekakuan lantai lunak (Soft-Storey) yang rentan terhadap geser gempa dangkal.",
+    details: "Two-story travertine sandstone entrance portico. ASCE 41-17 critical zone: 1F ground hall features open column stiffness contrast susceptible to shear concentration during near-fault shallow earthquakes.",
     specs: [
-      { label: "Seismograf", value: "NCU_ACC_04 (Triaksial Z/N/E)" },
-      { label: "Rasio Kekakuan", value: "K_1F / K_2F = 0.62 (Soft-Storey)" },
-      { label: "Tingkat", value: "Lantai 1 Dasar (Atrium Terbuka)" },
-      { label: "Status Audit", value: "Audit Pasca-1999: Zona Kritis Geser" },
+      { label: "Seismograph", value: "NCU_ACC_04 (Triaxial Z/N/E)" },
+      { label: "Stiffness Ratio", value: "K_1F / K_2F = 0.62 (Soft-Storey)" },
+      { label: "Storey Level", value: "Level 1 Ground Hall" },
+      { label: "Audit Rating", value: "Post-1999 Audit: Critical Shear Zone" },
     ],
   },
   {
@@ -193,12 +193,12 @@ const SCIENCE4_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 86.5,
     category: "structural",
     tag: "EVACUATION POINT",
-    details: "Plaza pejalan kaki batu granit, jalur landai difabel ADA, dan area terbuka aman yang ditetapkan sebagai Titik Evakuasi Darurat NCU #4.",
+    details: "Interlocking granite pedestrian forecourt, ADA handicap ramp, and open assembly ground designated as NCU Emergency Evacuation Muster Point #4.",
     specs: [
-      { label: "Kapasitas", value: "600 Orang" },
-      { label: "Material", value: "Granit Interlocking Pavers" },
-      { label: "Akses", value: "Ramp Ganda & 3 Trap Tangga" },
-      { label: "Hidran", value: "CWA Station #4 Hydrant" },
+      { label: "Capacity", value: "600 Persons" },
+      { label: "Pavement", value: "Interlocking Granite Pavers" },
+      { label: "Access", value: "Dual Ramp & 3-Tier Steps" },
+      { label: "Hydrant", value: "CWA Station #4 Hydrant" },
     ],
   },
 ];
@@ -210,7 +210,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<CampusBuilding | null>(null);
-  const [cameraMode, setCameraMode] = useState<"campus" | "science4" | "eng5" | "library" | "admin">("campus");
+  const [cameraMode, setCameraMode] = useState<"campus" | "edream" | "library" | "eng5" | "admin" | "gym">("campus");
   const [displayMode, setDisplayMode] = useState<"orbit_3d" | "ultra_hd_twin">("orbit_3d");
   const [activeHotspot, setActiveHotspot] = useState<ArchitecturalHotspot | null>(null);
   const [localSimulating, setLocalSimulating] = useState<boolean>(false);
@@ -225,7 +225,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   useEffect(() => {
     if (!scenario) return;
     const id = scenario.id.toLowerCase();
-    if (id.includes("20883") || id.includes("20122")) {
+    if (id.includes("20883") || id.includes("20122") || id.includes("daxi")) {
       setWaveRegime("short_period");
     } else if (id.includes("hualien")) {
       setWaveRegime("long_period");
@@ -234,31 +234,41 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     }
   }, [scenario]);
 
-  // Determine active felt CWA intensity at NCU
-  const activeIntensity = useMemo(() => {
-    if (waveRegime === "short_period") {
-      // 2012 Daxi Taoyuan (EQ 20883) was recorded at on-campus TCU083 with Intensity 3!
-      if (scenario?.id?.includes("20122")) return "2";
-      return "3";
+  const isDaxiScenario = useMemo(() => {
+    return (
+      waveRegime === "short_period" ||
+      Boolean(scenario?.id?.toLowerCase().includes("20883")) ||
+      Boolean(scenario?.id?.toLowerCase().includes("20122")) ||
+      Boolean(scenario?.id?.toLowerCase().includes("daxi"))
+    );
+  }, [waveRegime, scenario]);
+
+  // Helper: compute felt intensity for a given building under active earthquake conditions
+  // Specifically for Daxi earthquake:
+  // - Buildings <= 3 storeys feel Intensity 3 (Yellow #facc15)
+  // - Buildings > 3 storeys feel Intensity 2 (Green #4ade80)
+  const getBuildingFeltIntensity = (b: CampusBuilding): string => {
+    if (isDaxiScenario) {
+      return b.stories <= 3 ? "3" : "2";
     } else if (waveRegime === "long_period") {
-      // Hualien offshore felt Int 4 in northern basins
-      return "4";
+      // Long-period subduction: tall buildings resonate strongly (Int 4), low-rise move rigidly (Int 2)
+      return b.stories > 3 ? "4" : "2";
     } else {
-      // Near fault rupture (Shuanglienpo M6.9)
+      // Near-fault pulse (M6.9): high velocity shockwave across all heights (Int 6-)
       return "6-";
     }
-  }, [scenario, waveRegime]);
+  };
 
   const animationFrameRef = useRef<number | null>(null);
   const beaconLightRef = useRef<THREE.PointLight | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Verified NCU Campus Buildings with Real Storeys, Structural Heights, and Period Analytics
+  // Verified NCU Campus Buildings: Renamed S4 to Edream Centre, with accurate storeys & physics
   const buildingsRef = useRef<CampusBuilding[]>([
     {
       id: "FAC_NCU_SCIENCE_B4",
-      name: "Science Building 4 (健雄館 / S4)",
-      nameZh: "國立中央大學 理學院四館 / 健雄館",
+      name: "Edream Centre (健雄館 / S4)",
+      nameZh: "國立中央大學 E-DREaM 跨領域中心 / 健雄館",
       x: -5,
       z: -65,
       width: 24,
@@ -267,24 +277,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       stories: 8,
       floors: 8,
       era: "Pre-1999 (Ground Floor Soft-Storey)",
-      structuralType: "RC Frame w/ Open Ground Hall (Diskontinuitas Kekakuan 1F)",
+      structuralType: "RC Frame w/ Open Ground Hall (1F Stiffness Discontinuity)",
       fundamentalPeriodSec: 0.65,
       sensors: ["NCU_ACC_04_Z", "NCU_ACC_04_N", "NCU_ACC_04_E"],
       softStorey: true,
       shortPeriodImpact: {
-        resonance: "Tinggi (Konsentrasi Geser Lantai 1)",
-        badgeText: "⚠️ 1F Soft-Storey Shear Alert",
+        resonance: "CWA Intensity 2 (Attenuated at Upper Floors) / 1F Soft-Storey Shear Alert",
+        badgeText: "CWA Int 2 • 8 Storeys (1F Soft-Storey Alert)",
         level: "critical",
         explanation:
-          "Meskipun gedung memiliki 8 lantai, lantai 1 (Ground Hall) memiliki dinding terbuka dengan rasio kekakuan K_1F / K_2F = 0.62. Gelombang frekuensi tinggi dari gempa dangkal Daxi (2012) memicu percepatan inersia cepat yang terkonsentrasi pada kolom lantai dasar!",
-        driftEstPct: 0.52,
+          "In the 2012 Daxi earthquake, multi-storey buildings (> 3 storeys) have longer fundamental periods (Tn = 0.65s) that dynamically filter out high frequencies, attenuating upper mass shaking to Intensity 2 (Green). However, the ground floor features an open column atrium with K_1F / K_2F = 0.62, concentrating high-frequency shear force at the ground-level columns!",
+        driftEstPct: 0.42,
       },
       longPeriodImpact: {
-        resonance: "Kritis (Resonansi Harmonik 8F)",
-        badgeText: "🏢 Resonansi Gedung Tinggi (8F)",
+        resonance: "Critical Harmonic Resonance (8F High-Rise)",
+        badgeText: "CWA Int 4 • Resonant Sway (8F)",
         level: "critical",
         explanation:
-          "Sebagai gedung tinggi 8 lantai (32m), S4 sangat peka terhadap gelombang periode panjang (>1.0s) dari gempa subduksi. Kubah astronomi di lantai 8 mengalami translasi lateral besar bolak-balik dengan osilasi lambat.",
+          "As an 8-storey structure (32m), the Edream Centre is susceptible to long-period subduction waves (> 1.0s). The rooftop observatory dome experiences large lateral periodic sway.",
         driftEstPct: 1.25,
       },
     },
@@ -300,24 +310,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       stories: 8,
       floors: 8,
       era: "Post-1999 Seismic Retrofitted Core",
-      structuralType: "Dual RC Shear Wall & Braced Core (Beban Rak Buku Masif)",
+      structuralType: "Dual RC Shear Wall & Braced Core (Heavy Bookstack Mass)",
       fundamentalPeriodSec: 0.72,
       sensors: ["NCU_LIB_SM1", "NCU_LIB_SM2"],
       softStorey: false,
       shortPeriodImpact: {
-        resonance: "Rendah (Teredam / Filter Dinamis)",
-        badgeText: "🛡️ Teredam (Filter Gelombang Pendek)",
+        resonance: "CWA Intensity 2 (Attenuated / Low-Pass Dynamic Filter)",
+        badgeText: "CWA Int 2 • 8 Storeys (Safe / Filtered)",
         level: "safe",
         explanation:
-          "Struktur 8 lantai yang fleksibel dan bermassa besar (Tn = 0.72s) bertindak sebagai low-pass filter terhadap gelombang periode pendek gempa dangkal Daxi. Ayunan atap kecil dan dinding geser inti tetap berada dalam rentang elastis aman.",
-        driftEstPct: 0.22,
+          "With 8 storeys (> 3 storeys) and massive inertia (Tn = 0.72s), the library acts as a low-pass filter against high-frequency Daxi earthquake waves. Ground motion is felt as Intensity 2 (Green) with shear walls well within elastic safety limits.",
+        driftEstPct: 0.20,
       },
       longPeriodImpact: {
-        resonance: "Kritis (Resonansi Harmonik Maksimal)",
-        badgeText: "🏢 Resonansi Maksimal (Gedung Tinggi 8F)",
+        resonance: "Critical Harmonic Resonance (8F High-Rise)",
+        badgeText: "CWA Int 4 • Maximum Resonance (8F)",
         level: "critical",
         explanation:
-          "Periode fundamental 0.72s berimpit langsung dengan spektrum gelombang geser periode panjang subduksi/cekungan Taoyuan! Terjadi amplifikasi harmonik hebat pada lantai atas (6F-8F), risiko buku berjatuhan dari rak bertingkat dan kabel lift terpelintir.",
+          "Fundamental period Tn = 0.72s matches the long-period shear wave spectrum of offshore subduction events. Massive dynamic amplification occurs on upper floors (6F-8F), with risks of tall bookstacks overturning and elevator cables twisting.",
         driftEstPct: 1.42,
       },
     },
@@ -338,19 +348,19 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       sensors: ["NCU_EECS_01", "NCU_EECS_02"],
       softStorey: false,
       shortPeriodImpact: {
-        resonance: "Moderat (Daktil Aman)",
-        badgeText: "🛡️ Daktil Rendah Resiko",
+        resonance: "CWA Intensity 2 (Attenuated / Ductile Safe)",
+        badgeText: "CWA Int 2 • 7 Storeys (Safe)",
         level: "safe",
         explanation:
-          "Detail sengkang pengekang daktil pasca-1999 mendisipasi energi getaran frekuensi tinggi dengan efektif. Percepatan lantai moderat tanpa risiko struktural berarti.",
-        driftEstPct: 0.26,
+          "As a 7-storey building (> 3 storeys), it filters out high-frequency Daxi waves, feeling attenuated Intensity 2 (Green). Modern ductile detailing dissipates vibration energy safely without structural distress.",
+        driftEstPct: 0.24,
       },
       longPeriodImpact: {
-        resonance: "Tinggi (Ayunan Resonan Lantai Atas)",
-        badgeText: "🏢 Ayunan Resonansi 7F",
+        resonance: "High Resonant Upper-Floor Sway",
+        badgeText: "CWA Int 4 • Upper-Floor Sway (7F)",
         level: "warning",
         explanation:
-          "Sebagai gedung bertingkat 7 lantai, gedung ini merespon gelombang periode panjang dengan ayunan lateral bolak-balik yang terasa jelas di lantai 5 hingga 7 (Lab Komputer & Server EECS).",
+          "Responds to long-period subduction waves with visible flexural swaying that is pronounced on levels 5 to 7 (Computer Science server and research facilities).",
         driftEstPct: 1.05,
       },
     },
@@ -371,26 +381,26 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       sensors: ["NCU_OPS_SCADA"],
       softStorey: false,
       shortPeriodImpact: {
-        resonance: "Tinggi (Resonansi Spektrum Pendek)",
-        badgeText: "⚡ Resonansi Periode Pendek (5F)",
-        level: "warning",
-        explanation:
-          "Periode alami ~0.45s berdekatan dengan spektrum energi dominan gempa dangkal Daxi (~0.25-0.4s). Mengalami percepatan spektral dasar tertinggi di antara gedung bertingkat menengah.",
-        driftEstPct: 0.38,
-      },
-      longPeriodImpact: {
-        resonance: "Moderat (Kekakuan Memadai)",
-        badgeText: "🛡️ Cukup Kaku (Resonansi Rendah)",
+        resonance: "CWA Intensity 2 (Attenuated Mid-Rise)",
+        badgeText: "CWA Int 2 • 5 Storeys",
         level: "safe",
         explanation:
-          "Kekakuan gedung 5 lantai cukup untuk mencegah resonansi dengan gelombang subduksi periode panjang (>1.2s).",
+          "Having 5 storeys (> 3 storeys), the building motion is attenuated to Intensity 2 during the Daxi earthquake, keeping base shear within design capacity.",
+        driftEstPct: 0.30,
+      },
+      longPeriodImpact: {
+        resonance: "Moderate (Sufficient Stiffness)",
+        badgeText: "CWA Int 2 • Moderate Sway",
+        level: "safe",
+        explanation:
+          "The structural stiffness of the 5-storey frame is sufficient to suppress severe resonant amplification during slow subduction waves.",
         driftEstPct: 0.45,
       },
     },
     {
       id: "FAC_NCU_EDREAM",
-      name: "College of Earth Sciences (地球科學學院 / E-DREaM)",
-      nameZh: "地球科學學院 / 健雄館南翼 / E-DREaM Lab",
+      name: "College of Earth Sciences (地球科學學院大樓)",
+      nameZh: "國立中央大學 地球科學學院大樓",
       x: 63,
       z: 46,
       width: 26,
@@ -404,19 +414,19 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       sensors: ["CWASN_NCU_BB", "TT_SAM_EDGE_NODE"],
       softStorey: false,
       shortPeriodImpact: {
-        resonance: "Tinggi (Resonansi Frekuensi Tinggi)",
-        badgeText: "⚡ Resonansi Frekuensi Tinggi (4F)",
-        level: "warning",
-        explanation:
-          "Struktur kaku 4 lantai memiliki Tn ≈ 0.35s, hampir identik dengan periode dominan gelombang gempa dangkal Daxi (f ≈ 3 Hz). Mengalami percepatan lantai puncak, namun kekakuan struktur menjaga drift tetap aman.",
-        driftEstPct: 0.32,
-      },
-      longPeriodImpact: {
-        resonance: "Rendah (Aman Bebas Resonansi)",
-        badgeText: "🛡️ Sangat Aman (Bebas Ayunan)",
+        resonance: "CWA Intensity 2 (Low-Rise Attenuated / 4 Storeys)",
+        badgeText: "CWA Int 2 • 4 Storeys (Safe)",
         level: "safe",
         explanation:
-          "Gedung kaku 4 lantai tidak memiliki fleksibilitas untuk berayun bersama gelombang periode panjang. Bergerak serempak bersama tanah tanpa amplifikasi dinamik.",
+          "At 4 storeys (> 3 storeys), the building motion is rated Intensity 2. While its period (Tn ≈ 0.35s) responds to high-frequency motion, low drift keeps the bedrock seismograph vault secure.",
+        driftEstPct: 0.28,
+      },
+      longPeriodImpact: {
+        resonance: "Low (Safe Rigid Body Motion)",
+        badgeText: "CWA Int 2 • Rigid Safe",
+        level: "safe",
+        explanation:
+          "The 4-storey stiff structure does not resonate with slow long-period waves, moving in unison with the bedrock without dynamic drift.",
         driftEstPct: 0.16,
       },
     },
@@ -432,24 +442,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       stories: 2,
       floors: 2,
       era: "Post-1999 Long-Span Roof Structure",
-      structuralType: "High-Bay Steel Space Truss on RC Columns (Bentang Lebar)",
+      structuralType: "High-Bay Steel Space Truss on RC Columns (Long-Span)",
       fundamentalPeriodSec: 0.28,
       sensors: ["NCU_GYM_S1"],
       softStorey: false,
       shortPeriodImpact: {
-        resonance: "Tinggi (Resonansi Rangka Atap Baja)",
-        badgeText: "⚡ Resonansi Rangka Atap (2F High-Bay)",
+        resonance: "CWA Intensity 3 (High-Frequency Resonance in Low-Rise ≤ 3F)",
+        badgeText: "CWA Int 3 (Yellow) • 2 Storeys High-Bay",
         level: "warning",
         explanation:
-          "Rangka atap baja bentang lebar sangat peka terhadap frekuensi tinggi dan komponen akselerasi vertikal gempa dangkal Daxi. Baut dan joint truss bergetar intensif.",
-        driftEstPct: 0.28,
+          "Being a low-rise building (≤ 3 storeys), the Gymnasium directly experiences CWA Intensity 3 (Yellow) during the Daxi earthquake! Its short natural period (Tn ≈ 0.28s) resonates with the shallow crustal high frequencies, exciting the long-span roof truss joints.",
+        driftEstPct: 0.38,
       },
       longPeriodImpact: {
-        resonance: "Rendah (Aman Bebas Ayunan Panjang)",
-        badgeText: "🛡️ Aman dari Ayunan Periode Panjang",
+        resonance: "Low (Safe from Long-Period Sway)",
+        badgeText: "CWA Int 2 • Low-Rise Safe",
         level: "safe",
         explanation:
-          "Gedung rendah 2 lantai ini tidak terpengaruh oleh ayunan periode panjang subduksi.",
+          "The 2-storey low-rise building does not undergo resonant amplification during long-period ground motion, maintaining low drift.",
         driftEstPct: 0.12,
       },
     },
@@ -581,7 +591,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     lawn.position.set(0, 0.15, -8);
     scene.add(lawn);
 
-    // 9. Build 3D NCU Buildings with Visible Storey / Floor Slabs
+    // 9. Build 3D NCU Buildings with Visible Storey Slabs
     buildingMeshesRef.current.clear();
     buildingsRef.current.forEach((b) => {
       if (b.id === "FAC_NCU_SCIENCE_B4") {
@@ -690,31 +700,30 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           const group = buildingMeshesRef.current.get(b.id);
           if (!group) return;
 
-          if (waveRegime === "short_period") {
-            // Gempa Dangkal Jarak Dekat / Periode Pendek (2012 Daxi Taoyuan ML 4.66)
-            // Frekuensi tinggi (w ~ 24 rad/s), resonansi pada gedung rendah-menengah & 1F soft storey
-            const Tn = b.fundamentalPeriodSec;
-            const Teq = 0.28; // Periode dominan gempa dangkal Daxi
-            const freqRatio = Teq / Tn;
-            const daf = 1 / Math.sqrt(Math.pow(1 - freqRatio * freqRatio, 2) + Math.pow(2 * 0.05 * freqRatio, 2));
-
-            const softStoreyMultiplier = b.softStorey ? 1.75 : 1.0;
-            const amp = (0.2 + Math.min(2.5, daf) * 0.25) * softStoreyMultiplier;
-            const displacement = Math.sin(elapsedTime * 24 + b.x * 0.1) * amp;
-
-            group.position.x = b.x + displacement;
-            group.rotation.z = (displacement / b.height) * 0.045;
+          if (isDaxiScenario) {
+            // Gempa Dangkal Daxi: High frequency (f ~ 3.6 Hz), peak amplification on low-rise (<= 3 storeys)
+            if (b.stories <= 3) {
+              // Low-rise (Gym 2F): high acceleration shaking
+              const amp = 0.75;
+              const displacement = Math.sin(elapsedTime * 26 + b.x * 0.1) * amp;
+              group.position.x = b.x + displacement;
+              group.rotation.z = (displacement / b.height) * 0.05;
+            } else {
+              // Multi-storey (> 3 storeys): attenuated motion (Int 2)
+              const softStoreyMultiplier = b.softStorey ? 1.4 : 1.0;
+              const amp = 0.32 * softStoreyMultiplier;
+              const displacement = Math.sin(elapsedTime * 18 + b.x * 0.1) * amp;
+              group.position.x = b.x + displacement;
+              group.rotation.z = (displacement / b.height) * 0.025;
+            }
           } else if (waveRegime === "long_period") {
-            // Gempa Subduksi Jarak Jauh / Periode Panjang (Hualien Offshore Mw 7.2)
-            // Frekuensi lambat (w ~ 3.6 rad/s), resonansi besar pada GEDUNG TINGGI (7-8 Lantai)
+            // Long-period subduction: slow, deep swaying in tall buildings (7-8F)
             const heightAmplification = Math.pow(b.stories / 8, 2.2);
             const swayDisplacement = Math.sin(elapsedTime * 3.6 + b.z * 0.05) * 1.85 * heightAmplification;
-
             group.position.x = b.x + swayDisplacement;
-            // Visible harmonic drift sway proportional to height
             group.rotation.z = (swayDisplacement / b.height) * 0.14;
           } else {
-            // Pulsa Patahan Dekat (Shuanglienpo-Hukou Mw 6.91)
+            // Near-fault pulse (M6.9)
             const pulse = Math.sin(elapsedTime * 14) * 2.4;
             group.position.x = b.x + pulse;
             group.rotation.z = (pulse / b.height) * 0.09;
@@ -735,7 +744,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     };
     animate();
 
-    // Robust Resize Handling
+    // Resize handling
     const handleResize = () => {
       if (!container || !renderer || !camera) return;
       const w = container.clientWidth || 700;
@@ -755,21 +764,23 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       }
       renderer.dispose();
     };
-  }, [isSimulating, waveRegime]);
+  }, [isSimulating, isDaxiScenario, waveRegime]);
 
-  // Update Building Colors Based on CWA Felt Intensity and Structural Resonance
+  // Update Building Colors per-building according to the user's Daxi rule:
+  // <= 3 storeys: Intensity 3 (Yellow #facc15)
+  // > 3 storeys: Intensity 2 (Green #4ade80)
   useEffect(() => {
-    const palette = CWA_INTENSITY_PALETTE[activeIntensity] || CWA_INTENSITY_PALETTE["3"];
-    const intensityHex = palette.hex;
-
     buildingsRef.current.forEach((b) => {
       const group = buildingMeshesRef.current.get(b.id);
       if (!group) return;
 
-      // Resonant status calculation
+      const feltInt = getBuildingFeltIntensity(b);
+      const palette = CWA_INTENSITY_PALETTE[feltInt] || CWA_INTENSITY_PALETTE["2"];
+      const intensityHex = palette.hex;
+
       const isResonant =
-        waveRegime === "short_period"
-          ? b.stories <= 5 || b.softStorey
+        isDaxiScenario
+          ? b.stories <= 3 || b.softStorey
           : waveRegime === "long_period"
           ? b.stories >= 7
           : true;
@@ -781,9 +792,8 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             const mat = mesh.material as THREE.MeshStandardMaterial;
             if (mat && mat.emissive) {
               if (isSimulating) {
-                // Apply CWA Intensity Color
                 mat.emissive.setHex(intensityHex);
-                mat.emissiveIntensity = isResonant ? 0.7 : 0.25;
+                mat.emissiveIntensity = isResonant ? 0.6 : 0.2;
               } else {
                 mat.emissive.setHex(0x000000);
                 mat.emissiveIntensity = 0.0;
@@ -839,7 +849,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         });
       }
     });
-  }, [isSimulating, activeIntensity, waveRegime]);
+  }, [isSimulating, isDaxiScenario, waveRegime]);
 
   const updateCameraPosition = () => {
     if (!cameraRef.current) return;
@@ -881,7 +891,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     );
     isDraggingRef.current = false;
 
-    // Raycast on single click (not dragging)
+    // Raycast on click
     if (dist < 6 && containerRef.current && cameraRef.current && sceneRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const mouse = new THREE.Vector2(
@@ -926,28 +936,32 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     updateCameraPosition();
   };
 
-  const setPreset = (preset: "campus" | "science4" | "eng5" | "library" | "admin") => {
+  const setPreset = (preset: "campus" | "edream" | "library" | "eng5" | "admin" | "gym") => {
     setCameraMode(preset);
     if (preset === "campus") {
       cameraTargetRef.current.set(0, 10, 0);
       cameraAngleRef.current = { theta: Math.PI / 4, phi: Math.PI / 3.2, radius: 250 };
       setSelectedBuilding(null);
-    } else if (preset === "science4") {
+    } else if (preset === "edream") {
       cameraTargetRef.current.set(-5, 18, -65);
       cameraAngleRef.current = { theta: Math.PI / 1.7, phi: Math.PI / 3.4, radius: 75 };
       setSelectedBuilding(buildingsRef.current[0]);
-    } else if (preset === "eng5") {
-      cameraTargetRef.current.set(-116, 18, 55);
-      cameraAngleRef.current = { theta: -Math.PI / 3, phi: Math.PI / 3.5, radius: 100 };
-      setSelectedBuilding(buildingsRef.current[2]);
     } else if (preset === "library") {
       cameraTargetRef.current.set(57, 18, 19);
       cameraAngleRef.current = { theta: (5 * Math.PI) / 4, phi: Math.PI / 3.5, radius: 95 };
       setSelectedBuilding(buildingsRef.current[1]);
+    } else if (preset === "eng5") {
+      cameraTargetRef.current.set(-116, 18, 55);
+      cameraAngleRef.current = { theta: -Math.PI / 3, phi: Math.PI / 3.5, radius: 100 };
+      setSelectedBuilding(buildingsRef.current[2]);
     } else if (preset === "admin") {
       cameraTargetRef.current.set(77, 14, 20);
       cameraAngleRef.current = { theta: Math.PI, phi: Math.PI / 3.2, radius: 85 };
       setSelectedBuilding(buildingsRef.current[3]);
+    } else if (preset === "gym") {
+      cameraTargetRef.current.set(-30, 10, 22);
+      cameraAngleRef.current = { theta: Math.PI / 2.5, phi: Math.PI / 3.2, radius: 85 };
+      setSelectedBuilding(buildingsRef.current[5]);
     }
     updateCameraPosition();
   };
@@ -957,10 +971,8 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     setTimeout(() => setLocalSimulating(false), 12000);
   };
 
-  const intensityMeta = CWA_INTENSITY_PALETTE[activeIntensity] || CWA_INTENSITY_PALETTE["3"];
-
   return (
-    <div className="relative h-full w-full overflow-hidden bg-slate-950 select-none">
+    <div className="relative h-full w-full overflow-hidden bg-slate-950 select-none font-sans">
       <style>{`
         @keyframes seismicTremor {
           0% { transform: translate(0px, 0px) rotate(0deg); }
@@ -984,7 +996,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         onWheel={handleWheel}
       />
 
-      {/* 3D Floating Building Labels (Overlayed over 3D Canvas) */}
+      {/* 3D Floating Building Labels */}
       {displayMode === "orbit_3d" && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
           {buildingsRef.current.map((b) => {
@@ -992,19 +1004,8 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             if (!coord || !coord.visible) return null;
 
             const isSelected = selectedBuilding?.id === b.id;
-            const isResonant =
-              waveRegime === "short_period"
-                ? b.stories <= 5 || b.softStorey
-                : waveRegime === "long_period"
-                ? b.stories >= 7
-                : true;
-
-            const resonanceBadge =
-              waveRegime === "short_period"
-                ? b.shortPeriodImpact.badgeText
-                : waveRegime === "long_period"
-                ? b.longPeriodImpact.badgeText
-                : "💥 Pulsa Patahan Dekat";
+            const feltInt = getBuildingFeltIntensity(b);
+            const palette = CWA_INTENSITY_PALETTE[feltInt] || CWA_INTENSITY_PALETTE["2"];
 
             return (
               <div
@@ -1020,16 +1021,19 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   className={`flex flex-col items-center rounded-lg px-2 py-1 shadow-2xl backdrop-blur-md border transition-all ${
                     isSelected
                       ? "bg-slate-900/95 border-cyan-400 ring-2 ring-cyan-400/50 scale-110"
-                      : isSimulating && isResonant
-                      ? "bg-slate-900/90 border-amber-400/90"
+                      : isSimulating
+                      ? "bg-slate-900/90"
                       : "bg-slate-900/80 border-slate-700/80 hover:border-slate-500"
                   }`}
+                  style={{
+                    borderColor: isSimulating ? palette.css : undefined,
+                  }}
                 >
                   <div className="flex items-center space-x-1.5">
                     <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-1 py-0.2 text-[9px] font-mono font-bold">
-                      {b.floors} Lantai ({b.stories}F)
+                      {b.floors} Storeys ({b.stories}F)
                     </span>
-                    <span className="text-[10px] font-bold text-white whitespace-nowrap truncate max-w-[120px]">
+                    <span className="text-[10px] font-bold text-white whitespace-nowrap truncate max-w-[130px]">
                       {b.name.split("(")[0]}
                     </span>
                   </div>
@@ -1038,14 +1042,16 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                     <div className="flex items-center space-x-1 mt-0.5">
                       <span
                         className="inline-block w-2 h-2 rounded-full animate-ping"
-                        style={{ backgroundColor: intensityMeta.css }}
+                        style={{ backgroundColor: palette.css }}
                       />
                       <span
-                        className={`text-[8px] font-mono font-bold px-1 rounded truncate max-w-[130px] ${
-                          isResonant ? "bg-amber-400 text-slate-950" : "bg-slate-800 text-slate-300"
-                        }`}
+                        className="text-[8px] font-mono font-bold px-1 rounded truncate max-w-[140px]"
+                        style={{
+                          backgroundColor: palette.css,
+                          color: palette.textDark ? "#0f172a" : "#ffffff",
+                        }}
                       >
-                        {resonanceBadge}
+                        Int {feltInt} ({feltInt === "3" ? "Yellow ≤3F" : "Green >3F"})
                       </span>
                     </div>
                   )}
@@ -1069,13 +1075,13 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           >
             <img
               src="/assets/buildings/science4_isometric.jpg"
-              alt="NCU Science Building 4 Ultra-HD Perspective Twin"
+              alt="NCU Edream Centre Ultra-HD Perspective Twin"
               className="max-h-[430px] w-auto object-contain rounded-lg shadow-2xl border border-slate-800/80 select-none"
               draggable={false}
             />
 
             {/* Interactive Telemetry Hotspot Pins */}
-            {SCIENCE4_HOTSPOTS.map((spot, idx) => {
+            {EDREAM_CENTRE_HOTSPOTS.map((spot, idx) => {
               const isSelected = activeHotspot?.id === spot.id;
               return (
                 <button
@@ -1089,7 +1095,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                     <span
                       className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
                         isSimulating
-                          ? "bg-amber-400"
+                          ? "bg-emerald-400"
                           : spot.category === "astronomy"
                           ? "bg-cyan-400"
                           : spot.category === "energy"
@@ -1104,7 +1110,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                         isSelected
                           ? "bg-white text-slate-950 border-cyan-400 scale-125 ring-2 ring-cyan-400/50"
                           : isSimulating
-                          ? "bg-amber-500 text-slate-950 border-white"
+                          ? "bg-emerald-500 text-slate-950 border-white"
                           : spot.category === "astronomy"
                           ? "bg-cyan-500 text-slate-950 border-white"
                           : spot.category === "energy"
@@ -1117,7 +1123,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   </span>
 
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-0.5 rounded bg-slate-900/95 border border-slate-700 text-[9px] font-bold text-white whitespace-nowrap pointer-events-none shadow-xl backdrop-blur-md">
-                    {spot.nameZh}
+                    {spot.nameEn}
                   </span>
                 </button>
               );
@@ -1126,20 +1132,9 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             {/* In-Simulation Ground Floor Soft-Storey Callout */}
             {isSimulating && (
               <div className="absolute left-[51.5%] top-[78%] -translate-x-1/2 z-20 pointer-events-none">
-                <div
-                  className="flex items-center space-x-1 px-2 py-1 rounded border text-[9px] font-bold shadow-2xl animate-bounce backdrop-blur-md"
-                  style={{
-                    backgroundColor: "rgba(120, 53, 15, 0.95)",
-                    borderColor: intensityMeta.css,
-                    color: intensityMeta.css,
-                  }}
-                >
-                  <ShieldAlert className="h-3 w-3" />
-                  <span>
-                    {waveRegime === "short_period"
-                      ? "CRITICAL: 1F SOFT-STOREY GESER TERKONSENTRASI (INT 3)"
-                      : "CRITICAL: AYUNAN RESONANSI 8F LANTAI ATAS"}
-                  </span>
+                <div className="flex items-center space-x-1 px-2.5 py-1 rounded border border-emerald-400/80 bg-slate-950/95 text-emerald-300 text-[9px] font-bold shadow-2xl animate-bounce backdrop-blur-md">
+                  <ShieldAlert className="h-3 w-3 text-emerald-400" />
+                  <span>EDREAM CENTRE (8F): FELT INTENSITY 2 • 1F SOFT-STOREY SHEAR CONCENTRATION</span>
                 </div>
               </div>
             )}
@@ -1158,8 +1153,8 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                       {activeHotspot.category}
                     </span>
                   </div>
-                  <h4 className="font-bold text-white text-[13px]">{activeHotspot.nameZh}</h4>
-                  <p className="text-[10px] text-cyan-400 font-medium">{activeHotspot.nameEn}</p>
+                  <h4 className="font-bold text-white text-[13px]">{activeHotspot.nameEn}</h4>
+                  <p className="text-[10px] text-cyan-400 font-medium">{activeHotspot.nameZh}</p>
                 </div>
                 <button
                   onClick={() => setActiveHotspot(null)}
@@ -1193,7 +1188,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   onClick={() => setDisplayMode("orbit_3d")}
                   className="text-cyan-400 hover:underline font-semibold"
                 >
-                  Lihat di 3D WebGL →
+                  View in 3D WebGL →
                 </button>
               </div>
             </div>
@@ -1205,18 +1200,18 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900/90 text-xs font-semibold text-cyan-300 hover:bg-slate-800 hover:text-white transition shadow-lg backdrop-blur-md"
             >
               <Box className="h-3.5 w-3.5 text-cyan-400" />
-              <span>Rotasi 360° 3D WebGL</span>
+              <span>Rotate 360° in 3D WebGL</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* TOP-LEFT STATUS & CWA INTENSITY BADGE */}
+      {/* TOP-LEFT: STATUS & DAXI INTENSITY DISTRIBUTION BADGE */}
       <div className="absolute top-3 left-3 z-20 flex flex-col space-y-1.5 max-w-sm">
         <div className="flex items-center space-x-2 rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-1.5 backdrop-blur-md text-xs shadow-lg">
           <Building2 className="h-3.5 w-3.5 text-cyan-400" />
           <span className="font-bold text-slate-200">
-            {displayMode === "ultra_hd_twin" ? "NCU S4 (健雄館) Twin" : "NCU Real Campus 3D Twin"}
+            {displayMode === "ultra_hd_twin" ? "NCU Edream Centre Digital Twin" : "NCU Real Campus 3D Twin"}
           </span>
           <span
             className={`rounded px-1.5 py-0.5 text-[10px] font-mono font-bold ${
@@ -1225,41 +1220,42 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                 : "bg-slate-800 text-slate-400 border border-slate-700"
             }`}
           >
-            {isSimulating ? "SIMULASI SEISMIK AKTIF" : "STANDBY MONITORING"}
+            {isSimulating ? "SEISMIC SIMULATION ACTIVE" : "STANDBY MONITORING"}
           </span>
         </div>
 
-        {/* CWA Intensity Scale Color Indicator */}
-        <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-1.5 backdrop-blur-md text-xs shadow-lg">
-          <div className="flex items-center space-x-2">
-            <span
-              className="inline-block w-3.5 h-3.5 rounded shadow-sm font-bold text-[9px] text-center leading-3.5"
-              style={{
-                backgroundColor: intensityMeta.css,
-                color: intensityMeta.textDark ? "#0f172a" : "#ffffff",
-              }}
-            >
-              {activeIntensity}
-            </span>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-slate-400 font-medium">Intensitas Dirasakan di NCU:</span>
-              <span className="font-bold text-[11px] text-white" style={{ color: intensityMeta.css }}>
-                {intensityMeta.labelId}
-              </span>
-            </div>
+        {/* Height-Dependent Intensity Distribution Banner */}
+        <div className="flex flex-col rounded-lg border border-slate-800 bg-slate-900/95 p-2 backdrop-blur-md text-xs shadow-lg space-y-1">
+          <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+            <span>2012 Daxi EQ Building Intensity Distribution:</span>
+            <span className="font-mono text-cyan-300 font-bold">TCU083 Ground Truth</span>
           </div>
-          <div className="text-right pl-2 border-l border-slate-800 text-[9px] font-mono text-slate-400">
-            <div>PGA: {scenario?.id?.includes("20883") ? "12.26 Gal" : intensityMeta.pga}</div>
-            <div>PGV: {scenario?.id?.includes("20883") ? "1.03 cm/s" : intensityMeta.pgv}</div>
+
+          <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+            <div className="flex items-center space-x-1.5 rounded bg-slate-950/80 p-1 border border-yellow-500/40">
+              <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-mono text-slate-400">≤ 3 Storeys (Gym)</span>
+                <span className="text-[10px] font-bold text-yellow-400 font-mono">Intensity 3 (Yellow)</span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-1.5 rounded bg-slate-950/80 p-1 border border-emerald-500/40">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
+              <div className="flex flex-col">
+                <span className="text-[9px] font-mono text-slate-400">&gt; 3 Storeys (Edream)</span>
+                <span className="text-[10px] font-bold text-emerald-400 font-mono">Intensity 2 (Green)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* TOP-CENTER: WAVE SPECTRUM / REGIME SWITCHER */}
+      {/* TOP-CENTER: WAVE SPECTRUM SWITCHER */}
       <div className="hidden md:flex items-center space-x-1 absolute top-3 left-1/2 -translate-x-1/2 z-20 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md shadow-xl text-xs">
         <span className="text-[10px] text-slate-400 font-semibold px-2 flex items-center space-x-1">
           <Activity className="h-3 w-3 text-cyan-400" />
-          <span>Spektrum Gelombang:</span>
+          <span>Wave Spectrum:</span>
         </span>
         <button
           onClick={() => setWaveRegime("short_period")}
@@ -1268,10 +1264,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               ? "bg-yellow-400 text-slate-950 shadow-md ring-1 ring-yellow-400/50"
               : "text-slate-400 hover:text-white"
           }`}
-          title="Gempa Dangkal 2012 Daxi (EQ 20883) - Gelombang frekuensi tinggi meresonansi gedung rendah/menengah & soft-storey"
+          title="2012 Daxi Earthquake - High-frequency motion causing Intensity 3 in low-rise (≤3F) and Intensity 2 in taller buildings (>3F)"
         >
           <Zap className="h-3 w-3" />
-          <span>Periode Pendek (2012 Daxi - Int 3 Kuning)</span>
+          <span>Short-Period (2012 Daxi: ≤3F Int 3 / &gt;3F Int 2)</span>
         </button>
         <button
           onClick={() => setWaveRegime("long_period")}
@@ -1280,10 +1276,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               ? "bg-orange-500 text-slate-950 shadow-md ring-1 ring-orange-400/50"
               : "text-slate-400 hover:text-white"
           }`}
-          title="Gempa Subduksi Jarak Jauh (Hualien Offshore) - Gelombang periode panjang meresonansi gedung bertingkat tinggi (8F)"
+          title="Distant Subduction (Hualien Offshore) - Long-period harmonic sway in high-rise buildings (8F)"
         >
           <Layers className="h-3 w-3" />
-          <span>Periode Panjang (Subduksi - Int 4 Oranye)</span>
+          <span>Long-Period (Subduction - Int 4 Orange)</span>
         </button>
         <button
           onClick={() => setWaveRegime("near_fault_pulse")}
@@ -1292,10 +1288,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               ? "bg-red-600 text-white shadow-md ring-1 ring-red-400/50"
               : "text-slate-400 hover:text-white"
           }`}
-          title="Pulsa Patahan Dekat (Shuanglienpo Mw 6.9) - Hantaman fling-step ekstrem di semua lantai"
+          title="Near-Fault Multi-Segment Rupture (Shuanglienpo Mw 6.91)"
         >
           <AlertTriangle className="h-3 w-3" />
-          <span>Pulsa Patahan (M6.9 - Int 6- Merah)</span>
+          <span>Near-Fault Pulse (M6.9 - Int 6- Red)</span>
         </button>
       </div>
 
@@ -1305,10 +1301,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           <button
             onClick={onBackToGis}
             className="flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition shadow-sm mr-1"
-            title="Kembali ke Peta Satelit GIS Gelombang Gempa"
+            title="Return to Aerial Satellite GIS Wavefront Map"
           >
             <MapIcon className="h-3 w-3" />
-            <span>Peta Satelit</span>
+            <span>Satellite Map</span>
           </button>
         )}
 
@@ -1321,7 +1317,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                 ? "bg-cyan-500 text-slate-950 shadow-sm"
                 : "text-slate-400 hover:text-white"
             }`}
-            title="3D WebGL Orbit Interaktif"
+            title="Interactive 3D WebGL Orbit"
           >
             <Box className="h-3 w-3" />
             <span>3D WebGL</span>
@@ -1329,14 +1325,14 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           <button
             onClick={() => {
               setDisplayMode("ultra_hd_twin");
-              setPreset("science4");
+              setPreset("edream");
             }}
             className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
               displayMode === "ultra_hd_twin"
                 ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-sm"
                 : "text-cyan-300 hover:text-white hover:bg-slate-800"
             }`}
-            title="Ultra-HD Perspective Twin Science 4 (Foto Realistik dengan Hotspot Telemetri)"
+            title="Ultra-HD Perspective Twin (Edream Centre High-Res Model with Telemetry Pins)"
           >
             <Sparkles className="h-3 w-3 text-amber-300" />
             <span>Ultra-HD Twin</span>
@@ -1354,17 +1350,18 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
-              Kampus 360°
+              Campus 360°
             </button>
             <button
-              onClick={() => setPreset("science4")}
+              onClick={() => setPreset("edream")}
               className={`flex items-center space-x-1 px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "science4"
+                cameraMode === "edream"
                   ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
                   : "text-slate-300 hover:text-white hover:bg-slate-800"
               }`}
+              title="Inspect Edream Centre (健雄館 / S4 - 8 Storeys)"
             >
-              <span>S4 (8 Lantai)</span>
+              <span>Edream Centre (8F)</span>
             </button>
             <button
               onClick={() => setPreset("library")}
@@ -1374,7 +1371,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
-              Perpus (8 Lantai)
+              Library (8F)
             </button>
             <button
               onClick={() => setPreset("eng5")}
@@ -1384,7 +1381,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
-              E6 (7 Lantai)
+              Eng 5 (7F)
             </button>
             <button
               onClick={() => setPreset("admin")}
@@ -1394,11 +1391,22 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   : "text-slate-400 hover:text-white hover:bg-slate-800"
               }`}
             >
-              Admin (5 Lantai)
+              Admin (5F)
+            </button>
+            <button
+              onClick={() => setPreset("gym")}
+              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                cameraMode === "gym"
+                  ? "bg-yellow-400 text-slate-950 font-bold shadow-sm"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+              title="Inspect NCU Gymnasium (2 Storeys High-Bay - Felt Intensity 3)"
+            >
+              <span>Gym (2F - Int 3)</span>
             </button>
             <button
               onClick={() => setPreset("campus")}
-              title="Reset Kamera"
+              title="Reset Camera"
               className="p-1 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded transition"
             >
               <RotateCcw className="h-3 w-3" />
@@ -1407,17 +1415,17 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         )}
       </div>
 
-      {/* BUILDING INSPECTION MODAL (FOR SELECTED BUILDING) */}
+      {/* BUILDING INSPECTOR MODAL */}
       {displayMode === "orbit_3d" && selectedBuilding && (
         <div className="absolute bottom-3 left-3 z-20 w-96 rounded-xl border border-slate-700 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md text-xs animate-in fade-in zoom-in-95 duration-150">
           <div className="flex items-start justify-between border-b border-slate-800 pb-2.5 mb-2.5">
             <div>
               <div className="flex items-center space-x-1.5 mb-1">
                 <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 text-[10px] font-mono font-bold">
-                  {selectedBuilding.floors} Lantai ({selectedBuilding.stories}F)
+                  {selectedBuilding.floors} Storeys ({selectedBuilding.stories}F)
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">
-                  Tinggi: ~{selectedBuilding.height}m
+                  Height: ~{selectedBuilding.height}m
                 </span>
               </div>
               <h4 className="font-bold text-white text-[13px]">{selectedBuilding.name}</h4>
@@ -1435,106 +1443,87 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             {/* Structural Parameters */}
             <div className="grid grid-cols-2 gap-1.5 bg-slate-950/70 p-2 rounded-lg border border-slate-800">
               <div>
-                <span className="text-[9px] text-slate-400 block font-mono">JUMLAH LANTAI</span>
+                <span className="text-[9px] text-slate-400 block font-mono uppercase">Storey Count</span>
                 <span className="font-bold text-white text-[12px]">
-                  {selectedBuilding.floors} Tingkat
+                  {selectedBuilding.floors} Floors
                 </span>
               </div>
               <div>
-                <span className="text-[9px] text-slate-400 block font-mono">PERIODE ALAMI (Tn)</span>
+                <span className="text-[9px] text-slate-400 block font-mono uppercase">Natural Period (Tn)</span>
                 <span className="font-bold text-cyan-300 text-[12px] font-mono">
-                  ~{selectedBuilding.fundamentalPeriodSec} detik
+                  ~{selectedBuilding.fundamentalPeriodSec} sec
                 </span>
               </div>
               <div className="col-span-2 pt-1 border-t border-slate-800/80">
-                <span className="text-[9px] text-slate-400 block font-mono">TIPE STRUKTUR</span>
+                <span className="text-[9px] text-slate-400 block font-mono uppercase">Structural Frame</span>
                 <span className="text-[10px] text-slate-300 font-medium truncate block" title={selectedBuilding.structuralType}>
                   {selectedBuilding.structuralType}
                 </span>
               </div>
             </div>
 
-            {/* Earthquake Impact Under Current Wave Regime */}
-            <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 font-bold uppercase">
-                  Dampak Gelombang Gempa:
-                </span>
-                <span
-                  className="px-2 py-0.5 rounded text-[9px] font-bold font-mono"
-                  style={{
-                    backgroundColor:
-                      (waveRegime === "short_period"
-                        ? selectedBuilding.shortPeriodImpact.level
-                        : selectedBuilding.longPeriodImpact.level) === "critical"
-                        ? "rgba(239, 68, 68, 0.2)"
-                        : (waveRegime === "short_period"
-                            ? selectedBuilding.shortPeriodImpact.level
-                            : selectedBuilding.longPeriodImpact.level) === "warning"
-                        ? "rgba(245, 158, 11, 0.2)"
-                        : "rgba(16, 185, 129, 0.2)",
-                    color:
-                      (waveRegime === "short_period"
-                        ? selectedBuilding.shortPeriodImpact.level
-                        : selectedBuilding.longPeriodImpact.level) === "critical"
-                        ? "#f87171"
-                        : (waveRegime === "short_period"
-                            ? selectedBuilding.shortPeriodImpact.level
-                            : selectedBuilding.longPeriodImpact.level) === "warning"
-                        ? "#fbbf24"
-                        : "#34d399",
-                    border: `1px solid ${
-                      (waveRegime === "short_period"
-                        ? selectedBuilding.shortPeriodImpact.level
-                        : selectedBuilding.longPeriodImpact.level) === "critical"
-                        ? "rgba(239, 68, 68, 0.4)"
-                        : (waveRegime === "short_period"
-                            ? selectedBuilding.shortPeriodImpact.level
-                            : selectedBuilding.longPeriodImpact.level) === "warning"
-                        ? "rgba(245, 158, 11, 0.4)"
-                        : "rgba(16, 185, 129, 0.4)"
-                    }`,
-                  }}
-                >
-                  {waveRegime === "short_period"
-                    ? selectedBuilding.shortPeriodImpact.badgeText
-                    : selectedBuilding.longPeriodImpact.badgeText}
-                </span>
-              </div>
+            {/* Felt Intensity and Structural Response */}
+            {(() => {
+              const feltInt = getBuildingFeltIntensity(selectedBuilding);
+              const palette = CWA_INTENSITY_PALETTE[feltInt] || CWA_INTENSITY_PALETTE["2"];
 
-              {/* Scientific Structural Explanation */}
-              <p className="text-[10px] text-slate-300 leading-relaxed">
-                {waveRegime === "short_period"
-                  ? selectedBuilding.shortPeriodImpact.explanation
-                  : selectedBuilding.longPeriodImpact.explanation}
-              </p>
+              return (
+                <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase">
+                      Felt Seismic Intensity:
+                    </span>
+                    <span
+                      className="px-2 py-0.5 rounded text-[10px] font-bold font-mono"
+                      style={{
+                        backgroundColor: palette.css,
+                        color: palette.textDark ? "#0f172a" : "#ffffff",
+                      }}
+                    >
+                      CWA Intensity {feltInt} ({feltInt === "3" ? "Yellow ≤3F" : "Green >3F"})
+                    </span>
+                  </div>
 
-              {/* Estimated Inter-Storey Drift (IDR) */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
-                <span className="text-slate-400">Estimasi Drift (IDR):</span>
-                <span className="font-mono font-bold text-amber-300">
-                  {waveRegime === "short_period"
-                    ? `${selectedBuilding.shortPeriodImpact.driftEstPct}% (Aman / Pemeriksaan Ringan)`
-                    : `${selectedBuilding.longPeriodImpact.driftEstPct}% (Ayunan Lateral Atap)`}
-                </span>
-              </div>
-            </div>
+                  {/* Impact Description */}
+                  <p className="text-[10px] text-slate-300 leading-relaxed">
+                    {isDaxiScenario
+                      ? selectedBuilding.shortPeriodImpact.explanation
+                      : waveRegime === "long_period"
+                      ? selectedBuilding.longPeriodImpact.explanation
+                      : "Near-fault high-velocity fling pulse excites the building dynamically."}
+                  </p>
 
-            {/* Special Action for Science 4 */}
+                  {/* Estimated Inter-Storey Drift (IDR) */}
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
+                    <span className="text-slate-400">Estimated Inter-Storey Drift (IDR):</span>
+                    <span
+                      className="font-mono font-bold"
+                      style={{ color: palette.css }}
+                    >
+                      {isDaxiScenario
+                        ? `${selectedBuilding.shortPeriodImpact.driftEstPct}% (Safe / Light Inspection)`
+                        : `${selectedBuilding.longPeriodImpact.driftEstPct}% (Roof Lateral Sway)`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Special Action for Edream Centre */}
             {selectedBuilding.id === "FAC_NCU_SCIENCE_B4" && (
               <button
                 onClick={() => setDisplayMode("ultra_hd_twin")}
                 className="w-full flex items-center justify-center space-x-1.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-[11px] shadow hover:opacity-95 transition"
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                <span>Buka Ultra-HD Perspective Twin S4 (Hotspot Telemetri)</span>
+                <span>Open Edream Centre Ultra-HD Perspective Twin</span>
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* BOTTOM-RIGHT: INTERACTIVE SIMULATION TRIGGER & NAVIGATION GUIDE */}
+      {/* BOTTOM-RIGHT: SIMULATION TRIGGER & INSTRUCTION */}
       {displayMode === "orbit_3d" && (
         <div className="absolute bottom-3 right-3 z-10 flex items-center space-x-2">
           <button
@@ -1546,10 +1535,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             }`}
           >
             <Activity className="h-3.5 w-3.5" />
-            <span>{isSimulating ? "Simulasi Sedang Berjalan..." : "Mulai Simulasi Seismik 3D"}</span>
+            <span>{isSimulating ? "Simulation In Progress..." : "Run 3D Seismic Simulation"}</span>
           </button>
           <div className="hidden sm:block text-[10px] text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800 font-mono">
-            Klik Bangunan untuk Inspeksi Lantai & Resonansi
+            Click any building to inspect storeys & seismic resonance
           </div>
         </div>
       )}

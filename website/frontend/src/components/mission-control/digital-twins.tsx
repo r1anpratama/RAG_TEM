@@ -14,7 +14,7 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({ facilities, isSimula
   const defaultFacilities: FacilityTriage[] = [
     {
       facility_id: "FAC_NCU_SCIENCE_B4",
-      facility_name: "NCU Science Building 4",
+      facility_name: "NCU Edream Centre (健雄館 / S4)",
       building_era: "PRE_1999_SOFT_STOREY",
       triage_tag: "RED_CRITICAL",
       drift_ratio_pct: 2.14,
