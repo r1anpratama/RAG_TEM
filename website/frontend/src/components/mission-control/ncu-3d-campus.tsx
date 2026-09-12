@@ -23,7 +23,80 @@ import { createDetailedScience4Building } from "./detailed-building-3d";
 interface NCU3DCampusProps {
   scenario: Scenario | null;
   isSimulating: boolean;
+  simTimeSec?: number;
+  isPlaying?: boolean;
+  onPlayToggle?: () => void;
+  onReset?: () => void;
   onBackToGis?: () => void;
+}
+
+export function getCampusArrivalTimes(scenario: Scenario | null, regime: SeismicWaveRegime) {
+  const id = scenario?.id?.toLowerCase() || "";
+  if (id.includes("20883")) {
+    return {
+      tP: 8.16,
+      tS: 14.85,
+      distKm: 23.90,
+      station: "TCU083 (0.11 km from S4)",
+      eventName: "2012 Daxi-Taoyuan (EQ 20883)",
+      leadTime: 6.69,
+    };
+  } else if (id.includes("20122")) {
+    return {
+      tP: 6.85,
+      tS: 12.45,
+      distKm: 19.76,
+      station: "MND020 (12.18 km)",
+      eventName: "2011 Daxi (EQ 20122)",
+      leadTime: 5.60,
+    };
+  } else if (id.includes("shuanglienpo") || id.includes("hukou")) {
+    return {
+      tP: 1.80,
+      tS: 3.80,
+      distKm: 2.80,
+      station: "NCU Bedrock Core",
+      eventName: "Shuanglienpo Near-Fault (M6.91)",
+      leadTime: 2.00,
+    };
+  } else if (id.includes("meinong")) {
+    return {
+      tP: 14.20,
+      tS: 24.50,
+      distKm: 245.0,
+      station: "NCU / CHY Regional",
+      eventName: "2016 Meinong Regional M6.6",
+      leadTime: 10.30,
+    };
+  } else {
+    if (regime === "near_fault_pulse") {
+      return {
+        tP: 1.80,
+        tS: 3.80,
+        distKm: 2.80,
+        station: "NCU Bedrock Core",
+        eventName: "Near-Fault Rupture",
+        leadTime: 2.00,
+      };
+    } else if (regime === "long_period") {
+      return {
+        tP: 12.00,
+        tS: 22.00,
+        distKm: 110.0,
+        station: "NCU Core",
+        eventName: "Long-Period Subduction",
+        leadTime: 10.00,
+      };
+    }
+    return {
+      tP: 8.16,
+      tS: 14.85,
+      distKm: 23.90,
+      station: "TCU083 (0.11 km from S4)",
+      eventName: "2012 Daxi-Taoyuan (EQ 20883)",
+      leadTime: 6.69,
+    };
+  }
 }
 
 export type SeismicWaveRegime = "short_period" | "long_period" | "near_fault_pulse";
@@ -206,6 +279,10 @@ const EDREAM_CENTRE_HOTSPOTS: ArchitecturalHotspot[] = [
 export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   scenario,
   isSimulating: propIsSimulating,
+  simTimeSec: propSimTimeSec,
+  isPlaying: propIsPlaying,
+  onPlayToggle,
+  onReset,
   onBackToGis,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -213,13 +290,62 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   const [cameraMode, setCameraMode] = useState<"campus" | "edream" | "library" | "eng5" | "admin" | "gym">("campus");
   const [displayMode, setDisplayMode] = useState<"orbit_3d" | "ultra_hd_twin">("orbit_3d");
   const [activeHotspot, setActiveHotspot] = useState<ArchitecturalHotspot | null>(null);
-  const [localSimulating, setLocalSimulating] = useState<boolean>(false);
+  const [localSimTime, setLocalSimTime] = useState<number>(0);
+  const [localIsPlaying, setLocalIsPlaying] = useState<boolean>(false);
   const [waveRegime, setWaveRegime] = useState<SeismicWaveRegime>("short_period");
   const [buildingScreenCoords, setBuildingScreenCoords] = useState<
     Record<string, { x: number; y: number; visible: boolean }>
   >({});
 
-  const isSimulating = propIsSimulating || localSimulating;
+  const effectiveSimTime = propSimTimeSec !== undefined ? propSimTimeSec : localSimTime;
+  const isPlaying = propIsPlaying !== undefined ? propIsPlaying : localIsPlaying;
+  const isSimulating = Boolean(propIsSimulating || isPlaying || (effectiveSimTime > 0 && effectiveSimTime < 30));
+
+  const arrival = useMemo(() => {
+    return getCampusArrivalTimes(scenario, waveRegime);
+  }, [scenario, waveRegime]);
+  const { tP, tS } = arrival;
+
+  const currentPhase: "idle" | "pre_arrival" | "p_wave" | "s_wave" = useMemo(() => {
+    if (!isSimulating && effectiveSimTime === 0) return "idle";
+    if (effectiveSimTime < tP) return "pre_arrival";
+    if (effectiveSimTime < tS) return "p_wave";
+    return "s_wave";
+  }, [isSimulating, effectiveSimTime, tP, tS]);
+
+  // Local clock loop for standalone testing if parent propSimTimeSec not provided
+  useEffect(() => {
+    if (propSimTimeSec !== undefined) return;
+    if (!localIsPlaying) return;
+
+    let lastT = performance.now();
+    let rafId: number;
+    const loop = (now: number) => {
+      const dt = (now - lastT) / 1000;
+      lastT = now;
+      setLocalSimTime((prev) => {
+        const next = prev + dt;
+        if (next >= 30.0) {
+          setLocalIsPlaying(false);
+          return 30.0;
+        }
+        return next;
+      });
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafId);
+  }, [localIsPlaying, propSimTimeSec]);
+
+  // Play/Pause toggle
+  const handleTriggerSim = () => {
+    if (onPlayToggle) {
+      onPlayToggle();
+    } else {
+      if (localSimTime >= 30) setLocalSimTime(0);
+      setLocalIsPlaying(!localIsPlaying);
+    }
+  };
 
   useEffect(() => {
     if (!scenario) return;
@@ -680,41 +806,71 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         setBuildingScreenCoords(newCoords);
       }
 
-      if (isSimulating) {
-        buildingsRef.current.forEach((b) => {
-          const group = buildingMeshesRef.current.get(b.id);
-          if (!group) return;
+      const curT = simTimeRef.current;
+      const active = isSimulatingRef.current || isPlayingRef.current || curT > 0;
+      const arr = getCampusArrivalTimes(scenarioRef.current, waveRegimeRef.current);
+      const phase = !active && curT === 0 ? "idle" : curT < arr.tP ? "pre_arrival" : curT < arr.tS ? "p_wave" : "s_wave";
 
-          if (isDaxiScenario) {
-            if (b.stories <= 3) {
-              const amp = 0.75;
-              const displacement = Math.sin(elapsedTime * 26 + b.x * 0.1) * amp;
-              group.position.x = b.x + displacement;
-              group.rotation.z = (displacement / b.height) * 0.05;
-            } else {
-              const softStoreyMultiplier = b.softStorey ? 1.4 : 1.0;
-              const amp = 0.32 * softStoreyMultiplier;
-              const displacement = Math.sin(elapsedTime * 18 + b.x * 0.1) * amp;
-              group.position.x = b.x + displacement;
-              group.rotation.z = (displacement / b.height) * 0.025;
-            }
-          } else if (waveRegime === "long_period") {
-            const heightAmplification = Math.pow(b.stories / 8, 2.2);
-            const swayDisplacement = Math.sin(elapsedTime * 3.6 + b.z * 0.05) * 1.85 * heightAmplification;
-            group.position.x = b.x + swayDisplacement;
-            group.rotation.z = (swayDisplacement / b.height) * 0.14;
-          } else {
-            const pulse = Math.sin(elapsedTime * 14) * 2.4;
-            group.position.x = b.x + pulse;
-            group.rotation.z = (pulse / b.height) * 0.09;
-          }
-        });
-      } else {
+      if (phase === "idle" || phase === "pre_arrival") {
         buildingsRef.current.forEach((b) => {
           const group = buildingMeshesRef.current.get(b.id);
           if (group) {
             group.position.x = b.x;
+            group.position.y = 0;
             group.rotation.z = 0;
+          }
+        });
+      } else if (phase === "p_wave") {
+        // High-frequency compressional preliminary microtremor (Subtle vertical & horizontal)
+        const tauP = curT - arr.tP;
+        buildingsRef.current.forEach((b) => {
+          const group = buildingMeshesRef.current.get(b.id);
+          if (!group) return;
+          const pTremor = Math.sin(tauP * 36 + b.x * 0.2) * 0.08;
+          const pVertical = Math.sin(tauP * 50 + b.z * 0.2) * 0.05;
+          group.position.x = b.x + pTremor;
+          group.position.y = pVertical;
+          group.rotation.z = (pTremor / b.height) * 0.012;
+        });
+      } else if (phase === "s_wave") {
+        // Destructive shear wave & structural resonance
+        const tauS = curT - arr.tS;
+        const rise = Math.min(1.0, tauS / 1.2);
+        const decay = Math.exp(-0.07 * Math.max(0, tauS - 4.0));
+        const envelope = Math.max(0.12, rise * decay);
+
+        buildingsRef.current.forEach((b) => {
+          const group = buildingMeshesRef.current.get(b.id);
+          if (!group) return;
+
+          if (isDaxiScenarioRef.current) {
+            if (b.stories <= 3) {
+              // Gymnasium (2F <= 3F): Resonates strongly with shallow crustal short period (CWA Intensity 3)
+              const amp = 0.85 * envelope;
+              const displacement = Math.sin(tauS * 24 + b.x * 0.1) * amp;
+              group.position.x = b.x + displacement;
+              group.position.y = 0;
+              group.rotation.z = (displacement / b.height) * 0.065;
+            } else {
+              // Multi-storey (> 3F: Edream Centre, Library, Eng 5, Admin, Earth Sci): Attenuated to CWA Intensity 2
+              const softStoreyMultiplier = b.softStorey ? 1.45 : 1.0;
+              const amp = 0.32 * softStoreyMultiplier * envelope;
+              const displacement = Math.sin(tauS * 16 + b.x * 0.1) * amp;
+              group.position.x = b.x + displacement;
+              group.position.y = 0;
+              group.rotation.z = (displacement / b.height) * 0.028;
+            }
+          } else if (waveRegimeRef.current === "long_period") {
+            const heightAmplification = Math.pow(b.stories / 8, 2.2);
+            const swayDisplacement = Math.sin(tauS * 3.4 + b.z * 0.05) * 2.2 * heightAmplification * envelope;
+            group.position.x = b.x + swayDisplacement;
+            group.position.y = 0;
+            group.rotation.z = (swayDisplacement / b.height) * 0.15;
+          } else {
+            const pulse = Math.sin(tauS * 14) * Math.exp(-0.25 * tauS) * 2.4 * envelope;
+            group.position.x = b.x + pulse;
+            group.position.y = 0;
+            group.rotation.z = (pulse / b.height) * 0.09;
           }
         });
       }
@@ -744,7 +900,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     };
   }, [isSimulating, isDaxiScenario, waveRegime]);
 
-  // Update Building Colors dynamically per-building
+  // Update Building Colors dynamically per-building synchronized with wave arrival phase
   useEffect(() => {
     buildingsRef.current.forEach((b) => {
       const group = buildingMeshesRef.current.get(b.id);
@@ -767,9 +923,12 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             const mesh = child as THREE.Mesh;
             const mat = mesh.material as THREE.MeshStandardMaterial;
             if (mat && mat.emissive) {
-              if (isSimulating) {
+              if (currentPhase === "s_wave") {
                 mat.emissive.setHex(intensityHex);
-                mat.emissiveIntensity = isResonant ? 0.6 : 0.2;
+                mat.emissiveIntensity = isResonant ? 0.55 : 0.25;
+              } else if (currentPhase === "p_wave") {
+                mat.emissive.setHex(0xfbbf24);
+                mat.emissiveIntensity = 0.25;
               } else {
                 mat.emissive.setHex(0x000000);
                 mat.emissiveIntensity = 0.0;
@@ -786,22 +945,29 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
 
       if (boxMesh && boxMesh.material) {
         const mat = boxMesh.material as THREE.MeshStandardMaterial;
-        if (!isSimulating) {
-          mat.color.setHex(0x1e293b);
-          mat.emissive.setHex(0x000000);
-          mat.emissiveIntensity = 0;
-        } else {
+        if (currentPhase === "s_wave") {
           mat.color.setHex(intensityHex);
           mat.emissive.setHex(intensityHex);
           mat.emissiveIntensity = isResonant ? 0.45 : 0.15;
+        } else if (currentPhase === "p_wave") {
+          mat.color.setHex(0x1e293b);
+          mat.emissive.setHex(0xfbbf24);
+          mat.emissiveIntensity = 0.2;
+        } else {
+          mat.color.setHex(0x1e293b);
+          mat.emissive.setHex(0x000000);
+          mat.emissiveIntensity = 0;
         }
       }
 
       if (wireframe && wireframe.material) {
         const lineMat = wireframe.material as THREE.LineBasicMaterial;
-        if (isSimulating) {
+        if (currentPhase === "s_wave") {
           lineMat.color.setHex(intensityHex);
           lineMat.opacity = isResonant ? 0.95 : 0.4;
+        } else if (currentPhase === "p_wave") {
+          lineMat.color.setHex(0xfbbf24);
+          lineMat.opacity = 0.7;
         } else {
           lineMat.color.setHex(0x38bdf8);
           lineMat.opacity = 0.55;
@@ -813,9 +979,12 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           const line = child as THREE.Line;
           if (line.material) {
             const lMat = line.material as THREE.LineBasicMaterial;
-            if (isSimulating) {
+            if (currentPhase === "s_wave") {
               lMat.color.setHex(intensityHex);
               lMat.opacity = isResonant ? 0.85 : 0.35;
+            } else if (currentPhase === "p_wave") {
+              lMat.color.setHex(0xfbbf24);
+              lMat.opacity = 0.6;
             } else {
               lMat.color.setHex(0x0284c7);
               lMat.opacity = 0.45;
@@ -824,7 +993,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         });
       }
     });
-  }, [isSimulating, isDaxiScenario, waveRegime]);
+  }, [currentPhase, isDaxiScenario, waveRegime]);
 
   const updateCameraPosition = () => {
     if (!cameraRef.current) return;
@@ -940,10 +1109,24 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     updateCameraPosition();
   };
 
-  const triggerLocalSimulation = () => {
-    setLocalSimulating(true);
-    setTimeout(() => setLocalSimulating(false), 12000);
-  };
+  const simTimeRef = useRef<number>(effectiveSimTime);
+  const isSimulatingRef = useRef<boolean>(isSimulating);
+  const isPlayingRef = useRef<boolean>(isPlaying);
+  const waveRegimeRef = useRef<SeismicWaveRegime>(waveRegime);
+  const isDaxiScenarioRef = useRef<boolean>(isDaxiScenario);
+  const scenarioRef = useRef<Scenario | null>(scenario);
+
+  useEffect(() => {
+    simTimeRef.current = effectiveSimTime;
+  }, [effectiveSimTime]);
+
+  useEffect(() => {
+    isSimulatingRef.current = isSimulating;
+    isPlayingRef.current = isPlaying;
+    waveRegimeRef.current = waveRegime;
+    isDaxiScenarioRef.current = isDaxiScenario;
+    scenarioRef.current = scenario;
+  }, [isSimulating, isPlaying, waveRegime, isDaxiScenario, scenario]);
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-slate-950 select-none font-sans">
@@ -982,13 +1165,23 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           </div>
 
           <span
-            className={`rounded px-1.5 py-0.5 text-[9px] font-mono font-bold ${
-              isSimulating
+            className={`rounded px-2 py-0.5 text-[9px] font-mono font-bold ${
+              currentPhase === "s_wave"
+                ? "bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse"
+                : currentPhase === "p_wave"
                 ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse"
+                : currentPhase === "pre_arrival"
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                 : "bg-slate-800 text-slate-400 border border-slate-700"
             }`}
           >
-            {isSimulating ? "SIMULATING" : "STANDBY"}
+            {currentPhase === "s_wave"
+              ? `S-WAVE ACTIVE (${effectiveSimTime.toFixed(1)}s)`
+              : currentPhase === "p_wave"
+              ? `P-WAVE TREMOR (S in ${Math.max(0, tS - effectiveSimTime).toFixed(1)}s)`
+              : currentPhase === "pre_arrival"
+              ? `TRANSIT (P in ${Math.max(0, tP - effectiveSimTime).toFixed(1)}s)`
+              : "STANDBY (0.0s)"}
           </span>
 
           {/* Daxi Ground Motion Distribution Indicator */}
@@ -1124,6 +1317,48 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         </div>
       </div>
 
+      {/* DYNAMIC WAVEFRONT ARRIVAL TELEMETRY HUD */}
+      {displayMode === "orbit_3d" && (
+        <div className="absolute top-11 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-slate-800 shadow-xl text-[10px] font-mono pointer-events-none">
+          {currentPhase === "pre_arrival" && (
+            <>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span className="text-cyan-300 font-bold">WAVEFRONT IN TRANSIT:</span>
+              <span className="text-slate-300">P-Wave in <b className="text-cyan-400 font-black">{Math.max(0, tP - effectiveSimTime).toFixed(1)}s</b></span>
+              <span className="text-slate-600">|</span>
+              <span className="text-slate-300">S-Wave in <b className="text-amber-400 font-black">{Math.max(0, tS - effectiveSimTime).toFixed(1)}s</b></span>
+              <span className="text-slate-400 text-[9px]">(Campus Static / Standby)</span>
+            </>
+          )}
+          {currentPhase === "p_wave" && (
+            <>
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+              <span className="text-amber-300 font-bold">P-WAVE ARRIVED (t={effectiveSimTime.toFixed(1)}s):</span>
+              <span className="text-slate-300">Compressional Tremor</span>
+              <span className="text-slate-600">|</span>
+              <span className="text-amber-400 font-bold">S-Wave Warning: +{Math.max(0, tS - effectiveSimTime).toFixed(1)}s Lead Time</span>
+              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold">TRACK-A REFLEX ACTIVE</span>
+            </>
+          )}
+          {currentPhase === "s_wave" && (
+            <>
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              <span className="text-red-400 font-bold">S-WAVE ACTIVE SHAKING (t={effectiveSimTime.toFixed(1)}s):</span>
+              <span className="text-slate-300">Resonant Sway Active</span>
+              <span className="text-slate-600">|</span>
+              <span className="text-yellow-400 font-bold">≤3F: Int 3 (Yellow)</span>
+              <span className="text-emerald-400 font-bold">&gt;3F: Int 2 (Green)</span>
+            </>
+          )}
+          {currentPhase === "idle" && (
+            <>
+              <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+              <span className="text-slate-400">NCU Real Campus 3D Twin • Standby for Real-Time Wavefront Arrival</span>
+            </>
+          )}
+        </div>
+      )}
+
       {/* 3D FLOATING LABELS (Hidden for currently inspected building to eliminate roof clutter) */}
       {displayMode === "orbit_3d" && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
@@ -1162,7 +1397,25 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                     </span>
                   </div>
 
-                  {isSimulating && (
+                  {currentPhase === "pre_arrival" && (
+                    <div className="flex items-center space-x-1 mt-0.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      <span className="text-[8px] font-mono font-medium text-cyan-300 px-1 rounded bg-cyan-950/60 border border-cyan-800/60">
+                        P-Wave in {Math.max(0, tP - effectiveSimTime).toFixed(1)}s
+                      </span>
+                    </div>
+                  )}
+
+                  {currentPhase === "p_wave" && (
+                    <div className="flex items-center space-x-1 mt-0.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                      <span className="text-[8px] font-mono font-bold text-amber-300 px-1 rounded bg-amber-950/60 border border-amber-700/60">
+                        P-Wave • S in {Math.max(0, tS - effectiveSimTime).toFixed(1)}s
+                      </span>
+                    </div>
+                  )}
+
+                  {currentPhase === "s_wave" && (
                     <div className="flex items-center space-x-1 mt-0.5">
                       <span
                         className="inline-block w-2 h-2 rounded-full animate-ping"
@@ -1194,7 +1447,12 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           <div
             className="relative max-h-full max-w-full aspect-[4/3] flex items-center justify-center transition-transform"
             style={{
-              animation: isSimulating ? "seismicTremor 0.12s infinite alternate" : "none",
+              animation:
+                currentPhase === "s_wave"
+                  ? "seismicTremor 0.12s infinite alternate"
+                  : currentPhase === "p_wave"
+                  ? "seismicTremor 0.35s infinite alternate"
+                  : "none",
             }}
           >
             <img
@@ -1483,7 +1741,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           <div className="h-4 w-px bg-slate-700 mx-1" />
 
           <button
-            onClick={triggerLocalSimulation}
+            onClick={handleTriggerSim}
             className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition shadow border ${
               isSimulating
                 ? "bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-400/50 animate-pulse"
@@ -1491,7 +1749,11 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             }`}
           >
             <Activity className="h-3 w-3" />
-            <span>{isSimulating ? "Simulating..." : "Run Simulation"}</span>
+            <span>
+              {isSimulating
+                ? `Simulating (${effectiveSimTime.toFixed(1)}s)`
+                : "Run Simulation"}
+            </span>
           </button>
         </div>
       )}

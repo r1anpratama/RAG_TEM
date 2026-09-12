@@ -170,7 +170,11 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
             ) : (
               <NCU3DCampus
                 scenario={scenario}
-                isSimulating={isSimulating}
+                isSimulating={isSimulating || isPlaying}
+                simTimeSec={simTimeSec}
+                isPlaying={isPlaying}
+                onPlayToggle={handlePlayToggle}
+                onReset={handleReset}
                 onBackToGis={() => setActiveCampusView("gis")}
               />
             )}
