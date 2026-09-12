@@ -34,9 +34,10 @@ function DashboardContent() {
     fetch("http://127.0.0.1:8000/api/triage/scenarios")
       .then((res) => res.json())
       .then((data) => {
-        if (data.scenarios && data.scenarios.length > 0) {
-          setScenarios(data.scenarios);
-          setSelectedScenario(data.scenarios[0]);
+        const scenarioList = Array.isArray(data) ? data : (data.scenarios || []);
+        if (scenarioList.length > 0) {
+          setScenarios(scenarioList);
+          setSelectedScenario(scenarioList[0]);
           setBackendHealth(true);
         }
       })
@@ -44,6 +45,38 @@ function DashboardContent() {
         console.error("Failed to load scenarios from FastAPI backend", err);
         setBackendHealth(false);
         const fallback: Scenario[] = [
+          {
+            id: "eq_20883_taoyuan_daxi",
+            title: "2012 Daxi-Taoyuan Local Earthquake (EQ 20883)",
+            fault_name: "Daxi / Fuxing Fault Structure",
+            description: "Historical near-NCU event recorded by on-campus station TCU083 (0.11 km from S4). Epicenter 23.9 km in Daxi/Fuxing.",
+            magnitude: 4.66,
+            depth_km: 10.22,
+            epicenter: { lat: 24.7620, lon: 121.2608 },
+            target_facility: "NCU Campus (TCU083 Station Core)",
+            distance_to_target_km: 23.90,
+            predicted_pgv_cm_s: 1.03,
+            estimated_cwa_intensity: "3",
+            s_wave_countdown_sec: 6.69,
+            countdown_seconds: 6.69,
+            track_a_actuators: [
+              {
+                target: "ELEVATORS_ALL_CAMPUS",
+                action: "HALT_AT_NEAREST_FLOOR_DOORS_OPEN",
+                urgency: "INSTANT_SUB_5MS",
+              },
+              {
+                target: "MAIN_NATURAL_GAS_VALVE",
+                action: "PNEUMATIC_EMERGENCY_SHUTOFF",
+                urgency: "INSTANT_SUB_5MS",
+              },
+              {
+                target: "CLEANROOM_TOXIC_VENTILATION",
+                action: "HALT_CORROSIVE_GAS_DAMPER_CLOSED",
+                urgency: "INSTANT_SUB_5MS",
+              },
+            ],
+          },
           {
             id: "SCENARIO_SHUANGLIENPO_HUKOU",
             title: "Shuanglienpo - Hukou Multi-Fault Rupture",
@@ -85,7 +118,8 @@ function DashboardContent() {
     fetch("http://127.0.0.1:8000/api/triage/faults")
       .then((res) => res.json())
       .then((data) => {
-        if (data.faults) setFaults(data.faults);
+        const faultList = Array.isArray(data) ? data : (data.faults || []);
+        if (faultList.length > 0) setFaults(faultList);
       })
       .catch(() => {
         setFaults([

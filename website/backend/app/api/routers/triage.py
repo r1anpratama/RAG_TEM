@@ -63,6 +63,7 @@ class TriageRequest(BaseModel):
 
 
 @router.get("/faults", summary="List 38 Taiwan Seismogenic Structures")
+@router.get("/triage/faults", summary="List 38 Taiwan Seismogenic Structures (Alias)")
 async def list_faults(
     lat: Optional[float] = Query(None, description="Query latitude for nearest fault calculation"),
     lon: Optional[float] = Query(None, description="Query longitude for nearest fault calculation"),
@@ -139,41 +140,126 @@ async def get_graph_topology() -> Dict[str, Any]:
 
 
 @router.get("/scenarios", summary="Earthquake Simulation Scenarios")
+@router.get("/triage/scenarios", summary="Earthquake Simulation Scenarios (Alias)")
 async def get_scenarios() -> List[Dict[str, Any]]:
     """Return pre-configured realistic earthquake scenarios."""
     return [
         {
+            "id": "eq_20883_taoyuan_daxi",
+            "title": "2012 Daxi-Taoyuan Local Earthquake (EQ 20883)",
+            "fault_name": "Daxi / Fuxing Fault Structure",
+            "description": "Historical near-NCU event recorded by on-campus station TCU083 (0.11 km from S4). Epicenter 23.9 km in Daxi/Fuxing.",
+            "magnitude": 4.66,
+            "depth_km": 10.22,
+            "epicenter": {"lat": 24.7620, "lon": 121.2608},
+            "predicted_pgv_cm_s": 1.03,
+            "predicted_pga_gal": 12.26,
+            "estimated_cwa_intensity": "3",
+            "target_facility": "NCU Campus (TCU083 Station Core)",
+            "distance_to_target_km": 23.90,
+            "countdown_seconds": 6.69,
+            "s_wave_countdown_sec": 6.69,
+            "track_a_actuators": [
+                {
+                    "target": "ELEVATORS_ALL_CAMPUS",
+                    "action": "HALT_AT_NEAREST_FLOOR_DOORS_OPEN",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+                {
+                    "target": "MAIN_NATURAL_GAS_VALVE",
+                    "action": "PNEUMATIC_EMERGENCY_SHUTOFF",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+                {
+                    "target": "CLEANROOM_TOXIC_VENTILATION",
+                    "action": "HALT_CORROSIVE_GAS_DAMPER_CLOSED",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+            ],
+        },
+        {
             "id": "shuanglienpo_hukou_mw69",
             "title": "Shuanglienpo-Hukou Multi-Fault Rupture (Mw 6.91)",
+            "fault_name": "Shuanglienpo Fault (#2) + Hukou (#3)",
             "description": "Near-source shallow crustal rupture 2.8 km from NCU campus and HSP Science Park.",
             "magnitude": 6.91,
             "depth_km": 8.0,
             "epicenter": {"lat": 24.945, "lon": 121.185},
             "predicted_pgv_cm_s": 72.4,
-            "target_facility": "NCU Campus & Taoyuan Corridor",
+            "predicted_pga_gal": 485.0,
+            "estimated_cwa_intensity": "6-Strong",
+            "target_facility": "NCU Science Building 4",
+            "distance_to_target_km": 2.8,
             "countdown_seconds": 3.8,
+            "s_wave_countdown_sec": 3.8,
+            "track_a_actuators": [
+                {
+                    "target": "ELEVATORS_ALL_CAMPUS",
+                    "action": "HALT_AT_NEAREST_FLOOR_DOORS_OPEN",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+                {
+                    "target": "MAIN_NATURAL_GAS_VALVE",
+                    "action": "PNEUMATIC_EMERGENCY_SHUTOFF",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+                {
+                    "target": "CLEANROOM_TOXIC_VENTILATION",
+                    "action": "HALT_CORROSIVE_GAS_DAMPER_CLOSED",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+            ],
+        },
+        {
+            "id": "meinong_2016_mw64",
+            "title": "2016 Meinong Benchmark Earthquake (Mw 6.40)",
+            "fault_name": "Chishan / Zuozhen Fault Corridor",
+            "description": "2016 Southern Taiwan benchmark with high-density strong-motion network records.",
+            "magnitude": 6.40,
+            "depth_km": 14.6,
+            "epicenter": {"lat": 22.920, "lon": 120.540},
+            "predicted_pgv_cm_s": 58.2,
+            "predicted_pga_gal": 395.0,
+            "estimated_cwa_intensity": "6-Strong",
+            "target_facility": "Southern Science Park & Lifelines",
+            "distance_to_target_km": 31.5,
+            "countdown_seconds": 12.0,
+            "s_wave_countdown_sec": 12.0,
+            "track_a_actuators": [
+                {
+                    "target": "ELEVATORS_ALL_CAMPUS",
+                    "action": "HALT_AT_NEAREST_FLOOR_DOORS_OPEN",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+                {
+                    "target": "MAIN_NATURAL_GAS_VALVE",
+                    "action": "PNEUMATIC_EMERGENCY_SHUTOFF",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+            ],
         },
         {
             "id": "hualien_offshore_mw72",
             "title": "Hualien Offshore Subduction Transition (Mw 7.20)",
+            "fault_name": "Ryukyu Trench Subduction",
             "description": "2024-scale eastern offshore sequence with long-period ground motion.",
             "magnitude": 7.20,
             "depth_km": 35.0,
             "epicenter": {"lat": 23.980, "lon": 121.650},
             "predicted_pgv_cm_s": 24.5,
+            "predicted_pga_gal": 85.0,
+            "estimated_cwa_intensity": "4",
             "target_facility": "Eastern Lifelines & Taipei Basin",
+            "distance_to_target_km": 142.0,
             "countdown_seconds": 22.4,
-        },
-        {
-            "id": "chichi_chelungpu_mw765",
-            "title": "Chi-Chi Chelungpu Thrust Rupture (Mw 7.65)",
-            "description": "Historical 1999 surface rupture benchmark with massive displacement.",
-            "magnitude": 7.65,
-            "depth_km": 8.0,
-            "epicenter": {"lat": 23.850, "lon": 120.820},
-            "predicted_pgv_cm_s": 98.0,
-            "target_facility": "Central Taiwan Lifelines",
-            "countdown_seconds": 0.0,
+            "s_wave_countdown_sec": 22.4,
+            "track_a_actuators": [
+                {
+                    "target": "ELEVATORS_ALL_CAMPUS",
+                    "action": "HALT_AT_NEAREST_FLOOR_DOORS_OPEN",
+                    "urgency": "INSTANT_SUB_5MS",
+                },
+            ],
         },
     ]
 
@@ -302,3 +388,27 @@ async def get_gmpe_curves(
         "vs30_m_s": vs30,
         "curve": points,
     }
+
+
+@router.get("/simulation/{event_id}", summary="Get Earthquake Simulation Waveform Data")
+async def get_simulation_data(event_id: str) -> Dict[str, Any]:
+    """Return pre-extracted HDF5 waveform telemetry for the specified earthquake."""
+    import json
+    from pathlib import Path
+    
+    data_dir = Path(__file__).resolve().parent.parent.parent / "data"
+    
+    if "20883" in event_id:
+        file_path = data_dir / "eq_20883_simulation.json"
+    else:
+        file_path = data_dir / "meinong_2016_simulation.json"
+        
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Simulation dataset for {event_id} not found at {file_path}."
+        )
+        
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+

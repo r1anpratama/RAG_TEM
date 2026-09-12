@@ -14,13 +14,15 @@ import {
   Layers,
   Radio
 } from "lucide-react";
-import simulationData from "@/data/meinong-simulation-data.json";
+import meinongSimulationData from "@/data/meinong-simulation-data.json";
+import eq20883SimulationData from "@/data/eq_20883_simulation.json";
 
 interface WaveformPreviewStation {
   role: string;
   label: string;
   station_name: string;
   distance_km: number;
+  dist_to_ncu_km?: number;
   cwa_intensity: string;
   warning_lead_time_sec: number;
   sampling_rate_hz: number;
@@ -48,16 +50,21 @@ interface WaveformPreviewStation {
 
 interface SimulationWaveformPanelProps {
   isSimulating?: boolean;
+  activeScenarioId?: string;
 }
 
 export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = ({
   isSimulating = false,
+  activeScenarioId,
 }) => {
-  const previews = simulationData.waveform_previews as Record<string, WaveformPreviewStation>;
-  const stationKeys = Object.keys(previews);
+  const [activeEvent, setActiveEvent] = useState<"eq20883" | "meinong">("eq20883");
+
+  const currentDataset: any = activeEvent === "eq20883" ? eq20883SimulationData : meinongSimulationData;
+  const previews = currentDataset.waveform_previews as Record<string, WaveformPreviewStation>;
+  const stationKeys = (currentDataset.key_stations as string[]) || Object.keys(previews);
 
   // Active station
-  const [selectedStation, setSelectedStation] = useState<string>("KAU068");
+  const [selectedStation, setSelectedStation] = useState<string>("TCU083");
   // Signal type: acc (Gal) or vel (cm/s)
   const [signalType, setSignalType] = useState<"acc" | "vel">("acc");
   // Component view: all 3 or single
@@ -70,7 +77,22 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
   const animFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
-  const currentStationData = previews[selectedStation] || previews["KAU068"];
+  // Sync with activeScenarioId prop
+  useEffect(() => {
+    if (activeScenarioId?.includes("meinong")) {
+      setActiveEvent("meinong");
+      setSelectedStation("KAU068");
+      setCurrentTimeSec(0);
+      setIsPlaying(false);
+    } else if (activeScenarioId?.includes("20883")) {
+      setActiveEvent("eq20883");
+      setSelectedStation("TCU083");
+      setCurrentTimeSec(0);
+      setIsPlaying(false);
+    }
+  }, [activeScenarioId]);
+
+  const currentStationData = previews[selectedStation] || previews[stationKeys[0]] || Object.values(previews)[0];
 
   // Sync with isSimulating prop if provided
   useEffect(() => {
@@ -359,9 +381,9 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
 
   return (
     <div className="flex flex-col h-[440px] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card shadow-xl overflow-hidden">
-      {/* Top Header & Station Picker */}
+      {/* Top Header & Event/Station Picker */}
       <div className="flex flex-col border-b border-slate-200 dark:border-slate-800/90 bg-slate-50 dark:bg-slate_obsidian-900/90 p-3 space-y-2">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
               <Activity className="h-4 w-4" />
@@ -374,33 +396,73 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                 </span>
               </h3>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                2016 ML 6.6 Meinong Benchmark • TT-SAM Model Input
+                {activeEvent === "eq20883"
+                  ? "2012-06-13 ML 4.66 Daxi-Taoyuan Local Event • TCU083 NCU Campus Direct Recording"
+                  : "2016-02-06 ML 6.6 Meinong Benchmark • TT-SAM Regional EEW Input"}
               </p>
             </div>
           </div>
 
-          {/* Signal Type Toggle: Acc vs Vel */}
-          <div className="flex items-center space-x-1 border border-slate-700 bg-slate-950/80 rounded-md p-0.5 text-[10px] font-mono">
-            <button
-              onClick={() => setSignalType("acc")}
-              className={`px-2 py-1 rounded font-bold transition ${
-                signalType === "acc"
-                  ? "bg-cyan-500 text-slate-950 shadow"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              ACC (Gal)
-            </button>
-            <button
-              onClick={() => setSignalType("vel")}
-              className={`px-2 py-1 rounded font-bold transition ${
-                signalType === "vel"
-                  ? "bg-cyan-500 text-slate-950 shadow"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              VEL (cm/s)
-            </button>
+          {/* Top Right: Event Selector & Signal Type */}
+          <div className="flex items-center space-x-2">
+            {/* Event Selector */}
+            <div className="flex items-center space-x-1 border border-slate-700 bg-slate-950/90 rounded-md p-0.5 text-[10px] font-mono">
+              <button
+                onClick={() => {
+                  setActiveEvent("eq20883");
+                  setSelectedStation("TCU083");
+                  setCurrentTimeSec(0);
+                  setIsPlaying(false);
+                }}
+                className={`px-2 py-1 rounded font-bold transition flex items-center space-x-1 ${
+                  activeEvent === "eq20883"
+                    ? "bg-amber-500 text-slate-950 shadow"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Radio className="h-3 w-3" />
+                <span>EQ 20883 (NCU Local)</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveEvent("meinong");
+                  setSelectedStation("KAU068");
+                  setCurrentTimeSec(0);
+                  setIsPlaying(false);
+                }}
+                className={`px-2 py-1 rounded font-bold transition ${
+                  activeEvent === "meinong"
+                    ? "bg-cyan-500 text-slate-950 shadow"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span>Meinong 2016</span>
+              </button>
+            </div>
+
+            {/* Signal Type Toggle: Acc vs Vel */}
+            <div className="flex items-center space-x-1 border border-slate-700 bg-slate-950/80 rounded-md p-0.5 text-[10px] font-mono">
+              <button
+                onClick={() => setSignalType("acc")}
+                className={`px-2 py-1 rounded font-bold transition ${
+                  signalType === "acc"
+                    ? "bg-cyan-500 text-slate-950 shadow"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                ACC (Gal)
+              </button>
+              <button
+                onClick={() => setSignalType("vel")}
+                className={`px-2 py-1 rounded font-bold transition ${
+                  signalType === "vel"
+                    ? "bg-cyan-500 text-slate-950 shadow"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                VEL (cm/s)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -408,7 +470,10 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
         <div className="flex items-center space-x-1 overflow-x-auto pb-1 scrollbar-thin">
           {stationKeys.map((sname) => {
             const sta = previews[sname];
+            if (!sta) return null;
             const isSel = selectedStation === sname;
+            const isOnCampus = sname === "TCU083";
+
             return (
               <button
                 key={sname}
@@ -420,6 +485,11 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                 }`}
               >
                 <span>{sname}</span>
+                {isOnCampus && (
+                  <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/25 text-amber-300 font-bold border border-amber-500/40 animate-pulse">
+                    NCU CAMPUS
+                  </span>
+                )}
                 <span
                   className={`text-[9px] px-1 rounded ${
                     sta.cwa_intensity.includes("6") || sta.cwa_intensity.includes("5")
@@ -438,21 +508,29 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
       {/* Station Telemetry & TT-SAM Status Strip */}
       <div className="grid grid-cols-4 gap-2 px-3 py-2 bg-slate-950/60 border-b border-slate-800/80 text-[11px] font-mono">
         <div>
-          <span className="text-slate-400 text-[10px] block">Distance:</span>
-          <span className="text-white font-bold">{currentStationData.distance_km} km</span>
-        </div>
-        <div>
-          <span className="text-slate-400 text-[10px] block">Max Shaking:</span>
-          <span className="text-amber-400 font-bold">
-            {currentStationData.max_abs_acc_gal.toFixed(1)} Gal
+          <span className="text-slate-400 text-[10px] block">
+            {selectedStation === "TCU083" ? "Campus Station Location:" : "Distance to Epicenter:"}
+          </span>
+          <span className="text-white font-bold">
+            {selectedStation === "TCU083"
+              ? "NCU Core (0.11 km to S4)"
+              : `${currentStationData.distance_km} km`}
           </span>
         </div>
         <div>
-          <span className="text-slate-400 text-[10px] block">P-Arrival:</span>
+          <span className="text-slate-400 text-[10px] block">Max Peak Shaking:</span>
+          <span className="text-amber-400 font-bold">
+            {signalType === "acc"
+              ? `${currentStationData.max_abs_acc_gal.toFixed(1)} Gal`
+              : `${currentStationData.max_abs_vel_cm_s.toFixed(3)} cm/s`}
+          </span>
+        </div>
+        <div>
+          <span className="text-slate-400 text-[10px] block">P-Wave Arrival:</span>
           <span className="text-cyan-400 font-bold">{currentStationData.p_pick_sec}s</span>
         </div>
         <div>
-          <span className="text-slate-400 text-[10px] block">Lead Time:</span>
+          <span className="text-slate-400 text-[10px] block">Warning Lead Time:</span>
           <span className="text-emerald-400 font-bold">
             +{currentStationData.warning_lead_time_sec}s
           </span>

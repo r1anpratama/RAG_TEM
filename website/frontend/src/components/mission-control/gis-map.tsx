@@ -329,29 +329,85 @@ export const GisMap: React.FC<GisMapProps> = ({
               `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:6px;font-size:11px;border-radius:6px">
                 <strong style="color:#f59e0b;font-size:12px">Hypocenter: ${scenario.title}</strong><br/>
                 Magnitude: <b>Mw ${scenario.magnitude}</b> | Depth: <b>${scenario.depth_km} km</b><br/>
-                Predicted PGV at NCU: <b style="color:#38bdf8">${scenario.predicted_pgv_cm_s} cm/s</b>
+                Target: <b>${scenario.target_facility}</b><br/>
+                Distance to NCU: <b>${scenario.distance_to_target_km || 23.9} km</b>
               </div>`
             )
             .addTo(markersLayer);
 
+          // If EQ 20883 scenario, render 5 Key Seismic Recording Stations & Propagation Ray
+          if (scenario.id.includes("20883") || epiLat > 24.5) {
+            const eqStations = [
+              { code: "TCU083", name: "NCU Campus Seismometer Core", lat: 24.9674, lon: 121.1943, dist: "23.8 km", pga: "12.3 Gal", int: "3", isCampus: true },
+              { code: "TCU009", name: "Zhongli / Pingzhen Station", lat: 24.9510, lon: 121.2180, dist: "22.6 km", pga: "14.8 Gal", int: "3", isCampus: false },
+              { code: "TCU006", name: "Yangmei Station", lat: 24.9120, lon: 121.1450, dist: "19.9 km", pga: "32.1 Gal", int: "4", isCampus: false },
+              { code: "TCU013", name: "Longtan / Daxi Strong Motion", lat: 24.8620, lon: 121.2130, dist: "12.3 km", pga: "198.3 Gal", int: "5-", isCampus: false },
+              { code: "TCU021", name: "Guanxi Peak Near-Field", lat: 24.7950, lon: 121.1730, dist: "9.4 km", pga: "209.8 Gal", int: "5-", isCampus: false },
+            ];
+
+            eqStations.forEach((s) => {
+              const staIcon = L.divIcon({
+                className: `sta-marker-${s.code}`,
+                html: `<div style="position:relative;display:flex;align-items:center;cursor:pointer">
+                  <div style="height:14px;width:14px;border-radius:4px;background:${s.isCampus ? '#f59e0b' : '#06b6d4'};border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px ${s.isCampus ? '#f59e0b' : '#06b6d4'}">
+                    <span style="font-size:8px;font-weight:bold;color:#0b0f19">▲</span>
+                  </div>
+                  <div style="position:absolute;left:18px;top:-8px;white-space:nowrap;border-radius:4px;background:rgba(11,15,25,0.95);padding:2px 6px;font-size:9px;font-family:monospace;font-weight:bold;color:${s.isCampus ? '#fcd34d' : '#38bdf8'};border:1px solid ${s.isCampus ? '#f59e0b' : '#0284c7'}">
+                    ${s.code} • ${s.pga} (Int ${s.int})
+                  </div>
+                </div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7],
+              });
+              L.marker([s.lat, s.lon], { icon: staIcon })
+                .bindPopup(
+                  `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:6px 10px;font-size:11px;border-radius:6px">
+                    <strong style="color:${s.isCampus ? '#f59e0b' : '#38bdf8'};font-size:12px">Station ${s.code}</strong><br/>
+                    <b>${s.name}</b><br/>
+                    Measured PGA: <b>${s.pga}</b> | CWA Intensity: <b>${s.int}</b><br/>
+                    Distance to Epicenter: <b>${s.dist}</b>
+                    ${s.isCampus ? '<br/><span style="color:#fcd34d;font-weight:bold">★ Located directly on NCU Campus (0.11 km from S4)</span>' : ''}
+                  </div>`
+                )
+                .addTo(markersLayer);
+            });
+          }
+
           if (wavefrontsLayer) {
             wavefrontsLayer.clearLayers();
 
+            // Direct distance propagation ray from Epicenter to NCU Campus Core
+            const ray = L.polyline([[epiLat, epiLon], [24.9688, 121.1918]], {
+              color: "#f59e0b",
+              weight: 2.2,
+              dashArray: "6, 6",
+              opacity: 0.85,
+            });
+            ray.bindTooltip(
+              `<div style="font-family:monospace;font-size:10px;background:#0b0f19;color:#fcd34d;padding:4px 8px;border:1px solid #f59e0b;border-radius:4px">
+                Epicenter → NCU Campus: 23.90 km<br/>P-wave arrival: 8.16s | S-wave arrival: 14.85s (Lead Time: +6.69s)
+              </div>`,
+              { sticky: true }
+            );
+            ray.addTo(wavefrontsLayer);
+
+            // P-Wave compressional wavefront (Fast)
             L.circle([epiLat, epiLon], {
-              radius: 45000,
+              radius: 28000,
               color: "#06b6d4",
-              weight: 1.5,
-              opacity: 0.7,
+              weight: 1.8,
+              opacity: 0.8,
               fillColor: "#0891b2",
               fillOpacity: 0.08,
               dashArray: "4, 4",
             }).addTo(wavefrontsLayer);
 
+            // S-Wave shear damaging wavefront (Reaching NCU campus ring)
             L.circle([epiLat, epiLon], {
-              radius: 25000,
+              radius: 23900,
               color: "#f59e0b",
-              weight: 2,
-              opacity: 0.85,
+              weight: 2.5,
+              opacity: 0.9,
               fillColor: "#f59e0b",
               fillOpacity: 0.12,
             }).addTo(wavefrontsLayer);

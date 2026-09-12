@@ -143,13 +143,18 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
 
             <div className="hidden sm:flex items-center space-x-1.5 text-[11px] text-slate-400 font-mono">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-emerald-300 font-bold">2016 Meinong Stream</span>
+              <span className="text-emerald-300 font-bold">
+                {scenario?.id?.includes("meinong") ? "2016 Meinong Stream" : "EQ 20883 Local Stream • TCU083"}
+              </span>
             </div>
           </div>
 
           {/* Active Content */}
           {rightPanelView === "waveform" ? (
-            <SimulationWaveformPanel isSimulating={isSimulating} />
+            <SimulationWaveformPanel
+              isSimulating={isSimulating}
+              activeScenarioId={scenario?.id}
+            />
           ) : (
             <div className="flex flex-col space-y-3">
               <ScadaPanel
