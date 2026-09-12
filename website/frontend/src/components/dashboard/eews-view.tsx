@@ -4,10 +4,9 @@ import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { AlertBanner } from "@/components/mission-control/alert-banner";
 import { DigitalTwins } from "@/components/mission-control/digital-twins";
-import { ScadaPanel } from "@/components/mission-control/scada-panel";
 import { SimulationWaveformPanel } from "@/components/mission-control/simulation-waveform-panel";
 import { Scenario, FaultTrace } from "@/types/triage";
-import { Map as MapIcon, Box, Activity, Sliders } from "lucide-react";
+import { Map as MapIcon, Box, Activity } from "lucide-react";
 
 const GisMap = dynamic(
   () =>
@@ -49,7 +48,6 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
   isSimulating,
 }) => {
   const [activeCampusView, setActiveCampusView] = useState<"gis" | "3d_campus">("gis");
-  const [rightPanelView, setRightPanelView] = useState<"waveform" | "scada">("waveform");
 
   // Shared Master Simulation Playback Clock (Syncs GIS Map & Multi-Station Waveform Panel)
   const [simTimeSec, setSimTimeSec] = useState<number>(0);
@@ -181,96 +179,53 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Real-Time Waveform Monitor / SCADA Actuators */}
+        {/* Right Column: Real-Time Multi-Station Waveform Monitor */}
         <div className="lg:col-span-5 flex flex-col space-y-2">
-          {/* Top Switcher: Waveform Monitor vs SCADA Actuators */}
+          {/* Top Title Bar */}
           <div className="flex items-center justify-between px-1">
-            <div className="flex items-center space-x-1.5 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md shadow-sm">
-              <button
-                onClick={() => setRightPanelView("waveform")}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
-                  rightPanelView === "waveform"
-                    ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Activity className="h-3.5 w-3.5" />
-                <span>Waveform Monitor</span>
-              </button>
-              <button
-                onClick={() => setRightPanelView("scada")}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
-                  rightPanelView === "scada"
-                    ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <Sliders className="h-3.5 w-3.5 text-amber-400" />
-                <span>SCADA Actuators</span>
-              </button>
+            <div className="flex items-center space-x-2 text-xs font-bold text-slate-100 font-mono">
+              <Activity className="h-4 w-4 text-cyan-400" />
+              <span>Multi-Station Waveform Array (Z-Component)</span>
             </div>
 
-            <div className="hidden sm:flex items-center space-x-1.5 text-[11px] text-slate-400 font-mono">
+            <div className="flex items-center space-x-1.5 text-[11px] text-slate-400 font-mono">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span className="text-emerald-300 font-bold">
                 {scenario?.id?.includes("meinong")
-                  ? "2016 Meinong Stream"
+                  ? "2016 Meinong Stream (373 Stations)"
                   : scenario?.id?.includes("20883")
-                  ? "EQ 20883 Stream (23.9 km)"
-                  : "EQ 20122 Closest Stream (19.8 km)"}
+                  ? "EQ 20883 Stream (55 Stations • TCU083 0.11 km)"
+                  : "EQ 20122 Stream (8 Stations • MND020 12.2 km)"}
               </span>
             </div>
           </div>
 
           {/* Active Content */}
-          {rightPanelView === "waveform" ? (
-            <SimulationWaveformPanel
-              isSimulating={isSimulating}
-              activeScenarioId={scenario?.id}
-              simTimeSec={simTimeSec}
-              onTimeChange={(t) => {
-                setIsPlaying(false);
-                setSimTimeSec(t);
-              }}
-              isPlaying={isPlaying}
-              onPlayToggle={handlePlayToggle}
-              onReset={handleReset}
-              playbackSpeed={playbackSpeed}
-              onSpeedChange={(spd) => setPlaybackSpeed(spd)}
-            />
-          ) : (
-            <div className="flex flex-col space-y-3">
-              <ScadaPanel
-                actuators={scenario?.track_a_actuators}
-                triggerStatus="ACTIVATED_SUB_5MS"
-                latencyMs={1.84}
-              />
-
-              <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-4 space-y-2">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Wavefront Propagation Telemetry
-                </h4>
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300 font-mono">
-                  <div className="rounded bg-slate-900/90 p-2 border border-slate-200 dark:border-slate-800">
-                    <span className="text-cyan-400 block font-bold">P-Wave Velocity:</span>
-                    ~ 6.0 km/s (Compressional)
-                  </div>
-                  <div className="rounded bg-slate-900/90 p-2 border border-slate-200 dark:border-slate-800">
-                    <span className="text-amber-400 block font-bold">S-Wave Velocity:</span>
-                    ~ 3.5 km/s (Shear Damaging)
-                  </div>
-                </div>
-                <p className="text-[10px] text-slate-400 pt-1">
-                  Warning lead time is maximized by automated Track A reflex cutoffs occurring within the 0 to 7.2 second S-wave arrival window.
-                </p>
-              </div>
-            </div>
-          )}
+          <SimulationWaveformPanel
+            isSimulating={isSimulating}
+            activeScenarioId={scenario?.id}
+            simTimeSec={simTimeSec}
+            onTimeChange={(t) => {
+              setIsPlaying(false);
+              setSimTimeSec(t);
+            }}
+            isPlaying={isPlaying}
+            onPlayToggle={handlePlayToggle}
+            onReset={handleReset}
+            playbackSpeed={playbackSpeed}
+            onSpeedChange={(spd) => setPlaybackSpeed(spd)}
+          />
         </div>
       </div>
 
-      {/* Campus Digital Twins */}
-      <DigitalTwins facilities={[]} isSimulating={isSimulating || isPlaying} />
+      {/* Campus SCADA Actuators & Digital Twins Interlocks */}
+      <DigitalTwins
+        scenario={scenario}
+        facilities={[]}
+        isSimulating={isSimulating || isPlaying}
+        simTimeSec={simTimeSec}
+        isPlaying={isPlaying}
+      />
     </div>
   );
 };
