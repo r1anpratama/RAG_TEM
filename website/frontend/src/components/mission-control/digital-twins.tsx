@@ -5,12 +5,9 @@ import {
   Building2,
   AlertTriangle,
   CheckCircle,
-  ShieldAlert,
   ShieldCheck,
   Zap,
   Radio,
-  Sliders,
-  CheckCircle2,
   Clock,
 } from "lucide-react";
 import { FacilityTriage, Scenario, SCADAActuator } from "@/types/triage";
@@ -69,7 +66,6 @@ export function getScadaTriggerSpecs(scenario?: Scenario | null) {
 
 export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
   scenario,
-  facilities,
   isSimulating: propIsSimulating = false,
   simTimeSec = 0,
   isPlaying = false,
@@ -111,72 +107,116 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
       ? scenario.track_a_actuators
       : defaultActuators;
 
-  // Structural Building Data
-  // If Daxi: multi-storey (>3F) has CWA Intensity 2 (Green) with 1F soft storey warning on Edream Centre!
-  const buildingItems = [
+  // ALL 6 NCU CAMPUS BUILDINGS FROM 3D TWIN WITH MATCHED IMPACTS:
+  // Daxi Ground Motion Rule:
+  // <= 3 storeys: CWA Intensity 3 (Yellow #facc15)
+  // > 3 storeys: CWA Intensity 2 (Green #4ade80)
+  const campusBuildings = [
     {
-      facility_id: "FAC_NCU_SCIENCE_B4",
-      facility_name: "NCU Edream Centre (健雄館 / S4)",
-      building_era: "PRE_1999_SOFT_STOREY",
-      stories: 8,
-      triage_tag: isDaxi ? "YELLOW_INSPECT" : "RED_CRITICAL",
-      drift_ratio_pct: isDaxi ? 0.42 : 2.14,
-      collapse_probability: isDaxi ? "< 0.5%" : "48.2%",
-      cwa_intensity: isDaxi ? "2" : "6-Weak",
+      facility_id: "FAC_NCU_GYM",
+      facility_name: "NCU Gymnasium (依仁堂體育館)",
+      building_era: "Post-1999 High-Bay Space Truss",
+      structural_type: "Steel Space Truss on RC Columns",
+      stories: 2,
+      is_low_rise: true,
+      fundamental_period_sec: 0.28,
+      cwa_intensity: isDaxi ? "3" : "2",
+      drift_ratio_pct: isDaxi ? 0.58 : 0.12,
+      collapse_probability: isDaxi ? "1.2%" : "< 0.1%",
       action_recommendation: isDaxi
-        ? "SOFT-STOREY WARNING: 1F open column atrium concentrated shear force (IDR: 0.42%). Gas riser isolated, elevators homed to 1F."
-        : "IMMEDIATE EVACUATION: High risk of 1st floor shear collapse.",
-      connected_lifelines: ["POWER_SUBSTATION_B", "GAS_RISER_04"],
+        ? "CWA INTENSITY 3 (YELLOW RESONANCE): Low-rise (2F <= 3F) resonates with Daxi shallow crustal high frequencies (Tn ≈ 0.28s). High roof truss vibration; emergency lighting engaged."
+        : "LOW-RISE SAFE: Rigid body motion without resonant drift during slow waves.",
+      connected_lifelines: ["GYM_ROOF_TRUSS_SENSORS", "EMERGENCY_EXIT_DOORS"],
       priority_rank: 1,
     },
     {
-      facility_id: "FAC_NCU_ENG_B5",
-      facility_name: "NCU Engineering Building 5",
-      building_era: "POST_1999_RC_FRAME",
-      stories: 7,
-      triage_tag: isDaxi ? "GREEN_SAFE" : "YELLOW_INSPECT",
-      drift_ratio_pct: isDaxi ? 0.24 : 1.05,
-      collapse_probability: isDaxi ? "< 0.1%" : "8.5%",
-      cwa_intensity: isDaxi ? "2" : "5-Strong",
+      facility_id: "FAC_NCU_SCIENCE_B4",
+      facility_name: "Edream Centre (健雄館 / S4)",
+      building_era: "Pre-1999 Ground Floor Soft-Storey",
+      structural_type: "RC Frame w/ Open Column Ground Atrium",
+      stories: 8,
+      is_low_rise: false,
+      fundamental_period_sec: 0.65,
+      cwa_intensity: isDaxi ? "2" : "6-Weak",
+      drift_ratio_pct: isDaxi ? 0.42 : 2.14,
+      collapse_probability: isDaxi ? "< 0.5%" : "48.2%",
       action_recommendation: isDaxi
-        ? "ATTENUATED SAFE: Ductile frame dissipated seismic energy within elastic range. Server backup online."
-        : "SECONDARY INSPECTION: Non-structural partition cracking.",
-      connected_lifelines: ["FIBER_BACKBONE_NCU", "CHILLED_WATER_LOOP"],
+        ? "CWA INTENSITY 2 (1F SOFT-STOREY ALERT): Multi-storey mass (>3F) filters high frequencies to Int 2, but 1F open column atrium concentrates shear force (IDR: 0.42%). Gas isolated, elevators homed to 1F."
+        : "IMMEDIATE EVACUATION: High risk of 1st floor shear collapse.",
+      connected_lifelines: ["GAS_RISER_04", "ELEVATOR_BANK_01", "OBSERVATORY_DOME_POWER"],
       priority_rank: 2,
     },
     {
-      facility_id: "FAC_NCU_LIBRARY",
-      facility_name: "NCU Main Library Core",
-      building_era: "POST_1999_SEISMIC_RETROFIT",
-      stories: 8,
-      triage_tag: "GREEN_SAFE",
-      drift_ratio_pct: isDaxi ? 0.20 : 0.42,
-      collapse_probability: isDaxi ? "< 0.1%" : "0.8%",
-      cwa_intensity: isDaxi ? "2" : "5-Weak",
+      facility_id: "FAC_NCU_ENG_B5",
+      facility_name: "Engineering Building 5 (工程五館 / E6)",
+      building_era: "Post-1999 Modern Ductile Code",
+      structural_type: "Moment-Resisting RC Frame",
+      stories: 7,
+      is_low_rise: false,
+      fundamental_period_sec: 0.60,
+      cwa_intensity: isDaxi ? "2" : "5-Strong",
+      drift_ratio_pct: isDaxi ? 0.24 : 1.05,
+      collapse_probability: isDaxi ? "< 0.1%" : "8.5%",
       action_recommendation: isDaxi
-        ? "ATTENUATED SAFE: Low-pass filtering mitigated roof drift. Dual shear core verified undamaged."
-        : "SHELTER IN PLACE: Structural integrity verified undamaged.",
-      connected_lifelines: ["CAMPUS_MICROGRID_SOLAR"],
+        ? "CWA INTENSITY 2 (ATTENUATED SAFE): 7-storey frame (>3F) acts as low-pass filter, safe within elastic design limit. Chilled water valves secured, CS/EECS server backup online."
+        : "SECONDARY INSPECTION: Non-structural partition cracking.",
+      connected_lifelines: ["EECS_SERVER_BACKUP", "CHILLED_WATER_LOOP"],
       priority_rank: 3,
     },
     {
-      facility_id: "FAC_HSP_TSMC_FAB",
-      facility_name: "Hsinchu SciPark Fab Cleanroom",
-      building_era: "BASE_ISOLATED_CLEANROOM",
-      stories: 4,
-      triage_tag: "GREEN_SAFE",
-      drift_ratio_pct: 0.18,
-      collapse_probability: "0.1%",
-      cwa_intensity: isDaxi ? "2" : "4",
+      facility_id: "FAC_NCU_LIBRARY",
+      facility_name: "NCU Main Library Core (總圖書館)",
+      building_era: "Post-1999 Retrofitted Heavy Core",
+      structural_type: "Dual RC Shear Wall & Braced Core",
+      stories: 8,
+      is_low_rise: false,
+      fundamental_period_sec: 0.72,
+      cwa_intensity: isDaxi ? "2" : "5-Weak",
+      drift_ratio_pct: isDaxi ? 0.20 : 0.42,
+      collapse_probability: isDaxi ? "< 0.1%" : "0.8%",
       action_recommendation: isDaxi
-        ? "ISOLATED SAFE: Lead-rubber bearings absorbed 85% seismic motion. Wafer fab dampers secured."
-        : "HOLD PRODUCTION: Lead-rubber bearings absorbed 82% seismic energy.",
-      connected_lifelines: ["TSMC_ULTRA_PURE_WATER", "HIGH_VOLTAGE_161KV"],
+        ? "CWA INTENSITY 2 (ATTENUATED SAFE): Heavy bookstack mass and dual RC shear core act as low-pass filter against Daxi waves. Elevators halted at nearest floor, emergency exits verified."
+        : "SHELTER IN PLACE: Structural integrity verified undamaged.",
+      connected_lifelines: ["CAMPUS_MICROGRID_SOLAR", "ELEVATORS_MAIN_LIBRARY"],
       priority_rank: 4,
+    },
+    {
+      facility_id: "FAC_NCU_ADMIN",
+      facility_name: "NCU Administration Building (行政大樓)",
+      building_era: "Campus Operations Center",
+      structural_type: "Reinforced Concrete Frame (Mid-Rise)",
+      stories: 5,
+      is_low_rise: false,
+      fundamental_period_sec: 0.45,
+      cwa_intensity: isDaxi ? "2" : "4",
+      drift_ratio_pct: isDaxi ? 0.28 : 0.45,
+      collapse_probability: isDaxi ? "< 0.1%" : "0.3%",
+      action_recommendation: isDaxi
+        ? "CWA INTENSITY 2 (ATTENUATED MID-RISE): 5-storey RC frame (>3F) kept base shear well within design capacity. Campus emergency operations network active."
+        : "OPERATIONS NOMINAL: Primary campus administration backbone secure.",
+      connected_lifelines: ["CAMPUS_OPS_NETWORK", "CENTRAL_PA_SYSTEM"],
+      priority_rank: 5,
+    },
+    {
+      facility_id: "FAC_NCU_EDREAM",
+      facility_name: "College of Earth Sciences (地球科學學院大樓)",
+      building_era: "Geoscientific Center of Excellence",
+      structural_type: "Stiff Low-Rise RC Frame w/ Bedrock Vault",
+      stories: 4,
+      is_low_rise: false,
+      fundamental_period_sec: 0.35,
+      cwa_intensity: isDaxi ? "2" : "4",
+      drift_ratio_pct: isDaxi ? 0.22 : 0.38,
+      collapse_probability: isDaxi ? "< 0.1%" : "0.2%",
+      action_recommendation: isDaxi
+        ? "CWA INTENSITY 2 (BEDROCK CORE SAFE): 4-storey frame (>3F) maintained low drift. CWASN_NCU_BB broadband seismograph bedrock vault undamaged."
+        : "SEISMOGRAPH VAULT STABLE: Bedrock sensors recording continuous telemetry.",
+      connected_lifelines: ["CWASN_BEDROCK_VAULT", "TT_SAM_EDGE_NODE"],
+      priority_rank: 6,
     },
   ];
 
-  const getTagBadge = (tag: string) => {
+  const getTagBadge = (b: typeof campusBuildings[0]) => {
     // Only display active triage color once SCADA is triggered (7s after 3rd station)!
     if (!isScadaTriggered) {
       return (
@@ -187,29 +227,30 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
       );
     }
 
-    switch (tag) {
-      case "RED_CRITICAL":
-        return (
-          <span className="flex items-center space-x-1 rounded-md bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/40 animate-pulse">
-            <ShieldAlert className="h-3 w-3 text-rose-400" />
-            <span>RED CRITICAL</span>
-          </span>
-        );
-      case "YELLOW_INSPECT":
-        return (
-          <span className="flex items-center space-x-1 rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/40">
-            <AlertTriangle className="h-3 w-3" />
-            <span>YELLOW INSPECT</span>
-          </span>
-        );
-      default:
-        return (
-          <span className="flex items-center space-x-1 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-            <CheckCircle className="h-3 w-3 text-emerald-400" />
-            <span>GREEN SAFE</span>
-          </span>
-        );
+    if (b.cwa_intensity === "3") {
+      return (
+        <span className="flex items-center space-x-1 rounded-md bg-yellow-400/15 px-2 py-0.5 text-[10px] font-bold text-yellow-400 border border-yellow-400/50 animate-pulse">
+          <AlertTriangle className="h-3 w-3 text-yellow-400" />
+          <span>CWA INT 3 • RESONANCE (≤3F)</span>
+        </span>
+      );
     }
+
+    if (b.facility_id === "FAC_NCU_SCIENCE_B4" && isDaxi) {
+      return (
+        <span className="flex items-center space-x-1 rounded-md bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/50">
+          <AlertTriangle className="h-3 w-3 text-amber-400" />
+          <span>CWA INT 2 • 1F SOFT-STOREY</span>
+        </span>
+      );
+    }
+
+    return (
+      <span className="flex items-center space-x-1 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+        <CheckCircle className="h-3 w-3 text-emerald-400" />
+        <span>CWA INT 2 • SAFE (&gt;3F)</span>
+      </span>
+    );
   };
 
   return (
@@ -217,14 +258,14 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
       {/* 1. SCADA AUTOMATED REFLEX INTERLOCKS PANEL (< 5 ms execution) */}
       <div className="flex flex-col space-y-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card p-3.5 shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-wrap gap-y-1">
             <Zap className="h-4 w-4 text-amber-400" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
               Track A Reflex SCADA Automated Interlocks (&lt; 5 ms)
             </h3>
             <span className="hidden sm:inline-flex items-center space-x-1 rounded bg-slate-900 px-2 py-0.5 text-[10px] font-mono text-cyan-300 border border-slate-700">
               <Clock className="h-2.5 w-2.5 text-cyan-400" />
-              <span>Trigger Rule: 7s After 3rd Pick ({specs.scadaTriggerSec.toFixed(2)}s)</span>
+              <span>Trigger Rule: 7s After 3rd Station ({specs.scadaTriggerSec.toFixed(2)}s)</span>
             </span>
           </div>
 
@@ -306,43 +347,42 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
         </div>
       </div>
 
-      {/* 2. CAMPUS DIGITAL TWINS & STRUCTURAL SCADA TELEMETRY CARDS */}
+      {/* 2. CAMPUS DIGITAL TWINS & STRUCTURAL SCADA TELEMETRY CARDS (ALL 6 3D TWIN BUILDINGS) */}
       <div className="flex flex-col space-y-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center space-x-2">
             <Building2 className="h-4 w-4 text-cyan-400" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-              Campus Digital Twins & Structural Drift Triage (ASCE 41-17)
+              NCU Campus 3D Twin Structural SCADA Interlocks (Matched with 3D Map)
             </h4>
           </div>
 
           <div className="flex items-center space-x-2 text-[11px] font-mono text-slate-400">
-            <span>Network Convergence:</span>
-            <span className="text-cyan-300 font-bold">
-              {isScadaTriggered
-                ? "3-Station + 7s Inverted"
-                : is3rdStationDetected
-                ? "3-Station Pick Recorded"
-                : "Standby"}
-            </span>
+            <span>Daxi Impact Rule:</span>
+            <span className="text-yellow-400 font-bold">≤3F: Int 3 (Yellow)</span>
+            <span className="text-slate-600">|</span>
+            <span className="text-emerald-400 font-bold">&gt;3F: Int 2 (Green)</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {buildingItems.map((fac) => {
+        {/* 6 Campus Building Cards matching 3D Twin */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {campusBuildings.map((b) => {
             // NUMBERS ONLY APPEAR 7 SECONDS AFTER THE FIRST 3 SENSORS RECORD!
-            const drift = isScadaTriggered ? fac.drift_ratio_pct : 0.0;
-            const isDanger = isScadaTriggered && drift >= 2.0;
-            const isWarning = isScadaTriggered && drift >= 0.4 && drift < 2.0;
+            const drift = isScadaTriggered ? b.drift_ratio_pct : 0.0;
+            const isGymResonant = isScadaTriggered && b.cwa_intensity === "3";
+            const isSoftStorey = isScadaTriggered && b.facility_id === "FAC_NCU_SCIENCE_B4";
 
             return (
               <div
-                key={fac.facility_id}
+                key={b.facility_id}
                 className={`flex flex-col justify-between rounded-xl border p-3.5 transition-all duration-300 backdrop-blur-sm ${
-                  isDanger
-                    ? "border-rose-500/40 bg-rose-500/5 hover:border-rose-500/60 shadow-lg shadow-rose-950/20"
-                    : isWarning
-                    ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/60 shadow-lg shadow-amber-950/20"
+                  isGymResonant
+                    ? "border-yellow-400/50 bg-yellow-400/5 shadow-lg shadow-yellow-950/20"
+                    : isSoftStorey
+                    ? "border-amber-500/40 bg-amber-500/5 shadow-lg shadow-amber-950/20"
+                    : isScadaTriggered
+                    ? "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/50"
                     : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card hover:border-slate-700"
                 }`}
               >
@@ -350,13 +390,13 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {fac.facility_name}
+                        {b.facility_name}
                       </h4>
-                      <p className="text-[10px] font-mono text-slate-400 mt-0.5">
-                        {fac.building_era}
+                      <p className="text-[10px] font-mono text-cyan-400 font-semibold mt-0.5">
+                        {b.stories} Storeys ({b.stories <= 3 ? "≤ 3F Low-Rise" : "> 3F Multi-Storey"}) • Tn ~{b.fundamental_period_sec}s
                       </p>
                     </div>
-                    {getTagBadge(fac.triage_tag)}
+                    {getTagBadge(b)}
                   </div>
 
                   {/* Inter-Story Drift Gauge (Appears at t >= scadaTriggerSec) */}
@@ -367,15 +407,15 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
                         className={`font-mono font-bold transition-colors duration-300 ${
                           !isScadaTriggered
                             ? "text-slate-400"
-                            : isDanger
-                            ? "text-rose-400"
-                            : isWarning
-                            ? "text-amber-400"
-                            : "text-emerald-400"
+                            : isGymResonant
+                            ? "text-yellow-400 font-black"
+                            : isSoftStorey
+                            ? "text-amber-400 font-black"
+                            : "text-emerald-400 font-bold"
                         }`}
                       >
                         {isScadaTriggered
-                          ? `${fac.drift_ratio_pct.toFixed(2)}%`
+                          ? `${b.drift_ratio_pct.toFixed(2)}%`
                           : "0.00% (Normal)"}
                       </span>
                     </div>
@@ -385,16 +425,16 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
                         className={`h-full rounded-full transition-all duration-700 ${
                           !isScadaTriggered
                             ? "bg-slate-700"
-                            : isDanger
-                            ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"
-                            : isWarning
-                            ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                            : isGymResonant
+                            ? "bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]"
+                            : isSoftStorey
+                            ? "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
                             : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                         }`}
                         style={{
                           width: `${
                             isScadaTriggered
-                              ? Math.min(100, Math.max(4, (fac.drift_ratio_pct / 2.5) * 100))
+                              ? Math.min(100, Math.max(4, (b.drift_ratio_pct / 1.5) * 100))
                               : 2
                           }%`,
                         }}
@@ -403,7 +443,7 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
 
                     <div className="flex justify-between text-[9px] text-slate-500 font-mono pt-0.5">
                       <span>Safe &lt;0.5%</span>
-                      <span>Yield 1.5%</span>
+                      <span>Yield 1.0%</span>
                       <span>Collapse &gt;2.0%</span>
                     </div>
                   </div>
@@ -416,12 +456,12 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
                         className={`font-semibold font-mono ${
                           !isScadaTriggered
                             ? "text-slate-400"
-                            : isDanger
-                            ? "text-rose-400 font-bold"
+                            : isGymResonant
+                            ? "text-yellow-400 font-bold"
                             : "text-slate-200"
                         }`}
                       >
-                        {isScadaTriggered ? fac.collapse_probability : "< 0.1%"}
+                        {isScadaTriggered ? b.collapse_probability : "< 0.1%"}
                       </span>
                     </div>
                     <div>
@@ -430,24 +470,28 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
                         className={`font-semibold font-mono ${
                           !isScadaTriggered
                             ? "text-slate-400"
-                            : isDaxi
-                            ? "text-emerald-400 font-bold"
-                            : "text-slate-200"
+                            : isGymResonant
+                            ? "text-yellow-400 font-bold"
+                            : "text-emerald-400 font-bold"
                         }`}
                       >
-                        {isScadaTriggered ? fac.cwa_intensity : "Normal"}
+                        {isScadaTriggered
+                          ? b.cwa_intensity === "3"
+                            ? "Int 3 (≤3F Yellow)"
+                            : "Int 2 (>3F Green)"
+                          : "Normal"}
                       </span>
                     </div>
                   </div>
 
                   {/* Recommendation / SCADA Interlock */}
-                  <div className="mt-2 text-[10px] text-slate-400 leading-tight bg-slate-900/60 p-2 rounded border border-slate-800/80 min-h-[50px] flex flex-col justify-center">
+                  <div className="mt-2 text-[10px] text-slate-400 leading-tight bg-slate-900/60 p-2 rounded border border-slate-800/80 min-h-[52px] flex flex-col justify-center">
                     <span className="text-cyan-400 font-bold block mb-0.5">
                       {isScadaTriggered ? "SCADA Interlock Action:" : "Triage Status:"}
                     </span>
                     <span className="text-slate-300">
                       {isScadaTriggered
-                        ? fac.action_recommendation
+                        ? b.action_recommendation
                         : is3rdStationDetected
                         ? `3-station trigger achieved at ${specs.t3rdStationSec.toFixed(1)}s. SCADA interlock inversion in ${Math.max(0, specs.scadaTriggerSec - currentT).toFixed(1)}s.`
                         : "Structural baseline verified intact. Standby for seismic trigger."}
@@ -457,13 +501,17 @@ export const DigitalTwins: React.FC<DigitalTwinsProps> = ({
 
                 {/* Priority & Lifelines */}
                 <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
-                  <span>Priority #{fac.priority_rank}</span>
+                  <span className="font-mono">Priority #{b.priority_rank}</span>
                   <span
                     className={`font-mono ${
-                      isScadaTriggered ? "text-emerald-400 font-bold" : "text-cyan-400"
+                      isScadaTriggered
+                        ? isGymResonant
+                          ? "text-yellow-400 font-bold"
+                          : "text-emerald-400 font-bold"
+                        : "text-cyan-400"
                     }`}
                   >
-                    {fac.connected_lifelines.length} Lifelines{" "}
+                    {b.connected_lifelines.length} Lifelines{" "}
                     {isScadaTriggered ? "Cutoff Executed" : "Interlocked"}
                   </span>
                 </div>
