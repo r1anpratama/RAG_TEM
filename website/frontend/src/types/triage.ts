@@ -25,6 +25,7 @@ export interface Scenario {
   estimated_cwa_intensity?: string;
   s_wave_countdown_sec?: number;
   track_a_actuators?: SCADAActuator[];
+  model_confidence?: string;
   gmpe_validation?: {
     status?: string;
     theoretical_median_pgv?: number;
