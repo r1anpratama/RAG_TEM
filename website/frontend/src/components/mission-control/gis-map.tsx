@@ -25,7 +25,7 @@ export const GisMap: React.FC<GisMapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
-  const [activeBasemap, setActiveBasemap] = useState<BasemapStyle>("satellite");
+  const [activeBasemap, setActiveBasemap] = useState<BasemapStyle>("esri_dark");
   const [isLegendOpen, setIsLegendOpen] = useState<boolean>(false);
   const tileLayersRef = useRef<{ [key: string]: any }>({});
   const layersRef = useRef<{
@@ -77,7 +77,7 @@ export const GisMap: React.FC<GisMapProps> = ({
         );
         const satelliteGroup = L.layerGroup([esriSatellite, esriLabels]);
 
-        // 2. Esri Dark Canvas
+        // 2. Esri Dark Canvas (Primary Default)
         const esriBase = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           { maxZoom: 16 }
@@ -106,8 +106,8 @@ export const GisMap: React.FC<GisMapProps> = ({
           osm: osm,
         };
 
-        // Add default Satellite layer to showcase real campus
-        satelliteGroup.addTo(map);
+        // Add default Dark layer
+        esriDarkGroup.addTo(map);
 
         mapInstanceRef.current = map;
         layersRef.current.campusBoundaryLayer = L.layerGroup().addTo(map);
@@ -278,46 +278,48 @@ export const GisMap: React.FC<GisMapProps> = ({
             }
           }
 
+          // Sleek minimalist pin - Clean dot without persistent floating text (info shown on click)
           const bIcon = L.divIcon({
             className: `custom-building-pin-${b.id}`,
-            html: `<div style="position:relative;display:flex;align-items:center;cursor:pointer">
-              <div style="height:12px;width:12px;border-radius:9999px;background:${dotColor};border:2px solid #ffffff;box-shadow:0 0 8px ${dotColor}"></div>
-              <div style="position:absolute;left:16px;top:-10px;white-space:nowrap;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:bold;color:#f8fafc;box-shadow:0 4px 12px rgba(0,0,0,0.6);border:1px solid;" class="${badgeBg} ${badgeBorder}">
-                ${b.name}<br/>
-                <span style="font-size:9px;font-weight:normal;opacity:0.85">${b.nameZh} • ${badgeText}</span>
-              </div>
+            html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <div style="height:14px;width:14px;border-radius:9999px;background:${dotColor};border:2px solid #ffffff;box-shadow:0 0 10px ${dotColor};transition:transform 0.2s" class="hover:scale-125"></div>
             </div>`,
-            iconSize: [12, 12],
-            iconAnchor: [6, 6],
+            iconSize: [14, 14],
+            iconAnchor: [7, 7],
           });
 
           L.marker([b.lat, b.lon], { icon: bIcon })
             .bindPopup(
-              `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:8px;font-size:11px;border-radius:6px;min-width:200px">
-                <strong style="color:#38bdf8;font-size:12px">${b.name}</strong><br/>
-                <span style="color:#94a3b8;font-size:10px">${b.nameZh}</span><br/>
-                Structural Category: <b>${b.type}</b><br/>
-                Exact GPS: <code style="color:#38bdf8">${b.lat.toFixed(5)}, ${b.lon.toFixed(5)}</code><br/>
-                Simulated Impact: <b style="color:${dotColor}">${badgeText}</b>
-              </div>`
+              `<div style="font-family:sans-serif;color:#f8fafc;background:#0f172a;padding:10px 12px;font-size:11px;border-radius:8px;min-width:220px;border:1px solid #1e293b;box-shadow:0 8px 24px rgba(0,0,0,0.85)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                  <strong style="color:#38bdf8;font-size:13px">${b.name}</strong>
+                  <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#1e293b;color:#94a3b8">${b.id.replace('FAC_NCU_', '')}</span>
+                </div>
+                <div style="color:#cbd5e1;font-size:11px;margin-bottom:6px;font-weight:600">${b.nameZh}</div>
+                <div style="font-size:10px;color:#94a3b8;line-height:1.5;margin-bottom:6px">
+                  Structural Category: <b style="color:#f1f5f9">${b.type}</b><br/>
+                  Exact GPS: <code style="color:#38bdf8">${b.lat.toFixed(5)}, ${b.lon.toFixed(5)}</code>
+                </div>
+                <div style="padding:4px 8px;border-radius:4px;font-size:10px;font-weight:bold;display:inline-block;" class="${badgeBg} ${badgeBorder}">
+                  Simulated Status: ${badgeText}
+                </div>
+              </div>`,
+              { maxWidth: 280 }
             )
             .addTo(markersLayer);
         });
 
-        // Render Active Epicenter if scenario present
+        // Render Active Epicenter if scenario present (clean star icon without floating label)
         if (scenario) {
           const epiLat = scenario.epicenter.lat;
           const epiLon = scenario.epicenter.lon;
 
           const epiIcon = L.divIcon({
             className: "custom-epi-marker",
-            html: `<div style="position:relative;display:flex;align-items:center;justify-content:center">
-              <div style="position:absolute;inset:-12px;border-radius:9999px;background:rgba(245,158,11,0.4);animation:ping 1.2s cubic-bezier(0,0,0.2,1) infinite"></div>
-              <div style="height:22px;width:22px;border-radius:9999px;background:#f59e0b;border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;color:#0b0f19;font-size:11px;font-weight:900;box-shadow:0 0 14px rgba(245,158,11,0.8)">
+            html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <div style="position:absolute;inset:-10px;border-radius:9999px;background:rgba(245,158,11,0.45);animation:ping 1.2s cubic-bezier(0,0,0.2,1) infinite"></div>
+              <div style="height:22px;width:22px;border-radius:9999px;background:#f59e0b;border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;color:#0b0f19;font-size:12px;font-weight:900;box-shadow:0 0 14px rgba(245,158,11,0.9)">
                 ★
-              </div>
-              <div style="position:absolute;left:26px;top:-4px;white-space:nowrap;border-radius:6px;background:rgba(17,28,46,0.96);padding:3px 9px;font-size:10px;font-weight:bold;color:#fcd34d;border:1px solid #f59e0b;box-shadow:0 4px 12px rgba(0,0,0,0.6)">
-                Epicenter Mw ${scenario.magnitude}
               </div>
             </div>`,
             iconSize: [22, 22],
@@ -326,16 +328,19 @@ export const GisMap: React.FC<GisMapProps> = ({
 
           L.marker([epiLat, epiLon], { icon: epiIcon })
             .bindPopup(
-              `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:6px;font-size:11px;border-radius:6px">
-                <strong style="color:#f59e0b;font-size:12px">Hypocenter: ${scenario.title}</strong><br/>
+              `<div style="font-family:sans-serif;color:#f8fafc;background:#0f172a;padding:10px 12px;font-size:11px;border-radius:8px;border:1px solid #f59e0b;box-shadow:0 8px 24px rgba(0,0,0,0.85)">
+                <strong style="color:#f59e0b;font-size:13px">★ Epicenter / Hypocenter</strong><br/>
+                <div style="color:#cbd5e1;font-size:11px;font-weight:bold;margin:4px 0">${scenario.title}</div>
                 Magnitude: <b>Mw ${scenario.magnitude}</b> | Depth: <b>${scenario.depth_km} km</b><br/>
-                Target: <b>${scenario.target_facility}</b><br/>
-                Distance to NCU: <b>${scenario.distance_to_target_km || 23.9} km</b>
-              </div>`
+                Coordinates: <code style="color:#38bdf8">${epiLat.toFixed(4)}°N, ${epiLon.toFixed(4)}°E</code><br/>
+                Target Facility: <b>${scenario.target_facility}</b><br/>
+                Distance to NCU: <b style="color:#fcd34d">${scenario.distance_to_target_km || 23.9} km</b>
+              </div>`,
+              { maxWidth: 280 }
             )
             .addTo(markersLayer);
 
-          // If EQ 20883 scenario, render 5 Key Seismic Recording Stations & Propagation Ray
+          // If EQ 20883 scenario, render 5 Key Seismic Recording Stations (clean triangle pins without floating labels)
           if (scenario.id.includes("20883") || epiLat > 24.5) {
             const eqStations = [
               { code: "TCU083", name: "NCU Campus Seismometer Core", lat: 24.9674, lon: 121.1943, dist: "23.8 km", pga: "12.3 Gal", int: "3", isCampus: true },
@@ -348,26 +353,28 @@ export const GisMap: React.FC<GisMapProps> = ({
             eqStations.forEach((s) => {
               const staIcon = L.divIcon({
                 className: `sta-marker-${s.code}`,
-                html: `<div style="position:relative;display:flex;align-items:center;cursor:pointer">
-                  <div style="height:14px;width:14px;border-radius:4px;background:${s.isCampus ? '#f59e0b' : '#06b6d4'};border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px ${s.isCampus ? '#f59e0b' : '#06b6d4'}">
-                    <span style="font-size:8px;font-weight:bold;color:#0b0f19">▲</span>
-                  </div>
-                  <div style="position:absolute;left:18px;top:-8px;white-space:nowrap;border-radius:4px;background:rgba(11,15,25,0.95);padding:2px 6px;font-size:9px;font-family:monospace;font-weight:bold;color:${s.isCampus ? '#fcd34d' : '#38bdf8'};border:1px solid ${s.isCampus ? '#f59e0b' : '#0284c7'}">
-                    ${s.code} • ${s.pga} (Int ${s.int})
+                html: `<div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer">
+                  <div style="height:16px;width:16px;border-radius:4px;background:${s.isCampus ? '#f59e0b' : '#06b6d4'};border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px ${s.isCampus ? '#f59e0b' : '#06b6d4'};transition:transform 0.2s" class="hover:scale-125">
+                    <span style="font-size:9px;font-weight:bold;color:#0b0f19">▲</span>
                   </div>
                 </div>`,
-                iconSize: [14, 14],
-                iconAnchor: [7, 7],
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
               });
               L.marker([s.lat, s.lon], { icon: staIcon })
                 .bindPopup(
-                  `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;padding:6px 10px;font-size:11px;border-radius:6px">
-                    <strong style="color:${s.isCampus ? '#f59e0b' : '#38bdf8'};font-size:12px">Station ${s.code}</strong><br/>
-                    <b>${s.name}</b><br/>
-                    Measured PGA: <b>${s.pga}</b> | CWA Intensity: <b>${s.int}</b><br/>
-                    Distance to Epicenter: <b>${s.dist}</b>
+                  `<div style="font-family:sans-serif;color:#f8fafc;background:#0f172a;padding:10px 12px;font-size:11px;border-radius:8px;border:1px solid ${s.isCampus ? '#f59e0b' : '#0284c7'};box-shadow:0 8px 24px rgba(0,0,0,0.85)">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                      <strong style="color:${s.isCampus ? '#f59e0b' : '#38bdf8'};font-size:13px">Station ${s.code}</strong>
+                      ${s.isCampus ? '<span style="font-size:9px;padding:2px 6px;border-radius:4px;background:#78350f;color:#fef08a;font-weight:bold">NCU CAMPUS</span>' : ''}
+                    </div>
+                    <b style="color:#e2e8f0">${s.name}</b><br/>
+                    Measured PGA: <b style="color:#f59e0b">${s.pga}</b> | CWA Intensity: <b style="color:#f59e0b">${s.int}</b><br/>
+                    Distance to Epicenter: <b>${s.dist}</b><br/>
+                    GPS: <code style="color:#38bdf8">${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</code>
                     ${s.isCampus ? '<br/><span style="color:#fcd34d;font-weight:bold">★ Located directly on NCU Campus (0.11 km from S4)</span>' : ''}
-                  </div>`
+                  </div>`,
+                  { maxWidth: 280 }
                 )
                 .addTo(markersLayer);
             });
@@ -376,18 +383,21 @@ export const GisMap: React.FC<GisMapProps> = ({
           if (wavefrontsLayer) {
             wavefrontsLayer.clearLayers();
 
-            // Direct distance propagation ray from Epicenter to NCU Campus Core
+            // Direct distance propagation ray from Epicenter to NCU Campus Core (info on click)
             const ray = L.polyline([[epiLat, epiLon], [24.9688, 121.1918]], {
               color: "#f59e0b",
               weight: 2.2,
               dashArray: "6, 6",
               opacity: 0.85,
             });
-            ray.bindTooltip(
-              `<div style="font-family:monospace;font-size:10px;background:#0b0f19;color:#fcd34d;padding:4px 8px;border:1px solid #f59e0b;border-radius:4px">
-                Epicenter → NCU Campus: 23.90 km<br/>P-wave arrival: 8.16s | S-wave arrival: 14.85s (Lead Time: +6.69s)
-              </div>`,
-              { sticky: true }
+            ray.bindPopup(
+              `<div style="font-family:monospace;font-size:11px;background:#0f172a;color:#fcd34d;padding:8px 12px;border:1px solid #f59e0b;border-radius:6px">
+                <strong>Propagation Path: Epicenter → NCU Campus</strong><br/>
+                Direct Hypocentral Distance: <b>23.90 km</b><br/>
+                P-wave Arrival: <b>8.16s</b><br/>
+                S-wave Arrival: <b>14.85s</b><br/>
+                Warning Lead Time: <b>+6.69s</b>
+              </div>`
             );
             ray.addTo(wavefrontsLayer);
 
@@ -525,6 +535,26 @@ export const GisMap: React.FC<GisMapProps> = ({
           {/* Basemap Switcher Toolbar */}
           <div className="flex items-center space-x-0.5 rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 ml-1">
             <button
+              onClick={() => handleSwitchBasemap("esri_dark")}
+              className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition ${
+                activeBasemap === "esri_dark"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Dark Canvas
+            </button>
+            <button
+              onClick={() => handleSwitchBasemap("carto_dark")}
+              className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition ${
+                activeBasemap === "carto_dark"
+                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              Carto Dark
+            </button>
+            <button
               onClick={() => handleSwitchBasemap("satellite")}
               className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition ${
                 activeBasemap === "satellite"
@@ -533,16 +563,6 @@ export const GisMap: React.FC<GisMapProps> = ({
               }`}
             >
               Satellite
-            </button>
-            <button
-              onClick={() => handleSwitchBasemap("esri_dark")}
-              className={`px-1.5 py-0.5 rounded text-[9px] font-medium transition ${
-                activeBasemap === "esri_dark"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              Dark
             </button>
             <button
               onClick={() => handleSwitchBasemap("osm")}
