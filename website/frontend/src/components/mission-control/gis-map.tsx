@@ -19,6 +19,7 @@ import { CwaIntensityColorbar } from "@/components/mission-control/cwa-intensity
 import { getCwaLevelInfo } from "@/lib/cwa-intensity";
 import eq20122Data from "@/data/eq_20122_simulation.json";
 import eq20883Data from "@/data/eq_20883_simulation.json";
+import meinongData from "@/data/meinong-simulation-data.json";
 
 interface GisMapProps {
   faults: FaultTrace[];
@@ -82,38 +83,29 @@ export const GisMap: React.FC<GisMapProps> = ({
 
     const is20122 = scenario.id.includes("20122");
     const is20883 = scenario.id.includes("20883");
+    const isMeinong = scenario.id.includes("meinong");
 
+    let prev: Record<string, any> = {};
     if (is20122) {
-      const prev = eq20122Data.waveform_previews as Record<string, any>;
-      return Object.entries(prev).map(([code, s]) => ({
-        code,
-        name: s.label?.split("•")[1]?.split("(")[0]?.trim() || `${code} Station`,
-        lat: s.latitude,
-        lon: s.longitude,
-        distEpi: s.distance_km,
-        distNcu: s.dist_to_ncu_km || 15.0,
-        pPickSec: s.p_pick_sec,
-        cwaIntensity: s.cwa_intensity,
-        pgaGal: s.max_abs_acc_gal,
-        isCampus: code === "TCU083",
-      }));
+      prev = eq20122Data.waveform_previews as Record<string, any>;
     } else if (is20883) {
-      const prev = eq20883Data.waveform_previews as Record<string, any>;
-      return Object.entries(prev).map(([code, s]) => ({
-        code,
-        name: s.label?.split("•")[1]?.split("(")[0]?.trim() || `${code} Station`,
-        lat: s.latitude || 24.9674,
-        lon: s.longitude || 121.1943,
-        distEpi: s.distance_km,
-        distNcu: s.dist_to_ncu_km || 0.11,
-        pPickSec: s.p_pick_sec,
-        cwaIntensity: s.cwa_intensity,
-        pgaGal: s.max_abs_acc_gal,
-        isCampus: code === "TCU083",
-      }));
+      prev = eq20883Data.waveform_previews as Record<string, any>;
+    } else if (isMeinong) {
+      prev = meinongData.waveform_previews as Record<string, any>;
     }
 
-    return [];
+    return Object.entries(prev).map(([code, s]) => ({
+      code,
+      name: s.label?.split("•")[1]?.split("(")[0]?.trim() || `${code} Station`,
+      lat: s.latitude,
+      lon: s.longitude,
+      distEpi: s.distance_km,
+      distNcu: s.dist_to_ncu_km || 15.0,
+      pPickSec: s.p_pick_sec,
+      cwaIntensity: s.cwa_intensity,
+      pgaGal: s.max_abs_acc_gal,
+      isCampus: code === "TCU083",
+    }));
   };
 
   const activeStations = getActiveStations();
@@ -129,8 +121,8 @@ export const GisMap: React.FC<GisMapProps> = ({
     if (!isTriggered) {
       // Standby Station (waiting for P-wave arrival)
       return `<div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer" title="${station.code} (Standby - Expected P-Arrival @ ${station.pPickSec}s)">
-        <div style="height:11px;width:11px;border-radius:2.5px;background:#334155;border:1.5px solid #64748b;opacity:0.55;display:flex;align-items:center;justify-content:center">
-          <span style="font-size:7px;color:#cbd5e1">▲</span>
+        <div style="height:10px;width:10px;border-radius:2px;background:#334155;border:1px solid #64748b;opacity:0.5;display:flex;align-items:center;justify-content:center">
+          <span style="font-size:6px;color:#cbd5e1">▲</span>
         </div>
       </div>`;
     }
@@ -139,13 +131,13 @@ export const GisMap: React.FC<GisMapProps> = ({
     return `<div style="position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer" title="${station.code}: Detected @ ${station.pPickSec}s • Intensity ${cwa.level} (${cwa.nameZh})">
       ${
         isNewlyDetected
-          ? `<div style="position:absolute;inset:-10px;border-radius:9999px;background:${cwa.glowColor};animation:ping 1s cubic-bezier(0,0,0.2,1) infinite"></div>`
+          ? `<div style="position:absolute;inset:-9px;border-radius:9999px;background:${cwa.glowColor};animation:ping 1s cubic-bezier(0,0,0.2,1) infinite"></div>`
           : ""
       }
-      <div style="height:17px;width:17px;border-radius:4px;background:${cwa.color};border:2px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px ${cwa.color};transition:transform 0.25s" class="hover:scale-125">
-        <span style="font-size:9px;font-weight:900;color:${cwa.textColor}">▲</span>
+      <div style="height:16px;width:16px;border-radius:3px;background:${cwa.color};border:1.5px solid #ffffff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px ${cwa.color};transition:transform 0.2s" class="hover:scale-125">
+        <span style="font-size:8px;font-weight:900;color:${cwa.textColor}">▲</span>
       </div>
-      <div style="position:absolute;top:-13px;background:#090d16;color:${cwa.color};border:1px solid ${cwa.color};font-size:8px;font-weight:bold;font-family:monospace;padding:1px 3px;border-radius:3px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.8)">
+      <div style="position:absolute;top:-12px;background:#090d16;color:${cwa.color};border:1px solid ${cwa.color};font-size:7.5px;font-weight:bold;font-family:monospace;padding:0.5px 2.5px;border-radius:2.5px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.8)">
         ${station.code} • ${cwa.level}
       </div>
     </div>`;
@@ -168,10 +160,14 @@ export const GisMap: React.FC<GisMapProps> = ({
       });
 
       if (!mapInstanceRef.current) {
-        // Center on Taoyuan/NCU region
+        const isMeinong = scenario?.id?.includes("meinong");
+        const centerLat = isMeinong ? 23.5 : 24.88;
+        const centerLon = isMeinong ? 120.9 : 121.22;
+        const initZoom = isMeinong ? 8 : 11;
+
         const map = L.map(mapContainerRef.current, {
-          center: [24.88, 121.22],
-          zoom: 11,
+          center: [centerLat, centerLon],
+          zoom: initZoom,
           minZoom: 6,
           maxZoom: 19,
           zoomControl: false,
@@ -179,13 +175,10 @@ export const GisMap: React.FC<GisMapProps> = ({
 
         L.control.zoom({ position: "topright" }).addTo(map);
 
-        // 1. High-Resolution Satellite Basemap
+        // Basemaps
         const esriSatellite = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          {
-            attribution: '&copy; <a href="https://www.esri.com/" target="_blank">Esri</a> Satellite',
-            maxZoom: 19,
-          }
+          { attribution: '&copy; Esri Satellite', maxZoom: 19 }
         );
         const esriLabels = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
@@ -193,7 +186,6 @@ export const GisMap: React.FC<GisMapProps> = ({
         );
         const satelliteGroup = L.layerGroup([esriSatellite, esriLabels]);
 
-        // 2. Esri Dark Canvas (Primary Default)
         const esriBase = L.tileLayer(
           "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
           { maxZoom: 16 }
@@ -204,13 +196,11 @@ export const GisMap: React.FC<GisMapProps> = ({
         );
         const esriDarkGroup = L.layerGroup([esriBase, esriRef]);
 
-        // 3. Carto Dark
         const cartoDark = L.tileLayer(
           "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
           { subdomains: "abcd", maxZoom: 19 }
         );
 
-        // 4. OpenStreetMap Standard
         const osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
           maxZoom: 19,
         });
@@ -222,7 +212,6 @@ export const GisMap: React.FC<GisMapProps> = ({
           osm: osm,
         };
 
-        // Add default Dark layer
         esriDarkGroup.addTo(map);
 
         mapInstanceRef.current = map;
@@ -387,7 +376,7 @@ export const GisMap: React.FC<GisMapProps> = ({
               `<div style="font-family:sans-serif;color:#f8fafc;background:#0f172a;padding:10px 12px;font-size:11px;border-radius:8px;border:1px solid #f59e0b;box-shadow:0 8px 24px rgba(0,0,0,0.85)">
                 <strong style="color:#f59e0b;font-size:13px">★ Epicenter / Hypocenter</strong><br/>
                 <div style="color:#cbd5e1;font-size:11px;font-weight:bold;margin:4px 0">${scenario.title}</div>
-                Magnitude: <b>ML ${scenario.magnitude}</b> | Depth: <b>${scenario.depth_km} km</b><br/>
+                Magnitude: <b>M ${scenario.magnitude}</b> | Depth: <b>${scenario.depth_km} km</b><br/>
                 Coordinates: <code style="color:#38bdf8">${epiLat.toFixed(4)}°N, ${epiLon.toFixed(4)}°E</code><br/>
                 Distance to NCU: <b style="color:#fcd34d">${scenario.distance_to_target_km || 19.8} km</b>
               </div>`,
@@ -407,10 +396,10 @@ export const GisMap: React.FC<GisMapProps> = ({
             ray.bindPopup(
               `<div style="font-family:monospace;font-size:11px;background:#0f172a;color:#fcd34d;padding:8px 12px;border:1px solid #f59e0b;border-radius:6px">
                 <strong>Propagation Ray: Epicenter → NCU Campus</strong><br/>
-                Direct Epicentral Distance: <b>${scenario.distance_to_target_km || 19.8} km</b><br/>
-                P-wave Arrival @ NCU: <b>${scenario.id.includes("20122") ? "6.85s" : "8.16s"}</b><br/>
-                S-wave Arrival @ NCU: <b>${scenario.id.includes("20122") ? "12.45s" : "14.85s"}</b><br/>
-                Warning Lead Time: <b>${scenario.id.includes("20122") ? "+5.60s" : "+6.69s"}</b>
+                Direct Distance: <b>${scenario.distance_to_target_km || 19.8} km</b><br/>
+                P-wave Arrival @ NCU: <b>${scenario.id.includes("20122") ? "6.85s" : scenario.id.includes("20883") ? "8.16s" : "36.2s"}</b><br/>
+                S-wave Arrival @ NCU: <b>${scenario.id.includes("20122") ? "12.45s" : scenario.id.includes("20883") ? "14.85s" : "68.5s"}</b><br/>
+                Warning Lead Time: <b>${scenario.id.includes("20122") ? "+5.60s" : scenario.id.includes("20883") ? "+6.69s" : "+32.3s"}</b>
               </div>`
             );
             ray.addTo(staticWavefrontsLayer);
@@ -429,8 +418,8 @@ export const GisMap: React.FC<GisMapProps> = ({
           const icon = L.divIcon({
             className: `sta-marker-${st.code}`,
             html: initialHtml,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9],
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
           });
 
           const marker = L.marker([st.lat, st.lon], { icon }).addTo(stationsLayer);
@@ -469,7 +458,7 @@ export const GisMap: React.FC<GisMapProps> = ({
           ];
           stations.forEach((s) => points.push([s.lat, s.lon]));
           const bounds = L.latLngBounds(points);
-          map.fitBounds(bounds, { padding: [35, 35], maxZoom: 12 });
+          map.fitBounds(bounds, { padding: [35, 35], maxZoom: scenario.id.includes("meinong") ? 9 : 12 });
         }
       }
 
@@ -480,7 +469,7 @@ export const GisMap: React.FC<GisMapProps> = ({
         const epiLat = scenario.epicenter.lat;
         const epiLon = scenario.epicenter.lon;
 
-        // P-Wave circle (Compressional, calibrated surface velocity)
+        // P-Wave circle
         pWaveCircleRef.current = L.circle([epiLat, epiLon], {
           radius: 1,
           color: "#06b6d4",
@@ -491,7 +480,7 @@ export const GisMap: React.FC<GisMapProps> = ({
           dashArray: "4, 4",
         }).addTo(dynamicWavefrontsLayer);
 
-        // S-Wave circle (Shear / Damaging, calibrated shear velocity)
+        // S-Wave circle
         sWaveCircleRef.current = L.circle([epiLat, epiLon], {
           radius: 1,
           color: "#f59e0b",
@@ -509,25 +498,23 @@ export const GisMap: React.FC<GisMapProps> = ({
   }, [faults, scenario, selectedFaultId, isSimulating]);
 
   // PHYSICAL PROPAGATING WAVEFRONT RADIUS & STATION SYNCHRONIZATION
-  // Matches exact arrival times of recording stations based on 3D spherical wavefront surface projection!
   useEffect(() => {
     if (!mapInstanceRef.current || !scenario) return;
 
     import("leaflet").then((L) => {
       const is20122 = scenario.id.includes("20122");
       const is20883 = scenario.id.includes("20883");
+      const isMeinong = scenario.id.includes("meinong");
 
       // Calibrated Seismological Parameters:
-      // In TSMIP accelerograms, t=0 starts at the pre-event recording buffer.
-      // Rupture origin time in recording t0:
-      const t0 = is20122 ? 2.825 : is20883 ? 2.822 : 3.5;
-      const vp = is20122 ? 5860 : is20883 ? 5000 : 5800; // m/s (P-wave crustal velocity)
-      const vs = is20122 ? 3380 : is20883 ? 2900 : 3350; // m/s (S-wave crustal velocity)
-      const depthM = (scenario.depth_km || (is20122 ? 12.0 : 10.22)) * 1000;
+      const t0 = is20122 ? 2.825 : is20883 ? 2.822 : isMeinong ? 2.65 : 3.5;
+      const vp = is20122 ? 5860 : is20883 ? 5000 : isMeinong ? 6720 : 5800; // m/s
+      const vs = is20122 ? 3380 : is20883 ? 2900 : isMeinong ? 3880 : 3350; // m/s
+      const depthM = (scenario.depth_km || (is20122 ? 12.0 : is20883 ? 10.22 : 14.64)) * 1000;
 
-      // Surface breakout times (when wave breaks through surface at epicenter above focal depth):
-      const tSurfBreakP = t0 + depthM / vp; // ~4.87s for EQ 20122
-      const tSurfBreakS = t0 + depthM / vs; // ~6.37s for EQ 20122
+      // Surface breakout times
+      const tSurfBreakP = t0 + depthM / vp;
+      const tSurfBreakS = t0 + depthM / vs;
 
       // 1. Calculate P-Wave horizontal surface radius:
       let pRadiusMeters = 0;
@@ -571,8 +558,8 @@ export const GisMap: React.FC<GisMapProps> = ({
           const icon = L.divIcon({
             className: `sta-marker-${station.code}`,
             html: newHtml,
-            iconSize: [18, 18],
-            iconAnchor: [9, 9],
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
           });
           marker.setIcon(icon);
         }
@@ -605,7 +592,7 @@ export const GisMap: React.FC<GisMapProps> = ({
 
   const flyToAllTaiwan = () => {
     if (!mapInstanceRef.current) return;
-    mapInstanceRef.current.flyTo([24.1, 121.0], 7.8, { duration: 1.2 });
+    mapInstanceRef.current.flyTo([23.8, 120.9], 7.5, { duration: 1.2 });
   };
 
   const fitAllStationsBounds = () => {
@@ -619,7 +606,7 @@ export const GisMap: React.FC<GisMapProps> = ({
       ];
       stations.forEach((s) => points.push([s.lat, s.lon]));
       const bounds = L.latLngBounds(points);
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 12 });
+      map.fitBounds(bounds, { padding: [35, 35], maxZoom: scenario.id.includes("meinong") ? 9 : 12 });
     });
   };
 
@@ -719,7 +706,7 @@ export const GisMap: React.FC<GisMapProps> = ({
       <div className="relative flex-1 w-full h-full overflow-hidden">
         <div ref={mapContainerRef} className="h-full w-full" />
 
-        {/* Floating CWA Intensity Scale Colorbar on Map */}
+        {/* Floating CWA Intensity Scale Colorbar on Map ONLY */}
         {showColorbar && (
           <div className="absolute top-3 left-3 z-[1000] pointer-events-auto max-w-[280px] sm:max-w-[320px]">
             <CwaIntensityColorbar compact={true} />
@@ -731,19 +718,19 @@ export const GisMap: React.FC<GisMapProps> = ({
           <div className="rounded-md border border-slate-800 bg-slate-950/90 px-2.5 py-1 text-[10px] font-mono backdrop-blur-md text-slate-300 flex items-center space-x-2">
             <span
               className={`w-2 h-2 rounded-full ${
-                simTimeSec < 4.87
+                simTimeSec < (scenario?.id?.includes("meinong") ? 4.83 : 4.87)
                   ? "bg-amber-400 animate-ping"
-                  : simTimeSec < 6.85
+                  : simTimeSec < (scenario?.id?.includes("meinong") ? 36.2 : 6.85)
                   ? "bg-cyan-400 animate-pulse"
                   : "bg-emerald-400"
               }`}
             />
             <span>
-              {simTimeSec < 4.87
-                ? "Focal Nucleation (12 km depth)"
-                : simTimeSec < 6.85
-                ? "P-Wave Surface Expanding"
-                : "P-Wave Reached Campus"}
+              {simTimeSec < (scenario?.id?.includes("meinong") ? 4.83 : 4.87)
+                ? "Focal Nucleation Phase"
+                : simTimeSec < (scenario?.id?.includes("meinong") ? 36.2 : 6.85)
+                ? "P-Wave Surface Propagation"
+                : "P-Wave Front Passed NCU"}
             </span>
           </div>
         </div>
@@ -773,7 +760,7 @@ export const GisMap: React.FC<GisMapProps> = ({
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-cyan-400 font-bold">▲</span>
-                <span className="text-slate-200">TSMIP Strong-Motion Station ({activeStations.length})</span>
+                <span className="text-slate-200">TSMIP Station ({activeStations.length} Active)</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="h-1 w-4 bg-cyan-400 rounded"></span>

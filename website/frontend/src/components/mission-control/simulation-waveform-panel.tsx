@@ -6,10 +6,8 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Sliders,
   Zap,
   Radio,
-  Layers,
   CheckCircle2,
   Search,
   ArrowUpDown,
@@ -17,7 +15,6 @@ import {
 import meinongSimulationData from "@/data/meinong-simulation-data.json";
 import eq20883SimulationData from "@/data/eq_20883_simulation.json";
 import eq20122SimulationData from "@/data/eq_20122_simulation.json";
-import { CwaIntensityColorbar } from "@/components/mission-control/cwa-intensity-colorbar";
 import { getCwaLevelInfo } from "@/lib/cwa-intensity";
 
 interface WaveformPreviewStation {
@@ -473,10 +470,10 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
               </h3>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                 {activeEvent === "eq20122"
-                  ? "EQ 20122 (19.76 km to NCU) • Real-Time P-Pick & CWA Intensity Triggering"
+                  ? "EQ 20122 (19.76 km to NCU) • All 8 Recording Stations"
                   : activeEvent === "eq20883"
-                  ? "EQ 20883 (23.90 km to NCU) • 55 Regional Stations Recorded"
-                  : "2016 Meinong Earthquake • Regional Strong-Motion Stream"}
+                  ? "EQ 20883 (23.90 km to NCU) • All 55 Regional Stations Recorded"
+                  : "2016 Meinong Earthquake (Mw 6.4) • All 373 Stations Across Taiwan"}
               </p>
             </div>
           </div>
@@ -496,7 +493,7 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                 }`}
               >
                 <Radio className="h-3 w-3" />
-                <span>EQ 20122 (19.8 km)</span>
+                <span>EQ 20122 (8 Sta)</span>
               </button>
               <button
                 onClick={() => {
@@ -522,7 +519,7 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                <span>Meinong</span>
+                <span>Meinong (373 Sta)</span>
               </button>
             </div>
 
@@ -611,14 +608,9 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
         </div>
       </div>
 
-      {/* Main Waveforms Scrollable Container */}
+      {/* Main Waveforms Scrollable Container - Expanded without duplicate CWA Colorbar */}
       <div className="flex-1 p-2 space-y-1.5 overflow-y-auto scrollbar-thin">
         {displayedStations.map((sta) => renderZComponentRow(sta))}
-      </div>
-
-      {/* Bottom CWA Intensity Colorbar Legend */}
-      <div className="px-2.5 py-1.5 bg-slate-950 border-t border-slate-800/90">
-        <CwaIntensityColorbar compact={true} />
       </div>
 
       {/* Bottom Playback & Scrubber Controls */}
