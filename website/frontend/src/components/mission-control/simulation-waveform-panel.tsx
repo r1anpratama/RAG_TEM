@@ -453,7 +453,7 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
   };
 
   return (
-    <div className="flex flex-col h-[440px] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card shadow-xl overflow-hidden">
+    <div className="flex flex-col h-[640px] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card shadow-xl overflow-hidden">
       {/* Top Header Toolbar */}
       <div className="flex flex-col border-b border-slate-200 dark:border-slate-800/90 bg-slate-50 dark:bg-slate_obsidian-900/90 p-2.5 space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

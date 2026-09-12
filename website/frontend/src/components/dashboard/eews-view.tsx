@@ -156,7 +156,7 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
           </div>
 
           {/* Interactive Viewer Container */}
-          <div className="h-[440px] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-slate-100 dark:bg-slate_obsidian-900 relative isolate">
+          <div className="h-[640px] rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xl bg-slate-100 dark:bg-slate_obsidian-900 relative isolate">
             {activeCampusView === "gis" ? (
               <GisMap
                 faults={faults}

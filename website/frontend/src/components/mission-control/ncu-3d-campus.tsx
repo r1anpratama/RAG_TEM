@@ -10,13 +10,13 @@ import {
   Box,
   Sparkles,
   ShieldAlert,
-  ShieldCheck,
   CheckCircle2,
-  Info,
   Zap,
   Activity,
   AlertTriangle,
   Layers,
+  ChevronRight,
+  X,
 } from "lucide-react";
 import { createDetailedScience4Building } from "./detailed-building-3d";
 
@@ -129,7 +129,7 @@ const EDREAM_CENTRE_HOTSPOTS: ArchitecturalHotspot[] = [
     yPct: 21.0,
     category: "structural",
     tag: "CORE SHEAR ZONE",
-    details: "Curved tempered-glass barrel vault skylight over the central atrium core. Houses the high-speed traction elevator machinery and core drift sensors.",
+    details: "Curved tempered-glass barrel vault skylight over the central atrium core. Houses high-speed traction elevator machinery and core drift telemetry.",
     specs: [
       { label: "Core Type", value: "RC Shear Wall Core" },
       { label: "Upper Storey", value: "Level 8 Penthouse" },
@@ -221,7 +221,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
 
   const isSimulating = propIsSimulating || localSimulating;
 
-  // Sync wave regime with incoming scenario
   useEffect(() => {
     if (!scenario) return;
     const id = scenario.id.toLowerCase();
@@ -243,18 +242,14 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     );
   }, [waveRegime, scenario]);
 
-  // Helper: compute felt intensity for a given building under active earthquake conditions
-  // Specifically for Daxi earthquake:
-  // - Buildings <= 3 storeys feel Intensity 3 (Yellow #facc15)
-  // - Buildings > 3 storeys feel Intensity 2 (Green #4ade80)
+  // Height-dependent intensity helper:
+  // For Daxi: <= 3 storeys -> Intensity 3 (Yellow #facc15), > 3 storeys -> Intensity 2 (Green #4ade80)
   const getBuildingFeltIntensity = (b: CampusBuilding): string => {
     if (isDaxiScenario) {
       return b.stories <= 3 ? "3" : "2";
     } else if (waveRegime === "long_period") {
-      // Long-period subduction: tall buildings resonate strongly (Int 4), low-rise move rigidly (Int 2)
       return b.stories > 3 ? "4" : "2";
     } else {
-      // Near-fault pulse (M6.9): high velocity shockwave across all heights (Int 6-)
       return "6-";
     }
   };
@@ -263,7 +258,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
   const beaconLightRef = useRef<THREE.PointLight | null>(null);
   const pointerDownPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Verified NCU Campus Buildings: Renamed S4 to Edream Centre, with accurate storeys & physics
   const buildingsRef = useRef<CampusBuilding[]>([
     {
       id: "FAC_NCU_SCIENCE_B4",
@@ -282,7 +276,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       sensors: ["NCU_ACC_04_Z", "NCU_ACC_04_N", "NCU_ACC_04_E"],
       softStorey: true,
       shortPeriodImpact: {
-        resonance: "CWA Intensity 2 (Attenuated at Upper Floors) / 1F Soft-Storey Shear Alert",
+        resonance: "CWA Intensity 2 (Attenuated at Upper Floors) / 1F Soft-Storey Alert",
         badgeText: "CWA Int 2 • 8 Storeys (1F Soft-Storey Alert)",
         level: "critical",
         explanation:
@@ -484,20 +478,17 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     if (!containerRef.current) return;
     const container = containerRef.current;
     const width = container.clientWidth || 700;
-    const height = container.clientHeight || 440;
+    const height = container.clientHeight || 640;
 
-    // 1. Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a101d);
     scene.fog = new THREE.FogExp2(0x0a101d, 0.0022);
     sceneRef.current = scene;
 
-    // 2. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 1, 1400);
     cameraRef.current = camera;
     updateCameraPosition();
 
-    // 3. Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -507,8 +498,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // 4. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.25);
     scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.6);
@@ -528,7 +518,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     fillLight.position.set(-120, 100, -80);
     scene.add(fillLight);
 
-    // 5. Ground / Campus Terrain Plane
+    // Ground Plane
     const groundGeo = new THREE.PlaneGeometry(380, 340, 32, 32);
     const groundMat = new THREE.MeshStandardMaterial({
       color: 0x111c2e,
@@ -544,7 +534,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     grid.position.y = 0.1;
     scene.add(grid);
 
-    // 6. NCU Zhongda Lake (中大湖)
+    // Zhongda Lake
     const lakeGeo = new THREE.CircleGeometry(24, 32);
     const lakeMat = new THREE.MeshStandardMaterial({
       color: 0x0284c7,
@@ -564,7 +554,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     pavilion.position.set(-11, 2.5, -37);
     scene.add(pavilion);
 
-    // 7. NCU Athletic Running Track (田徑場)
+    // Track
     const trackCurveGeo = new THREE.RingGeometry(24, 34, 32);
     const trackMat = new THREE.MeshBasicMaterial({
       color: 0xc2410c,
@@ -577,7 +567,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     track.position.set(-70, 0.15, 10);
     scene.add(track);
 
-    // 8. Campus Grand Lawn (中大大草坪)
+    // Lawn
     const lawnGeo = new THREE.CircleGeometry(28, 32);
     const lawnMat = new THREE.MeshStandardMaterial({
       color: 0x064e3b,
@@ -591,7 +581,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     lawn.position.set(0, 0.15, -8);
     scene.add(lawn);
 
-    // 9. Build 3D NCU Buildings with Visible Storey Slabs
+    // Build 3D NCU Buildings
     buildingMeshesRef.current.clear();
     buildingsRef.current.forEach((b) => {
       if (b.id === "FAC_NCU_SCIENCE_B4") {
@@ -607,7 +597,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       group.position.set(b.x, 0, b.z);
       group.userData = { buildingId: b.id };
 
-      // Main box massing
       const boxGeo = new THREE.BoxGeometry(b.width, b.height, b.depth);
       const mainMat = new THREE.MeshStandardMaterial({
         color: 0x1e293b,
@@ -621,7 +610,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       boxMesh.userData = { buildingId: b.id };
       group.add(boxMesh);
 
-      // Building outer edges
       const edges = new THREE.EdgesGeometry(boxGeo);
       const edgeMat = new THREE.LineBasicMaterial({
         color: 0x38bdf8,
@@ -632,7 +620,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       wireframe.position.y = b.height / 2;
       group.add(wireframe);
 
-      // Visual Floor Demarcation Rings (Showing each distinct floor level!)
+      // Floor demarcation rings
       const floorLinesGroup = new THREE.Group();
       floorLinesGroup.name = "floor_lines";
       const floorHeight = b.height / b.stories;
@@ -655,7 +643,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       }
       group.add(floorLinesGroup);
 
-      // Rooftop feature pad
       const roofPadGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 16);
       const roofMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, roughness: 0.4 });
       const roofPad = new THREE.Mesh(roofPadGeo, roofMat);
@@ -666,21 +653,20 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       buildingMeshesRef.current.set(b.id, group);
     });
 
-    // 10. Animation Loop
+    // Animation Loop
     let clock = new THREE.Clock();
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Aviation warning beacon pulse
       if (beaconLightRef.current) {
         beaconLightRef.current.intensity = 0.5 + Math.sin(elapsedTime * 4.5) * 0.7;
       }
 
-      // Project building 3D coordinates to 2D screen positions for floating labels
+      // Project 3D building coordinates to screen coordinates
       if (cameraRef.current && containerRef.current) {
         const curWidth = containerRef.current.clientWidth || 700;
-        const curHeight = containerRef.current.clientHeight || 440;
+        const curHeight = containerRef.current.clientHeight || 640;
         const newCoords: Record<string, { x: number; y: number; visible: boolean }> = {};
 
         buildingsRef.current.forEach((b) => {
@@ -694,22 +680,18 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         setBuildingScreenCoords(newCoords);
       }
 
-      // Dynamic frequency-dependent structural shaking physics
       if (isSimulating) {
         buildingsRef.current.forEach((b) => {
           const group = buildingMeshesRef.current.get(b.id);
           if (!group) return;
 
           if (isDaxiScenario) {
-            // Gempa Dangkal Daxi: High frequency (f ~ 3.6 Hz), peak amplification on low-rise (<= 3 storeys)
             if (b.stories <= 3) {
-              // Low-rise (Gym 2F): high acceleration shaking
               const amp = 0.75;
               const displacement = Math.sin(elapsedTime * 26 + b.x * 0.1) * amp;
               group.position.x = b.x + displacement;
               group.rotation.z = (displacement / b.height) * 0.05;
             } else {
-              // Multi-storey (> 3 storeys): attenuated motion (Int 2)
               const softStoreyMultiplier = b.softStorey ? 1.4 : 1.0;
               const amp = 0.32 * softStoreyMultiplier;
               const displacement = Math.sin(elapsedTime * 18 + b.x * 0.1) * amp;
@@ -717,20 +699,17 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               group.rotation.z = (displacement / b.height) * 0.025;
             }
           } else if (waveRegime === "long_period") {
-            // Long-period subduction: slow, deep swaying in tall buildings (7-8F)
             const heightAmplification = Math.pow(b.stories / 8, 2.2);
             const swayDisplacement = Math.sin(elapsedTime * 3.6 + b.z * 0.05) * 1.85 * heightAmplification;
             group.position.x = b.x + swayDisplacement;
             group.rotation.z = (swayDisplacement / b.height) * 0.14;
           } else {
-            // Near-fault pulse (M6.9)
             const pulse = Math.sin(elapsedTime * 14) * 2.4;
             group.position.x = b.x + pulse;
             group.rotation.z = (pulse / b.height) * 0.09;
           }
         });
       } else {
-        // Reset positions
         buildingsRef.current.forEach((b) => {
           const group = buildingMeshesRef.current.get(b.id);
           if (group) {
@@ -744,11 +723,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     };
     animate();
 
-    // Resize handling
     const handleResize = () => {
       if (!container || !renderer || !camera) return;
       const w = container.clientWidth || 700;
-      const h = container.clientHeight || 440;
+      const h = container.clientHeight || 640;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -766,9 +744,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     };
   }, [isSimulating, isDaxiScenario, waveRegime]);
 
-  // Update Building Colors per-building according to the user's Daxi rule:
-  // <= 3 storeys: Intensity 3 (Yellow #facc15)
-  // > 3 storeys: Intensity 2 (Green #4ade80)
+  // Update Building Colors dynamically per-building
   useEffect(() => {
     buildingsRef.current.forEach((b) => {
       const group = buildingMeshesRef.current.get(b.id);
@@ -804,7 +780,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         return;
       }
 
-      // Standard box buildings
       const boxMesh = group.children[0] as THREE.Mesh;
       const wireframe = group.children[1] as THREE.LineSegments;
       const floorLinesGroup = group.children[2] as THREE.Group;
@@ -891,7 +866,6 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
     );
     isDraggingRef.current = false;
 
-    // Raycast on click
     if (dist < 6 && containerRef.current && cameraRef.current && sceneRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const mouse = new THREE.Vector2(
@@ -996,14 +970,170 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         onWheel={handleWheel}
       />
 
-      {/* 3D Floating Building Labels */}
+      {/* TOP UNIFIED MISSION CONTROL BAR (Clean, non-overlapping) */}
+      <div className="absolute top-0 left-0 right-0 z-20 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/90 px-3 py-2 flex items-center justify-between gap-2 shadow-lg">
+        {/* Left: Building Title & Daxi Intensity Rule Badge */}
+        <div className="flex items-center space-x-2.5 flex-wrap gap-y-1">
+          <div className="flex items-center space-x-1.5">
+            <Building2 className="h-4 w-4 text-cyan-400" />
+            <span className="font-bold text-slate-100 text-xs tracking-wide">
+              {displayMode === "ultra_hd_twin" ? "NCU Edream Centre Digital Twin" : "NCU Real Campus 3D Twin"}
+            </span>
+          </div>
+
+          <span
+            className={`rounded px-1.5 py-0.5 text-[9px] font-mono font-bold ${
+              isSimulating
+                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse"
+                : "bg-slate-800 text-slate-400 border border-slate-700"
+            }`}
+          >
+            {isSimulating ? "SIMULATING" : "STANDBY"}
+          </span>
+
+          {/* Daxi Ground Motion Distribution Indicator */}
+          {isDaxiScenario && (
+            <div className="hidden sm:flex items-center space-x-1.5 px-2 py-0.5 rounded bg-slate-900 border border-slate-700/80 text-[10px] font-mono">
+              <span className="text-slate-400">Daxi Rule:</span>
+              <span className="inline-flex items-center space-x-1 font-bold text-yellow-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                <span>≤3F: Int 3</span>
+              </span>
+              <span className="text-slate-600">|</span>
+              <span className="inline-flex items-center space-x-1 font-bold text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>&gt;3F: Int 2</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Right: View Mode Toggle, Presets, and Satellite Map Return */}
+        <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+          {/* View Mode Switcher */}
+          <div className="flex items-center space-x-0.5 bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+            <button
+              onClick={() => setDisplayMode("orbit_3d")}
+              className={`flex items-center space-x-1 px-2 py-1 rounded text-[10px] font-bold transition ${
+                displayMode === "orbit_3d"
+                  ? "bg-cyan-500 text-slate-950 shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Box className="h-3 w-3" />
+              <span>3D Orbit</span>
+            </button>
+            <button
+              onClick={() => {
+                setDisplayMode("ultra_hd_twin");
+                setPreset("edream");
+              }}
+              className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
+                displayMode === "ultra_hd_twin"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-sm"
+                  : "text-cyan-300 hover:text-white"
+              }`}
+            >
+              <Sparkles className="h-3 w-3 text-amber-300" />
+              <span>Ultra-HD Twin</span>
+            </button>
+          </div>
+
+          {/* Camera Presets */}
+          {displayMode === "orbit_3d" && (
+            <div className="hidden md:flex items-center space-x-0.5 bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
+              <button
+                onClick={() => setPreset("campus")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "campus"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Campus
+              </button>
+              <button
+                onClick={() => setPreset("edream")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "edream"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                Edream (8F)
+              </button>
+              <button
+                onClick={() => setPreset("library")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "library"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Library (8F)
+              </button>
+              <button
+                onClick={() => setPreset("eng5")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "eng5"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Eng 5 (7F)
+              </button>
+              <button
+                onClick={() => setPreset("admin")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "admin"
+                    ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Admin (5F)
+              </button>
+              <button
+                onClick={() => setPreset("gym")}
+                className={`px-2 py-1 rounded text-[10px] font-medium transition ${
+                  cameraMode === "gym"
+                    ? "bg-yellow-400 text-slate-950 font-bold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Gym (2F)
+              </button>
+              <button
+                onClick={() => setPreset("campus")}
+                title="Reset Camera"
+                className="p-1 text-slate-400 hover:text-cyan-400 rounded transition"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {onBackToGis && (
+            <button
+              onClick={onBackToGis}
+              className="flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition shadow-sm ml-1"
+            >
+              <MapIcon className="h-3 w-3" />
+              <span>Satellite Map</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 3D FLOATING LABELS (Hidden for currently inspected building to eliminate roof clutter) */}
       {displayMode === "orbit_3d" && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
           {buildingsRef.current.map((b) => {
             const coord = buildingScreenCoords[b.id];
             if (!coord || !coord.visible) return null;
 
-            const isSelected = selectedBuilding?.id === b.id;
+            // Hide the floating tag if the building is currently selected and inspected!
+            if (selectedBuilding?.id === b.id) return null;
+
             const feltInt = getBuildingFeltIntensity(b);
             const palette = CWA_INTENSITY_PALETTE[feltInt] || CWA_INTENSITY_PALETTE["2"];
 
@@ -1018,22 +1148,16 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                 onClick={() => setSelectedBuilding(b)}
               >
                 <div
-                  className={`flex flex-col items-center rounded-lg px-2 py-1 shadow-2xl backdrop-blur-md border transition-all ${
-                    isSelected
-                      ? "bg-slate-900/95 border-cyan-400 ring-2 ring-cyan-400/50 scale-110"
-                      : isSimulating
-                      ? "bg-slate-900/90"
-                      : "bg-slate-900/80 border-slate-700/80 hover:border-slate-500"
-                  }`}
+                  className="flex flex-col items-center rounded-lg px-2 py-0.5 shadow-2xl backdrop-blur-md border bg-slate-900/85 hover:border-cyan-400 transition-all"
                   style={{
                     borderColor: isSimulating ? palette.css : undefined,
                   }}
                 >
-                  <div className="flex items-center space-x-1.5">
-                    <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-1 py-0.2 text-[9px] font-mono font-bold">
-                      {b.floors} Storeys ({b.stories}F)
+                  <div className="flex items-center space-x-1">
+                    <span className="text-[9px] font-mono font-bold text-cyan-300">
+                      {b.floors}F
                     </span>
-                    <span className="text-[10px] font-bold text-white whitespace-nowrap truncate max-w-[130px]">
+                    <span className="text-[10px] font-bold text-white whitespace-nowrap truncate max-w-[120px]">
                       {b.name.split("(")[0]}
                     </span>
                   </div>
@@ -1045,13 +1169,13 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                         style={{ backgroundColor: palette.css }}
                       />
                       <span
-                        className="text-[8px] font-mono font-bold px-1 rounded truncate max-w-[140px]"
+                        className="text-[8px] font-mono font-bold px-1 rounded truncate max-w-[120px]"
                         style={{
                           backgroundColor: palette.css,
                           color: palette.textDark ? "#0f172a" : "#ffffff",
                         }}
                       >
-                        Int {feltInt} ({feltInt === "3" ? "Yellow ≤3F" : "Green >3F"})
+                        Int {feltInt} ({feltInt === "3" ? "≤3F Yellow" : ">3F Green"})
                       </span>
                     </div>
                   )}
@@ -1064,7 +1188,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
 
       {/* ULTRA-HD PERSPECTIVE ARCHITECTURAL TWIN VIEW */}
       {displayMode === "ultra_hd_twin" && (
-        <div className="relative h-full w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+        <div className="relative h-full w-full bg-slate-950 flex items-center justify-center overflow-hidden pt-10">
           <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
 
           <div
@@ -1076,11 +1200,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
             <img
               src="/assets/buildings/science4_isometric.jpg"
               alt="NCU Edream Centre Ultra-HD Perspective Twin"
-              className="max-h-[430px] w-auto object-contain rounded-lg shadow-2xl border border-slate-800/80 select-none"
+              className="max-h-[520px] w-auto object-contain rounded-lg shadow-2xl border border-slate-800/80 select-none"
               draggable={false}
             />
 
-            {/* Interactive Telemetry Hotspot Pins */}
             {EDREAM_CENTRE_HOTSPOTS.map((spot, idx) => {
               const isSelected = activeHotspot?.id === spot.id;
               return (
@@ -1129,18 +1252,16 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               );
             })}
 
-            {/* In-Simulation Ground Floor Soft-Storey Callout */}
             {isSimulating && (
               <div className="absolute left-[51.5%] top-[78%] -translate-x-1/2 z-20 pointer-events-none">
                 <div className="flex items-center space-x-1 px-2.5 py-1 rounded border border-emerald-400/80 bg-slate-950/95 text-emerald-300 text-[9px] font-bold shadow-2xl animate-bounce backdrop-blur-md">
                   <ShieldAlert className="h-3 w-3 text-emerald-400" />
-                  <span>EDREAM CENTRE (8F): FELT INTENSITY 2 • 1F SOFT-STOREY SHEAR CONCENTRATION</span>
+                  <span>EDREAM CENTRE (8F): FELT INTENSITY 2 • 1F SOFT-STOREY SHEAR ALERT</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Active Hotspot Telemetry Flyout Modal */}
           {activeHotspot && (
             <div className="absolute top-14 right-3 z-30 w-80 rounded-xl border border-cyan-500/40 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-start justify-between border-b border-slate-800 pb-2 mb-2">
@@ -1188,7 +1309,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                   onClick={() => setDisplayMode("orbit_3d")}
                   className="text-cyan-400 hover:underline font-semibold"
                 >
-                  View in 3D WebGL →
+                  View in 3D Orbit →
                 </button>
               </div>
             </div>
@@ -1206,251 +1327,43 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         </div>
       )}
 
-      {/* TOP-LEFT: STATUS & DAXI INTENSITY DISTRIBUTION BADGE */}
-      <div className="absolute top-3 left-3 z-20 flex flex-col space-y-1.5 max-w-sm">
-        <div className="flex items-center space-x-2 rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-1.5 backdrop-blur-md text-xs shadow-lg">
-          <Building2 className="h-3.5 w-3.5 text-cyan-400" />
-          <span className="font-bold text-slate-200">
-            {displayMode === "ultra_hd_twin" ? "NCU Edream Centre Digital Twin" : "NCU Real Campus 3D Twin"}
-          </span>
-          <span
-            className={`rounded px-1.5 py-0.5 text-[10px] font-mono font-bold ${
-              isSimulating
-                ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse"
-                : "bg-slate-800 text-slate-400 border border-slate-700"
-            }`}
-          >
-            {isSimulating ? "SEISMIC SIMULATION ACTIVE" : "STANDBY MONITORING"}
-          </span>
-        </div>
-
-        {/* Height-Dependent Intensity Distribution Banner */}
-        <div className="flex flex-col rounded-lg border border-slate-800 bg-slate-900/95 p-2 backdrop-blur-md text-xs shadow-lg space-y-1">
-          <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-            <span>2012 Daxi EQ Building Intensity Distribution:</span>
-            <span className="font-mono text-cyan-300 font-bold">TCU083 Ground Truth</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-            <div className="flex items-center space-x-1.5 rounded bg-slate-950/80 p-1 border border-yellow-500/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-slate-400">≤ 3 Storeys (Gym)</span>
-                <span className="text-[10px] font-bold text-yellow-400 font-mono">Intensity 3 (Yellow)</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-1.5 rounded bg-slate-950/80 p-1 border border-emerald-500/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-[9px] font-mono text-slate-400">&gt; 3 Storeys (Edream)</span>
-                <span className="text-[10px] font-bold text-emerald-400 font-mono">Intensity 2 (Green)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* TOP-CENTER: WAVE SPECTRUM SWITCHER */}
-      <div className="hidden md:flex items-center space-x-1 absolute top-3 left-1/2 -translate-x-1/2 z-20 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md shadow-xl text-xs">
-        <span className="text-[10px] text-slate-400 font-semibold px-2 flex items-center space-x-1">
-          <Activity className="h-3 w-3 text-cyan-400" />
-          <span>Wave Spectrum:</span>
-        </span>
-        <button
-          onClick={() => setWaveRegime("short_period")}
-          className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
-            waveRegime === "short_period"
-              ? "bg-yellow-400 text-slate-950 shadow-md ring-1 ring-yellow-400/50"
-              : "text-slate-400 hover:text-white"
-          }`}
-          title="2012 Daxi Earthquake - High-frequency motion causing Intensity 3 in low-rise (≤3F) and Intensity 2 in taller buildings (>3F)"
-        >
-          <Zap className="h-3 w-3" />
-          <span>Short-Period (2012 Daxi: ≤3F Int 3 / &gt;3F Int 2)</span>
-        </button>
-        <button
-          onClick={() => setWaveRegime("long_period")}
-          className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
-            waveRegime === "long_period"
-              ? "bg-orange-500 text-slate-950 shadow-md ring-1 ring-orange-400/50"
-              : "text-slate-400 hover:text-white"
-          }`}
-          title="Distant Subduction (Hualien Offshore) - Long-period harmonic sway in high-rise buildings (8F)"
-        >
-          <Layers className="h-3 w-3" />
-          <span>Long-Period (Subduction - Int 4 Orange)</span>
-        </button>
-        <button
-          onClick={() => setWaveRegime("near_fault_pulse")}
-          className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
-            waveRegime === "near_fault_pulse"
-              ? "bg-red-600 text-white shadow-md ring-1 ring-red-400/50"
-              : "text-slate-400 hover:text-white"
-          }`}
-          title="Near-Fault Multi-Segment Rupture (Shuanglienpo Mw 6.91)"
-        >
-          <AlertTriangle className="h-3 w-3" />
-          <span>Near-Fault Pulse (M6.9 - Int 6- Red)</span>
-        </button>
-      </div>
-
-      {/* TOP-RIGHT CONTROLS */}
-      <div className="flex flex-wrap items-center gap-1.5 absolute top-3 right-3 z-20 rounded-lg border border-slate-800 bg-slate-900/90 p-1 backdrop-blur-md shadow-xl">
-        {onBackToGis && (
-          <button
-            onClick={onBackToGis}
-            className="flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold bg-cyan-500 text-slate-950 hover:bg-cyan-400 transition shadow-sm mr-1"
-            title="Return to Aerial Satellite GIS Wavefront Map"
-          >
-            <MapIcon className="h-3 w-3" />
-            <span>Satellite Map</span>
-          </button>
-        )}
-
-        {/* View Mode Switcher */}
-        <div className="flex items-center space-x-1 bg-slate-950/90 p-0.5 rounded border border-slate-700/80 mr-1.5">
-          <button
-            onClick={() => setDisplayMode("orbit_3d")}
-            className={`flex items-center space-x-1 px-2 py-1 rounded text-[10px] font-bold transition ${
-              displayMode === "orbit_3d"
-                ? "bg-cyan-500 text-slate-950 shadow-sm"
-                : "text-slate-400 hover:text-white"
-            }`}
-            title="Interactive 3D WebGL Orbit"
-          >
-            <Box className="h-3 w-3" />
-            <span>3D WebGL</span>
-          </button>
-          <button
-            onClick={() => {
-              setDisplayMode("ultra_hd_twin");
-              setPreset("edream");
-            }}
-            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
-              displayMode === "ultra_hd_twin"
-                ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-sm"
-                : "text-cyan-300 hover:text-white hover:bg-slate-800"
-            }`}
-            title="Ultra-HD Perspective Twin (Edream Centre High-Res Model with Telemetry Pins)"
-          >
-            <Sparkles className="h-3 w-3 text-amber-300" />
-            <span>Ultra-HD Twin</span>
-          </button>
-        </div>
-
-        {/* Camera Presets */}
-        {displayMode === "orbit_3d" && (
-          <>
-            <button
-              onClick={() => setPreset("campus")}
-              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "campus"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              }`}
-            >
-              Campus 360°
-            </button>
-            <button
-              onClick={() => setPreset("edream")}
-              className={`flex items-center space-x-1 px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "edream"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-300 hover:text-white hover:bg-slate-800"
-              }`}
-              title="Inspect Edream Centre (健雄館 / S4 - 8 Storeys)"
-            >
-              <span>Edream Centre (8F)</span>
-            </button>
-            <button
-              onClick={() => setPreset("library")}
-              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "library"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              }`}
-            >
-              Library (8F)
-            </button>
-            <button
-              onClick={() => setPreset("eng5")}
-              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "eng5"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              }`}
-            >
-              Eng 5 (7F)
-            </button>
-            <button
-              onClick={() => setPreset("admin")}
-              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "admin"
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              }`}
-            >
-              Admin (5F)
-            </button>
-            <button
-              onClick={() => setPreset("gym")}
-              className={`px-2 py-1 rounded text-[10px] font-medium transition ${
-                cameraMode === "gym"
-                  ? "bg-yellow-400 text-slate-950 font-bold shadow-sm"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800"
-              }`}
-              title="Inspect NCU Gymnasium (2 Storeys High-Bay - Felt Intensity 3)"
-            >
-              <span>Gym (2F - Int 3)</span>
-            </button>
-            <button
-              onClick={() => setPreset("campus")}
-              title="Reset Camera"
-              className="p-1 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 rounded transition"
-            >
-              <RotateCcw className="h-3 w-3" />
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* BUILDING INSPECTOR MODAL */}
+      {/* BUILDING INSPECTION MODAL (Upper Left Card - Clean, dismissable, fits spacious 640px height) */}
       {displayMode === "orbit_3d" && selectedBuilding && (
-        <div className="absolute bottom-3 left-3 z-20 w-96 rounded-xl border border-slate-700 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md text-xs animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-start justify-between border-b border-slate-800 pb-2.5 mb-2.5">
+        <div className="absolute top-14 left-3 z-20 w-80 max-h-[500px] overflow-y-auto rounded-xl border border-slate-700 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-start justify-between border-b border-slate-800 pb-2 mb-2">
             <div>
               <div className="flex items-center space-x-1.5 mb-1">
-                <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 text-[10px] font-mono font-bold">
+                <span className="rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-1.5 py-0.2 text-[9px] font-mono font-bold">
                   {selectedBuilding.floors} Storeys ({selectedBuilding.stories}F)
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">
                   Height: ~{selectedBuilding.height}m
                 </span>
               </div>
-              <h4 className="font-bold text-white text-[13px]">{selectedBuilding.name}</h4>
+              <h4 className="font-bold text-white text-[13px] leading-tight">{selectedBuilding.name}</h4>
               <p className="text-[10px] text-cyan-400 font-medium">{selectedBuilding.nameZh}</p>
             </div>
             <button
               onClick={() => setSelectedBuilding(null)}
-              className="text-slate-400 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-slate-800"
+              className="text-slate-400 hover:text-white text-xs p-1 rounded hover:bg-slate-800"
+              title="Close Panel"
             >
-              ✕
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="space-y-2.5 text-[11px] text-slate-300">
-            {/* Structural Parameters */}
+          <div className="space-y-2 text-[11px] text-slate-300">
+            {/* Parameters Matrix */}
             <div className="grid grid-cols-2 gap-1.5 bg-slate-950/70 p-2 rounded-lg border border-slate-800">
               <div>
-                <span className="text-[9px] text-slate-400 block font-mono uppercase">Storey Count</span>
-                <span className="font-bold text-white text-[12px]">
-                  {selectedBuilding.floors} Floors
+                <span className="text-[9px] text-slate-400 block font-mono uppercase">Floor Count</span>
+                <span className="font-bold text-white text-[11px]">
+                  {selectedBuilding.floors} Storeys
                 </span>
               </div>
               <div>
-                <span className="text-[9px] text-slate-400 block font-mono uppercase">Natural Period (Tn)</span>
-                <span className="font-bold text-cyan-300 text-[12px] font-mono">
+                <span className="text-[9px] text-slate-400 block font-mono uppercase">Period (Tn)</span>
+                <span className="font-bold text-cyan-300 text-[11px] font-mono">
                   ~{selectedBuilding.fundamentalPeriodSec} sec
                 </span>
               </div>
@@ -1462,7 +1375,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               </div>
             </div>
 
-            {/* Felt Intensity and Structural Response */}
+            {/* Felt Intensity and Response Card */}
             {(() => {
               const feltInt = getBuildingFeltIntensity(selectedBuilding);
               const palette = CWA_INTENSITY_PALETTE[feltInt] || CWA_INTENSITY_PALETTE["2"];
@@ -1471,7 +1384,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                 <div className="bg-slate-950/80 p-2.5 rounded-lg border border-slate-800 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-slate-400 font-bold uppercase">
-                      Felt Seismic Intensity:
+                      Felt Intensity:
                     </span>
                     <span
                       className="px-2 py-0.5 rounded text-[10px] font-bold font-mono"
@@ -1480,11 +1393,10 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                         color: palette.textDark ? "#0f172a" : "#ffffff",
                       }}
                     >
-                      CWA Intensity {feltInt} ({feltInt === "3" ? "Yellow ≤3F" : "Green >3F"})
+                      CWA Int {feltInt} ({feltInt === "3" ? "≤3F Yellow" : ">3F Green"})
                     </span>
                   </div>
 
-                  {/* Impact Description */}
                   <p className="text-[10px] text-slate-300 leading-relaxed">
                     {isDaxiScenario
                       ? selectedBuilding.shortPeriodImpact.explanation
@@ -1493,15 +1405,14 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
                       : "Near-fault high-velocity fling pulse excites the building dynamically."}
                   </p>
 
-                  {/* Estimated Inter-Storey Drift (IDR) */}
                   <div className="flex items-center justify-between pt-1 border-t border-slate-800 text-[10px]">
-                    <span className="text-slate-400">Estimated Inter-Storey Drift (IDR):</span>
+                    <span className="text-slate-400">Drift (IDR):</span>
                     <span
                       className="font-mono font-bold"
                       style={{ color: palette.css }}
                     >
                       {isDaxiScenario
-                        ? `${selectedBuilding.shortPeriodImpact.driftEstPct}% (Safe / Light Inspection)`
+                        ? `${selectedBuilding.shortPeriodImpact.driftEstPct}% (Safe / Attenuated)`
                         : `${selectedBuilding.longPeriodImpact.driftEstPct}% (Roof Lateral Sway)`}
                     </span>
                   </div>
@@ -1509,37 +1420,86 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
               );
             })()}
 
-            {/* Special Action for Edream Centre */}
             {selectedBuilding.id === "FAC_NCU_SCIENCE_B4" && (
               <button
                 onClick={() => setDisplayMode("ultra_hd_twin")}
-                className="w-full flex items-center justify-center space-x-1.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-[11px] shadow hover:opacity-95 transition"
+                className="w-full flex items-center justify-center space-x-1.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold text-[11px] shadow hover:opacity-95 transition mt-1"
               >
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                <span>Open Edream Centre Ultra-HD Perspective Twin</span>
+                <span>Open Ultra-HD Perspective Twin</span>
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* BOTTOM-RIGHT: SIMULATION TRIGGER & INSTRUCTION */}
+      {/* BOTTOM-CENTER: SEISMIC CONTROLS DOCK (Spacious, unified, non-colliding) */}
       {displayMode === "orbit_3d" && (
-        <div className="absolute bottom-3 right-3 z-10 flex items-center space-x-2">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-wrap items-center gap-1.5 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-1.5 shadow-2xl text-xs max-w-[95%]">
+          <div className="flex items-center space-x-1 text-[10px] text-slate-400 font-semibold font-mono mr-1">
+            <Zap className="h-3.5 w-3.5 text-amber-400" />
+            <span>Wave Spectrum:</span>
+          </div>
+
+          <button
+            onClick={() => setWaveRegime("short_period")}
+            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
+              waveRegime === "short_period"
+                ? "bg-yellow-400 text-slate-950 shadow-md ring-1 ring-yellow-400/50"
+                : "text-slate-400 hover:text-white"
+            }`}
+            title="2012 Daxi Earthquake - High-frequency shallow motion (≤3F Int 3 / >3F Int 2)"
+          >
+            <Zap className="h-3 w-3" />
+            <span>Short-Period (2012 Daxi: ≤3F Int 3 / &gt;3F Int 2)</span>
+          </button>
+
+          <button
+            onClick={() => setWaveRegime("long_period")}
+            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
+              waveRegime === "long_period"
+                ? "bg-orange-500 text-slate-950 shadow-md ring-1 ring-orange-400/50"
+                : "text-slate-400 hover:text-white"
+            }`}
+            title="Distant Subduction (Hualien Offshore) - Long-period harmonic sway in 8F buildings"
+          >
+            <Layers className="h-3 w-3" />
+            <span>Long-Period (Subduction - Int 4)</span>
+          </button>
+
+          <button
+            onClick={() => setWaveRegime("near_fault_pulse")}
+            className={`flex items-center space-x-1 px-2.5 py-1 rounded text-[10px] font-bold transition ${
+              waveRegime === "near_fault_pulse"
+                ? "bg-red-600 text-white shadow-md ring-1 ring-red-400/50"
+                : "text-slate-400 hover:text-white"
+            }`}
+            title="Near-Fault Multi-Segment Rupture (M6.91)"
+          >
+            <AlertTriangle className="h-3 w-3" />
+            <span>Near-Fault (M6.9 - Int 6-)</span>
+          </button>
+
+          <div className="h-4 w-px bg-slate-700 mx-1" />
+
           <button
             onClick={triggerLocalSimulation}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-lg backdrop-blur-md border ${
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg text-[10px] font-bold transition shadow border ${
               isSimulating
                 ? "bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-400/50 animate-pulse"
-                : "bg-slate-900/90 text-cyan-300 border-slate-700 hover:bg-slate-800 hover:text-white"
+                : "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 hover:bg-cyan-500 hover:text-slate-950"
             }`}
           >
-            <Activity className="h-3.5 w-3.5" />
-            <span>{isSimulating ? "Simulation In Progress..." : "Run 3D Seismic Simulation"}</span>
+            <Activity className="h-3 w-3" />
+            <span>{isSimulating ? "Simulating..." : "Run Simulation"}</span>
           </button>
-          <div className="hidden sm:block text-[10px] text-slate-400 bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800 font-mono">
-            Click any building to inspect storeys & seismic resonance
-          </div>
+        </div>
+      )}
+
+      {/* Subtle bottom-right caption */}
+      {displayMode === "orbit_3d" && (
+        <div className="hidden lg:block absolute bottom-3 right-3 z-10 text-[9px] text-slate-500 bg-slate-950/70 px-2 py-1 rounded border border-slate-800/80 font-mono">
+          Click building to inspect • Drag to rotate
         </div>
       )}
     </div>
