@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { AlertBanner } from "@/components/mission-control/alert-banner";
 import { DigitalTwins } from "@/components/mission-control/digital-twins";
@@ -51,10 +51,73 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
   const [activeCampusView, setActiveCampusView] = useState<"gis" | "3d_campus">("gis");
   const [rightPanelView, setRightPanelView] = useState<"waveform" | "scada">("waveform");
 
+  // Shared Master Simulation Playback Clock (Syncs GIS Map & Multi-Station Waveform Panel)
+  const [simTimeSec, setSimTimeSec] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
+  const animFrameRef = useRef<number | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+
+  // Sync external isSimulating prop
+  useEffect(() => {
+    if (isSimulating) {
+      setIsPlaying(true);
+    }
+  }, [isSimulating]);
+
+  // Reset clock when scenario switches
+  useEffect(() => {
+    setIsPlaying(false);
+    setSimTimeSec(0);
+  }, [scenario?.id]);
+
+  // Master Clock Animation Loop
+  useEffect(() => {
+    if (isPlaying) {
+      const step = (timestamp: number) => {
+        if (!lastTimeRef.current) lastTimeRef.current = timestamp;
+        const delta = (timestamp - lastTimeRef.current) / 1000;
+        lastTimeRef.current = timestamp;
+
+        setSimTimeSec((prev) => {
+          const next = prev + delta * playbackSpeed;
+          if (next >= 30.0) {
+            setIsPlaying(false);
+            return 30.0;
+          }
+          return next;
+        });
+
+        animFrameRef.current = requestAnimationFrame(step);
+      };
+
+      animFrameRef.current = requestAnimationFrame(step);
+    } else {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      lastTimeRef.current = null;
+    }
+
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [isPlaying, playbackSpeed]);
+
+  const handlePlayToggle = () => {
+    if (simTimeSec >= 30.0) {
+      setSimTimeSec(0);
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleReset = () => {
+    setIsPlaying(false);
+    setSimTimeSec(0);
+  };
+
   return (
     <div className="flex flex-col space-y-4">
       {/* Real-time S-wave countdown clock alert banner */}
-      <AlertBanner scenario={scenario} isSimulating={isSimulating} />
+      <AlertBanner scenario={scenario} isSimulating={isSimulating || isPlaying} />
 
       {/* Main split: Left = GIS Wavefront Map / 3D Campus Twin, Right = Waveform Monitor / SCADA */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -100,6 +163,8 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
                 scenario={scenario}
                 selectedFaultId={2}
                 isSimulating={isSimulating}
+                simTimeSec={simTimeSec}
+                isPlaying={isPlaying}
                 onSwitchTo3D={() => setActiveCampusView("3d_campus")}
               />
             ) : (
@@ -158,6 +223,16 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
             <SimulationWaveformPanel
               isSimulating={isSimulating}
               activeScenarioId={scenario?.id}
+              simTimeSec={simTimeSec}
+              onTimeChange={(t) => {
+                setIsPlaying(false);
+                setSimTimeSec(t);
+              }}
+              isPlaying={isPlaying}
+              onPlayToggle={handlePlayToggle}
+              onReset={handleReset}
+              playbackSpeed={playbackSpeed}
+              onSpeedChange={(spd) => setPlaybackSpeed(spd)}
             />
           ) : (
             <div className="flex flex-col space-y-3">
@@ -190,8 +265,8 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
         </div>
       </div>
 
-      {/* Campus Digital Twins - Neutral standby in idle, evaluated in simulation */}
-      <DigitalTwins facilities={[]} isSimulating={isSimulating} />
+      {/* Campus Digital Twins */}
+      <DigitalTwins facilities={[]} isSimulating={isSimulating || isPlaying} />
     </div>
   );
 };

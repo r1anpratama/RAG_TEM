@@ -1876,7 +1876,9 @@
           0.4195,
           0.1673
         ]
-      }
+      },
+      "latitude": 24.9674,
+      "longitude": 121.1943
     },
     "TCU009": {
       "role": "zhongli_urban_metro",
@@ -3712,7 +3714,9 @@
           -0.0368,
           0.0287
         ]
-      }
+      },
+      "latitude": 24.9627,
+      "longitude": 121.2283
     },
     "TCU006": {
       "role": "taoyuan_intermediate",
@@ -5548,7 +5552,9 @@
           -0.119,
           0.0371
         ]
-      }
+      },
+      "latitude": 24.9095,
+      "longitude": 121.1493
     },
     "TCU013": {
       "role": "strong_motion_epicenter",
@@ -7384,7 +7390,9 @@
           0.0054,
           -0.0107
         ]
-      }
+      },
+      "latitude": 24.864,
+      "longitude": 121.2134
     },
     "TCU021": {
       "role": "epicenter_near_field",
@@ -9220,7 +9228,9 @@
           0.0018,
           0.0049
         ]
-      }
+      },
+      "latitude": 24.7919,
+      "longitude": 121.174
     }
   }
 }
