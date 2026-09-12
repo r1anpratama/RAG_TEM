@@ -340,15 +340,25 @@ export const GisMap: React.FC<GisMapProps> = ({
             )
             .addTo(markersLayer);
 
-          // If EQ 20883 scenario, render 5 Key Seismic Recording Stations (clean triangle pins without floating labels)
-          if (scenario.id.includes("20883") || epiLat > 24.5) {
-            const eqStations = [
-              { code: "TCU083", name: "NCU Campus Seismometer Core", lat: 24.9674, lon: 121.1943, dist: "23.8 km", pga: "12.3 Gal", int: "3", isCampus: true },
-              { code: "TCU009", name: "Zhongli / Pingzhen Station", lat: 24.9510, lon: 121.2180, dist: "22.6 km", pga: "14.8 Gal", int: "3", isCampus: false },
-              { code: "TCU006", name: "Yangmei Station", lat: 24.9120, lon: 121.1450, dist: "19.9 km", pga: "32.1 Gal", int: "4", isCampus: false },
-              { code: "TCU013", name: "Longtan / Daxi Strong Motion", lat: 24.8620, lon: 121.2130, dist: "12.3 km", pga: "198.3 Gal", int: "5-", isCampus: false },
-              { code: "TCU021", name: "Guanxi Peak Near-Field", lat: 24.7950, lon: 121.1730, dist: "9.4 km", pga: "209.8 Gal", int: "5-", isCampus: false },
-            ];
+          // If Near-NCU scenario (EQ 20122 or EQ 20883), render Key Seismic Recording Stations (clean triangle pins)
+          if (scenario.id.includes("20122") || scenario.id.includes("20883") || epiLat > 24.5) {
+            const is20122 = scenario.id.includes("20122");
+            const eqStations = is20122
+              ? [
+                  { code: "TCU011", name: "Daxi East Foothills Station", lat: 24.8841, lon: 121.2865, dist: "11.4 km", distNCU: "13.2 km", pga: "26.1 Gal", int: "3", isCampus: false },
+                  { code: "MND020", name: "Daxi Military/Civil Corridor", lat: 24.8797, lon: 121.2650, dist: "10.1 km", distNCU: "12.2 km", pga: "11.9 Gal", int: "3", isCampus: false },
+                  { code: "MTN143", name: "Guanxi Peak Near-Field Mountain", lat: 24.7598, lon: 121.1997, dist: "5.1 km", distNCU: "23.2 km", pga: "20.5 Gal", int: "3", isCampus: false },
+                  { code: "TCU021", name: "Guanxi Town Station", lat: 24.7919, lon: 121.1740, dist: "6.0 km", distNCU: "19.7 km", pga: "7.7 Gal", int: "2", isCampus: false },
+                  { code: "MTN142", name: "Xinpu Ridge Station", lat: 24.7770, lon: 121.1230, dist: "11.3 km", distNCU: "22.4 km", pga: "7.3 Gal", int: "2", isCampus: false },
+                  { code: "TCU023", name: "Zhudong Sub-basin Station", lat: 24.7200, lon: 121.1399, dist: "12.5 km", distNCU: "28.1 km", pga: "5.1 Gal", int: "2", isCampus: false },
+                ]
+              : [
+                  { code: "TCU083", name: "NCU Campus Seismometer Core", lat: 24.9674, lon: 121.1943, dist: "23.8 km", distNCU: "0.11 km", pga: "12.3 Gal", int: "3", isCampus: true },
+                  { code: "TCU009", name: "Zhongli / Pingzhen Station", lat: 24.9510, lon: 121.2180, dist: "22.6 km", distNCU: "3.5 km", pga: "14.8 Gal", int: "3", isCampus: false },
+                  { code: "TCU006", name: "Yangmei Station", lat: 24.9120, lon: 121.1450, dist: "19.9 km", distNCU: "7.9 km", pga: "32.1 Gal", int: "4", isCampus: false },
+                  { code: "TCU013", name: "Longtan / Daxi Strong Motion", lat: 24.8620, lon: 121.2130, dist: "12.3 km", distNCU: "11.8 km", pga: "198.3 Gal", int: "5-", isCampus: false },
+                  { code: "TCU021", name: "Guanxi Peak Near-Field", lat: 24.7950, lon: 121.1730, dist: "9.4 km", distNCU: "19.7 km", pga: "209.8 Gal", int: "5-", isCampus: false },
+                ];
 
             eqStations.forEach((s) => {
               const staIcon = L.divIcon({
@@ -370,7 +380,7 @@ export const GisMap: React.FC<GisMapProps> = ({
                     </div>
                     <b style="color:#e2e8f0">${s.name}</b><br/>
                     Measured PGA: <b style="color:#f59e0b">${s.pga}</b> | CWA Intensity: <b style="color:#f59e0b">${s.int}</b><br/>
-                    Distance to Epicenter: <b>${s.dist}</b><br/>
+                    Distance to Epicenter: <b>${s.dist}</b> | Distance to NCU: <b>${s.distNCU}</b><br/>
                     GPS: <code style="color:#38bdf8">${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</code>
                     ${s.isCampus ? '<br/><span style="color:#fcd34d;font-weight:bold">★ Located directly on NCU Campus (0.11 km from S4)</span>' : ''}
                   </div>`,
@@ -383,6 +393,14 @@ export const GisMap: React.FC<GisMapProps> = ({
           if (wavefrontsLayer) {
             wavefrontsLayer.clearLayers();
 
+            const is20122 = scenario.id.includes("20122");
+            const distStr = is20122 ? "19.76 km" : "23.90 km";
+            const pArr = is20122 ? "6.85s" : "8.16s";
+            const sArr = is20122 ? "12.45s" : "14.85s";
+            const leadStr = is20122 ? "+5.60s" : "+6.69s";
+            const sRadius = is20122 ? 19760 : 23900;
+            const pRadius = is20122 ? 23500 : 28000;
+
             // Direct distance propagation ray from Epicenter to NCU Campus Core (info on click)
             const ray = L.polyline([[epiLat, epiLon], [24.9688, 121.1918]], {
               color: "#f59e0b",
@@ -393,17 +411,17 @@ export const GisMap: React.FC<GisMapProps> = ({
             ray.bindPopup(
               `<div style="font-family:monospace;font-size:11px;background:#0f172a;color:#fcd34d;padding:8px 12px;border:1px solid #f59e0b;border-radius:6px">
                 <strong>Propagation Path: Epicenter → NCU Campus</strong><br/>
-                Direct Hypocentral Distance: <b>23.90 km</b><br/>
-                P-wave Arrival: <b>8.16s</b><br/>
-                S-wave Arrival: <b>14.85s</b><br/>
-                Warning Lead Time: <b>+6.69s</b>
+                Direct Hypocentral Distance: <b>${distStr}</b><br/>
+                P-wave Arrival: <b>${pArr}</b><br/>
+                S-wave Arrival: <b>${sArr}</b><br/>
+                Warning Lead Time: <b>${leadStr}</b>
               </div>`
             );
             ray.addTo(wavefrontsLayer);
 
             // P-Wave compressional wavefront (Fast)
             L.circle([epiLat, epiLon], {
-              radius: 28000,
+              radius: pRadius,
               color: "#06b6d4",
               weight: 1.8,
               opacity: 0.8,
@@ -414,7 +432,7 @@ export const GisMap: React.FC<GisMapProps> = ({
 
             // S-Wave shear damaging wavefront (Reaching NCU campus ring)
             L.circle([epiLat, epiLon], {
-              radius: 23900,
+              radius: sRadius,
               color: "#f59e0b",
               weight: 2.5,
               opacity: 0.9,

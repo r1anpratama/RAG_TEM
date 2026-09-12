@@ -46,6 +46,33 @@ function DashboardContent() {
         setBackendHealth(false);
         const fallback: Scenario[] = [
           {
+            id: "eq_20122_daxi_guanxi",
+            title: "2011 Daxi-Guanxi Earthquake (EQ 20122 - 19.76 km)",
+            fault_name: "Daxi / Guanxi Active Fault Zone",
+            description: "Absolute closest recorded earthquake to NCU Campus (19.76 km). Recorded by near-source strong motion network.",
+            magnitude: 3.77,
+            depth_km: 12.00,
+            epicenter: { lat: 24.7940, lon: 121.2330 },
+            target_facility: "NCU Campus (19.76 km to Epicenter)",
+            distance_to_target_km: 19.76,
+            predicted_pgv_cm_s: 0.45,
+            estimated_cwa_intensity: "2",
+            s_wave_countdown_sec: 5.60,
+            countdown_seconds: 5.60,
+            track_a_actuators: [
+              {
+                target: "ELEVATORS_ALL_CAMPUS",
+                action: "MONITOR_ACCELERATION_STANDBY",
+                urgency: "INSTANT_SUB_5MS",
+              },
+              {
+                target: "MAIN_NATURAL_GAS_VALVE",
+                action: "STANDBY_PRESSURE_MONITOR",
+                urgency: "INSTANT_SUB_5MS",
+              },
+            ],
+          },
+          {
             id: "eq_20883_taoyuan_daxi",
             title: "2012 Daxi-Taoyuan Local Earthquake (EQ 20883)",
             fault_name: "Daxi / Fuxing Fault Structure",

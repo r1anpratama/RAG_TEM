@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import meinongSimulationData from "@/data/meinong-simulation-data.json";
 import eq20883SimulationData from "@/data/eq_20883_simulation.json";
+import eq20122SimulationData from "@/data/eq_20122_simulation.json";
 
 interface WaveformPreviewStation {
   role: string;
@@ -57,14 +58,20 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
   isSimulating = false,
   activeScenarioId,
 }) => {
-  const [activeEvent, setActiveEvent] = useState<"eq20883" | "meinong">("eq20883");
+  const [activeEvent, setActiveEvent] = useState<"eq20122" | "eq20883" | "meinong">("eq20122");
 
-  const currentDataset: any = activeEvent === "eq20883" ? eq20883SimulationData : meinongSimulationData;
+  const currentDataset: any =
+    activeEvent === "eq20122"
+      ? eq20122SimulationData
+      : activeEvent === "eq20883"
+      ? eq20883SimulationData
+      : meinongSimulationData;
+
   const previews = currentDataset.waveform_previews as Record<string, WaveformPreviewStation>;
   const stationKeys = (currentDataset.key_stations as string[]) || Object.keys(previews);
 
   // Active station
-  const [selectedStation, setSelectedStation] = useState<string>("TCU083");
+  const [selectedStation, setSelectedStation] = useState<string>("TCU011");
   // Signal type: acc (Gal) or vel (cm/s)
   const [signalType, setSignalType] = useState<"acc" | "vel">("acc");
   // Component view: all 3 or single
@@ -87,6 +94,11 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
     } else if (activeScenarioId?.includes("20883")) {
       setActiveEvent("eq20883");
       setSelectedStation("TCU083");
+      setCurrentTimeSec(0);
+      setIsPlaying(false);
+    } else if (activeScenarioId?.includes("20122")) {
+      setActiveEvent("eq20122");
+      setSelectedStation("TCU011");
       setCurrentTimeSec(0);
       setIsPlaying(false);
     }
@@ -396,8 +408,10 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                 </span>
               </h3>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                {activeEvent === "eq20883"
-                  ? "2012-06-13 ML 4.66 Daxi-Taoyuan Local Event • TCU083 NCU Campus Direct Recording"
+                {activeEvent === "eq20122"
+                  ? "2011-07-16 ML 3.77 Daxi-Guanxi Event • Absolute Closest to NCU (19.76 km)"
+                  : activeEvent === "eq20883"
+                  ? "2012-06-13 ML 4.66 Daxi-Taoyuan Local Event • TCU083 NCU Campus Recording (23.9 km)"
                   : "2016-02-06 ML 6.6 Meinong Benchmark • TT-SAM Regional EEW Input"}
               </p>
             </div>
@@ -407,6 +421,22 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
           <div className="flex items-center space-x-2">
             {/* Event Selector */}
             <div className="flex items-center space-x-1 border border-slate-700 bg-slate-950/90 rounded-md p-0.5 text-[10px] font-mono">
+              <button
+                onClick={() => {
+                  setActiveEvent("eq20122");
+                  setSelectedStation("TCU011");
+                  setCurrentTimeSec(0);
+                  setIsPlaying(false);
+                }}
+                className={`px-2 py-1 rounded font-bold transition flex items-center space-x-1 ${
+                  activeEvent === "eq20122"
+                    ? "bg-amber-500 text-slate-950 shadow"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Radio className="h-3 w-3" />
+                <span>EQ 20122 (19.8 km Closest)</span>
+              </button>
               <button
                 onClick={() => {
                   setActiveEvent("eq20883");
@@ -420,8 +450,7 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                <Radio className="h-3 w-3" />
-                <span>EQ 20883 (NCU Local)</span>
+                <span>EQ 20883 (23.9 km)</span>
               </button>
               <button
                 onClick={() => {

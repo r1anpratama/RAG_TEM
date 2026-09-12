@@ -144,7 +144,11 @@ export const EEWSView: React.FC<EEWSViewProps> = ({
             <div className="hidden sm:flex items-center space-x-1.5 text-[11px] text-slate-400 font-mono">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span className="text-emerald-300 font-bold">
-                {scenario?.id?.includes("meinong") ? "2016 Meinong Stream" : "EQ 20883 Local Stream • TCU083"}
+                {scenario?.id?.includes("meinong")
+                  ? "2016 Meinong Stream"
+                  : scenario?.id?.includes("20883")
+                  ? "EQ 20883 Stream (23.9 km)"
+                  : "EQ 20122 Closest Stream (19.8 km)"}
               </span>
             </div>
           </div>
