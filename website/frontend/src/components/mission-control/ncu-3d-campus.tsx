@@ -1444,17 +1444,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
         <div className="relative h-full w-full bg-slate-950 flex items-center justify-center overflow-hidden pt-10">
           <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
 
-          <div
-            className="relative max-h-full max-w-full aspect-[4/3] flex items-center justify-center transition-transform"
-            style={{
-              animation:
-                currentPhase === "s_wave"
-                  ? "seismicTremor 0.12s infinite alternate"
-                  : currentPhase === "p_wave"
-                  ? "seismicTremor 0.35s infinite alternate"
-                  : "none",
-            }}
-          >
+          <div className="relative max-h-full max-w-full aspect-[4/3] flex items-center justify-center">
             <img
               src="/assets/buildings/science4_isometric.jpg"
               alt="NCU Edream Centre Ultra-HD Perspective Twin"
