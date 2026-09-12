@@ -11,7 +11,8 @@ import {
   Radio,
   Layers,
   CheckCircle2,
-  AlertTriangle,
+  Search,
+  ArrowUpDown,
 } from "lucide-react";
 import meinongSimulationData from "@/data/meinong-simulation-data.json";
 import eq20883SimulationData from "@/data/eq_20883_simulation.json";
@@ -77,17 +78,16 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
 }) => {
   const [activeEvent, setActiveEvent] = useState<"eq20122" | "eq20883" | "meinong">("eq20122");
 
-  // Local playback state if external props are not fully bound
+  // Local playback fallback
   const [localPlaying, setLocalPlaying] = useState<boolean>(false);
   const [localTimeSec, setLocalTimeSec] = useState<number>(0);
   const [localSpeed, setLocalSpeed] = useState<number>(1);
   const animFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
-  // View Mode: 'all_z' (All stations vertical Z-component array) vs 'single_detail' (Triaxial Z, NS, EW)
-  const [viewMode, setViewMode] = useState<"all_z" | "single_detail">("all_z");
-  const [selectedStation, setSelectedStation] = useState<string>("TCU011");
   const [signalType, setSignalType] = useState<"acc" | "vel">("acc");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"time" | "dist" | "pga">("time");
 
   const isPlaying = externalIsPlaying !== undefined ? externalIsPlaying : localPlaying;
   const currentTimeSec = externalSimTime !== undefined ? externalSimTime : localTimeSec;
@@ -101,23 +101,19 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
       : meinongSimulationData;
 
   const previews = currentDataset.waveform_previews as Record<string, WaveformPreviewStation>;
-  const stationKeys = (currentDataset.key_stations as string[]) || Object.keys(previews);
 
   // Sync with activeScenarioId prop
   useEffect(() => {
     if (activeScenarioId?.includes("meinong")) {
       setActiveEvent("meinong");
-      setSelectedStation("KAU068");
       if (onReset) onReset();
       else setLocalTimeSec(0);
     } else if (activeScenarioId?.includes("20883")) {
       setActiveEvent("eq20883");
-      setSelectedStation("TCU083");
       if (onReset) onReset();
       else setLocalTimeSec(0);
     } else if (activeScenarioId?.includes("20122")) {
       setActiveEvent("eq20122");
-      setSelectedStation("TCU011");
       if (onReset) onReset();
       else setLocalTimeSec(0);
     }
@@ -130,9 +126,9 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
     }
   }, [isSimulating, externalIsPlaying]);
 
-  // Local animation loop if controlling internally
+  // Local timer fallback loop
   useEffect(() => {
-    if (externalSimTime !== undefined) return; // Controlled externally by EEWSView
+    if (externalSimTime !== undefined) return;
 
     if (localPlaying) {
       const step = (timestamp: number) => {
@@ -198,37 +194,52 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
     }
   };
 
-  // Sort all stations by epicentral distance (or arrival time) for record section view
-  const sortedStations = useMemo(() => {
-    return Object.values(previews).sort((a, b) => {
-      // Primary sort by p_pick_sec, secondary by distance
+  // Sort and filter all stations
+  const displayedStations = useMemo(() => {
+    const list = Object.values(previews || {});
+
+    // Filter by search query
+    const filtered = searchQuery.trim()
+      ? list.filter(
+          (s) =>
+            s.station_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.label?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : list;
+
+    // Sort
+    return filtered.sort((a, b) => {
+      if (sortBy === "dist") {
+        return a.distance_km - b.distance_km;
+      } else if (sortBy === "pga") {
+        return b.max_abs_acc_gal - a.max_abs_acc_gal;
+      }
+      // Default: arrival time
       return (a.p_pick_sec || 0) - (b.p_pick_sec || 0) || a.distance_km - b.distance_km;
     });
-  }, [previews]);
+  }, [previews, searchQuery, sortBy]);
 
   // Overall event detection status
   const detectionStats = useMemo(() => {
-    const triggered = sortedStations.filter((s) => currentTimeSec >= s.p_pick_sec);
-    const ncuStation = sortedStations.find((s) => s.station_name === "TCU083");
-    const ncuTriggered = ncuStation ? currentTimeSec >= ncuStation.p_pick_sec : false;
+    const all = Object.values(previews || {});
+    const triggered = all.filter((s) => currentTimeSec >= s.p_pick_sec);
 
     return {
-      total: sortedStations.length,
+      total: all.length,
       triggeredCount: triggered.length,
-      ncuTriggered,
-      percent: Math.round((triggered.length / sortedStations.length) * 100),
+      percent: all.length > 0 ? Math.round((triggered.length / all.length) * 100) : 0,
     };
-  }, [sortedStations, currentTimeSec]);
+  }, [previews, currentTimeSec]);
 
-  // Helper to render an individual Z-component station row in the multi-station array
+  // Helper to render an individual Z-component station row
   const renderZComponentRow = (station: WaveformPreviewStation) => {
     const durationSec = station.duration_sec || 30.0;
     const pPickSec = station.p_pick_sec;
-    const data = signalType === "acc" ? station.acc.z : station.vel.z;
+    const data = signalType === "acc" ? station.acc?.z : station.vel?.z;
     if (!data || data.length === 0) return null;
 
     const width = 480;
-    const height = 48;
+    const height = 44;
     const maxVal = Math.max(...data.map(Math.abs), 0.001);
     const totalPoints = data.length;
 
@@ -278,13 +289,12 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
         {/* Station Subheader */}
         <div className="flex items-center justify-between text-[11px] mb-1 font-mono">
           <div className="flex items-center space-x-2">
-            {/* Station Code with CWA Intensity Pill */}
             <span className="font-bold text-slate-100 flex items-center space-x-1">
               <span className="text-cyan-400">▲</span>
               <span>{station.station_name}</span>
             </span>
 
-            {/* CWA Intensity badge (Active only if wave has arrived) */}
+            {/* CWA Intensity badge */}
             {hasPArrived ? (
               <span
                 style={{
@@ -315,12 +325,12 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
             </span>
           </div>
 
-          {/* Real-time P-Arrival Notification & Amplitude */}
+          {/* Real-time P-Arrival & Live Amp */}
           <div className="flex items-center space-x-2">
             {isNewlyDetected ? (
               <span className="text-[10px] font-bold text-amber-300 animate-pulse flex items-center space-x-1">
                 <Zap className="h-3 w-3 text-amber-400" />
-                <span>P-PICK DETECTED ({pPickSec}s)</span>
+                <span>P-PICK @ {pPickSec}s</span>
               </span>
             ) : hasPArrived ? (
               <span className="text-[10px] text-emerald-400 flex items-center space-x-1">
@@ -348,7 +358,7 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
         </div>
 
         {/* SVG Oscilloscope Display for Z component */}
-        <div className="relative w-full h-[46px] bg-slate-950 rounded border border-slate-900/90 overflow-hidden">
+        <div className="relative w-full h-[42px] bg-slate-950 rounded border border-slate-900/90 overflow-hidden">
           <svg
             viewBox={`0 0 ${width} ${height}`}
             className="w-full h-full"
@@ -445,9 +455,6 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
     );
   };
 
-  const currentStationData =
-    previews[selectedStation] || sortedStations[0] || Object.values(previews)[0];
-
   return (
     <div className="flex flex-col h-[440px] rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate_obsidian-card shadow-xl overflow-hidden">
       {/* Top Header Toolbar */}
@@ -461,27 +468,25 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
               <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center space-x-1.5">
                 <span>Multi-Station Waveform Array (Z-Component)</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono font-normal">
-                  {sortedStations.length} Stations Active
+                  All {detectionStats.total} Stations Loaded
                 </span>
               </h3>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
                 {activeEvent === "eq20122"
                   ? "EQ 20122 (19.76 km to NCU) • Real-Time P-Pick & CWA Intensity Triggering"
                   : activeEvent === "eq20883"
-                  ? "EQ 20883 (23.90 km to NCU) • On-Campus TCU083 Array Stream"
+                  ? "EQ 20883 (23.90 km to NCU) • 55 Regional Stations Recorded"
                   : "2016 Meinong Earthquake • Regional Strong-Motion Stream"}
               </p>
             </div>
           </div>
 
-          {/* Event Switcher & View Selector */}
+          {/* Event Switcher & Signal Type */}
           <div className="flex items-center space-x-2">
-            {/* Event Switcher */}
             <div className="flex items-center space-x-1 border border-slate-700 bg-slate-950/90 rounded-md p-0.5 text-[10px] font-mono">
               <button
                 onClick={() => {
                   setActiveEvent("eq20122");
-                  setSelectedStation("TCU011");
                   handleReset();
                 }}
                 className={`px-2 py-1 rounded font-bold transition flex items-center space-x-1 ${
@@ -496,7 +501,6 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
               <button
                 onClick={() => {
                   setActiveEvent("eq20883");
-                  setSelectedStation("TCU083");
                   handleReset();
                 }}
                 className={`px-2 py-1 rounded font-bold transition flex items-center space-x-1 ${
@@ -505,12 +509,11 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                <span>EQ 20883 (23.9 km)</span>
+                <span>EQ 20883 (55 Sta)</span>
               </button>
               <button
                 onClick={() => {
                   setActiveEvent("meinong");
-                  setSelectedStation("KAU068");
                   handleReset();
                 }}
                 className={`px-2 py-1 rounded font-bold transition ${
@@ -549,35 +552,68 @@ export const SimulationWaveformPanel: React.FC<SimulationWaveformPanelProps> = (
           </div>
         </div>
 
-        {/* Real-time Triggering Summary Strip */}
-        <div className="flex items-center justify-between text-[10px] font-mono px-2 py-1 bg-slate-950/60 rounded border border-slate-800 text-slate-300">
+        {/* Real-time Summary Strip & Station Search/Sort */}
+        <div className="flex flex-wrap items-center justify-between text-[10px] font-mono px-2 py-1 bg-slate-950/60 rounded border border-slate-800 text-slate-300 gap-1.5">
           <div className="flex items-center space-x-2">
             <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
             <span>
-              Triggered Stations:{" "}
+              Triggered:{" "}
               <b className="text-cyan-300 font-bold">
                 {detectionStats.triggeredCount} / {detectionStats.total}
               </b>{" "}
               ({detectionStats.percent}%)
             </span>
           </div>
+
+          {/* Quick Search & Sort Bar */}
           <div className="flex items-center space-x-2">
-            <span className="text-slate-400">P-Wave to NCU:</span>
-            <span className="text-amber-300 font-bold">
-              {activeEvent === "eq20122" ? "6.85s (In transit)" : "8.16s"}
-            </span>
-            <span className="text-slate-400 ml-1">Warning Lead Time:</span>
-            <span className="text-emerald-400 font-bold">
-              {activeEvent === "eq20122" ? "+5.60s" : "+6.69s"}
-            </span>
+            <div className="relative flex items-center">
+              <Search className="h-3 w-3 text-slate-500 absolute left-1.5" />
+              <input
+                type="text"
+                placeholder="Search station..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-slate-900 border border-slate-800 rounded pl-5 pr-1.5 py-0.5 text-[9px] font-mono text-slate-200 placeholder-slate-500 w-24 focus:w-32 transition-all focus:outline-none focus:border-cyan-500"
+              />
+            </div>
+
+            <div className="flex items-center space-x-0.5 bg-slate-900 rounded p-0.5 border border-slate-800 text-[9px]">
+              <button
+                onClick={() => setSortBy("time")}
+                className={`px-1 rounded ${
+                  sortBy === "time" ? "bg-cyan-500 text-slate-950 font-bold" : "text-slate-400"
+                }`}
+                title="Sort by Arrival Time"
+              >
+                Time
+              </button>
+              <button
+                onClick={() => setSortBy("dist")}
+                className={`px-1 rounded ${
+                  sortBy === "dist" ? "bg-cyan-500 text-slate-950 font-bold" : "text-slate-400"
+                }`}
+                title="Sort by Epicentral Distance"
+              >
+                Dist
+              </button>
+              <button
+                onClick={() => setSortBy("pga")}
+                className={`px-1 rounded ${
+                  sortBy === "pga" ? "bg-cyan-500 text-slate-950 font-bold" : "text-slate-400"
+                }`}
+                title="Sort by Peak Acceleration (PGA)"
+              >
+                PGA
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Waveforms Scrollable Container */}
-      <div className="flex-1 p-2.5 space-y-2 overflow-y-auto scrollbar-thin">
-        {/* Render All Stations Vertical Z-Component Traces */}
-        {sortedStations.map((sta) => renderZComponentRow(sta))}
+      <div className="flex-1 p-2 space-y-1.5 overflow-y-auto scrollbar-thin">
+        {displayedStations.map((sta) => renderZComponentRow(sta))}
       </div>
 
       {/* Bottom CWA Intensity Colorbar Legend */}
