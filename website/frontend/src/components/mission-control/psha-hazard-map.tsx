@@ -396,7 +396,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         pane: "hazardPane",
         opacity: hazardOpacity / 100,
         maxZoom: 16,
-        maxNativeZoom: 10,
+        maxNativeZoom: 11,
         errorTileUrl: BLANK_TILE,
         className: "psha-hazard-raster",
       });
