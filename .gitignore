@@ -46,6 +46,8 @@ build/
 .turbo/
 next-env.d.ts
 *.tsbuildinfo
+website/frontend/AGENTS.md
+website/frontend/CLAUDE.md
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
