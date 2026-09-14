@@ -97,6 +97,36 @@ class FaultCatalog:
 
         return nearest_result
 
+    def find_nearby_faults(
+        self, target_lat: float, target_lon: float, max_distance_km: float = 60.0
+    ) -> List[FaultDistanceResult]:
+        """Find all seismogenic structures within max_distance_km, ordered by ascending distance."""
+        results: List[FaultDistanceResult] = []
+        for fault_id, param in self._parameters.items():
+            align = self._alignments.get(fault_id)
+            if not align or not align.coordinates:
+                continue
+
+            min_dist = float("inf")
+            nearest_coord: Tuple[float, float] = (0.0, 0.0)
+            for lon, lat in align.coordinates:
+                dist = haversine_distance_km(target_lat, target_lon, lat, lon)
+                if dist < min_dist:
+                    min_dist = dist
+                    nearest_coord = (lon, lat)
+
+            if min_dist <= max_distance_km:
+                results.append(
+                    FaultDistanceResult(
+                        fault=param,
+                        min_distance_km=round(min_dist, 2),
+                        nearest_coord=nearest_coord,
+                    )
+                )
+
+        results.sort(key=lambda r: r.min_distance_km)
+        return results
+
     @classmethod
     def load_from_excel(
         cls,

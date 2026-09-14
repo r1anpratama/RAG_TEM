@@ -61,6 +61,22 @@ class AreaSource:
         """Leaflet-friendly ring: [[lat, lon], ...]."""
         return [[lat, lon] for lon, lat in self.coordinates]
 
+    def contains_point(self, lon: float, lat: float) -> bool:
+        """Ray-casting algorithm to test if point (lon, lat) is within the zone polygon."""
+        min_lon, min_lat, max_lon, max_lat = self.bbox
+        if not (min_lon <= lon <= max_lon and min_lat <= lat <= max_lat):
+            return False
+        inside = False
+        n = len(self.coordinates)
+        for i in range(n):
+            j = (i - 1) % n
+            xi, yi = self.coordinates[i]
+            xj, yj = self.coordinates[j]
+            intersect = ((yi > lat) != (yj > lat)) and (lon < (xj - xi) * (lat - yi) / (yj - yi + 1e-12) + xi)
+            if intersect:
+                inside = not inside
+        return inside
+
 
 class AreaSourceCatalog:
     """In-memory catalog of the on- and offshore areal source zones."""
@@ -78,6 +94,10 @@ class AreaSourceCatalog:
 
     def get_by_id(self, source_id: str) -> Optional[AreaSource]:
         return self._by_id.get(source_id.strip().upper())
+
+    def find_containing_sources(self, lon: float, lat: float) -> List[AreaSource]:
+        """Find all areal source zones whose polygon contains the point (lon, lat)."""
+        return [s for s in self._sources if s.contains_point(lon, lat)]
 
     @classmethod
     def load_from_text(cls, path: Optional[Path] = None) -> "AreaSourceCatalog":

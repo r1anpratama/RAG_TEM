@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Bot,
   GitFork,
+  MapPin,
   Search,
   Send,
   ShieldCheck,
@@ -38,6 +39,11 @@ interface StarterPrompt {
 }
 
 const STARTER_PROMPTS: StarterPrompt[] = [
+  {
+    tag: "My Location",
+    title: "Seismic Hazard at My Current Location",
+    prompt: "How about the seismic hazard at my location?",
+  },
   {
     tag: "Logic Tree",
     title: "Shanchiao Fault Slip Rate & Mw Uncertainty Treatment",
@@ -93,6 +99,8 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [query, setQuery] = useState<string>("");
   const [input, setInput] = useState<string>("");
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number; label?: string } | null>(null);
+  const [isLocating, setIsLocating] = useState<boolean>(false);
 
   const { messages, isStreaming, error, sendMessage, stopStreaming, clearMessages } = useRagStream();
 
@@ -136,11 +144,90 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
     setSelectedFaultId(pairing.fault_ids[0]);
   }, []);
 
+  const handleRequestLocation = useCallback(
+    (customPrompt?: string) => {
+      setIsLocating(true);
+      if (typeof window !== "undefined" && "geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            setUserLocation({
+              lat,
+              lon,
+              label: "Your Current Location",
+            });
+            setIsLocating(false);
+            const promptToSend = customPrompt?.trim()
+              ? `${customPrompt.trim()} (Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)})`
+              : `How is the seismic hazard at my current location? (Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+            sendMessage(promptToSend);
+          },
+          (error) => {
+            console.warn("Geolocation denied or unavailable; defaulting to NCU Campus, Taoyuan", error);
+            const fallbackLat = 24.968;
+            const fallbackLon = 121.194;
+            setUserLocation({
+              lat: fallbackLat,
+              lon: fallbackLon,
+              label: "NCU Campus, Taoyuan (Default Demo Location)",
+            });
+            setIsLocating(false);
+            const promptToSend = customPrompt?.trim()
+              ? `${customPrompt.trim()} (Coordinates: ${fallbackLat.toFixed(4)}, ${fallbackLon.toFixed(4)} - Default Demo Location: NCU Campus, Taoyuan)`
+              : `How is the seismic hazard at my location? (Coordinates: ${fallbackLat.toFixed(4)}, ${fallbackLon.toFixed(4)} - Default Demo Location: NCU Campus, Taoyuan)`;
+            sendMessage(promptToSend);
+          },
+          { timeout: 8000, enableHighAccuracy: true }
+        );
+      } else {
+        const fallbackLat = 24.968;
+        const fallbackLon = 121.194;
+        setUserLocation({
+          lat: fallbackLat,
+          lon: fallbackLon,
+          label: "NCU Campus, Taoyuan (Default Demo Location)",
+        });
+        setIsLocating(false);
+        const promptToSend = customPrompt?.trim()
+          ? `${customPrompt.trim()} (Coordinates: ${fallbackLat.toFixed(4)}, ${fallbackLon.toFixed(4)} - Default Demo Location: NCU Campus, Taoyuan)`
+          : `How is the seismic hazard at my location? (Coordinates: ${fallbackLat.toFixed(4)}, ${fallbackLon.toFixed(4)} - Default Demo Location: NCU Campus, Taoyuan)`;
+        sendMessage(promptToSend);
+      }
+    },
+    [sendMessage]
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isStreaming) return;
-    sendMessage(input);
+    const trimmed = input.trim();
+    if (!trimmed || isStreaming) return;
     setInput("");
+
+    const lowered = trimmed.toLowerCase();
+    const isLocationAsk =
+      lowered.includes("lokasi") ||
+      lowered.includes("location") ||
+      lowered.includes("di sini") ||
+      lowered.includes("around me") ||
+      lowered.includes("my site") ||
+      lowered.includes("where i am");
+
+    // If asking about location without coordinates attached, trigger geolocation
+    if (isLocationAsk && !trimmed.includes("Coordinates:") && !/\d{2}\.\d+/.test(trimmed)) {
+      handleRequestLocation(trimmed);
+      return;
+    }
+
+    sendMessage(trimmed);
+  };
+
+  const handleStarterClick = (item: StarterPrompt) => {
+    if (item.tag === "My Location" || item.prompt.toLowerCase().includes("location")) {
+      handleRequestLocation(item.prompt);
+    } else {
+      sendMessage(item.prompt);
+    }
   };
 
   const strongest = [...faults].sort((a, b) => b.mw_max - a.mw_max)[0];
@@ -257,13 +344,28 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleRequestLocation()}
+                disabled={isLocating}
+                className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-[10px] font-bold transition ${
+                  userLocation
+                    ? "border-cyan-500/60 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                }`}
+                title="Detect my location on the map and assess seismic hazard"
+              >
+                <MapPin className={`h-3 w-3 ${isLocating ? "animate-spin text-amber-500" : "text-cyan-500"}`} />
+                <span>{isLocating ? "Locating..." : userLocation ? "📍 My Location" : "📍 Locate Me"}</span>
+              </button>
+
               <div className="flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 dark:border-slate-700">
                 <Search className="h-3 w-3 text-slate-400" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Find structure or ID"
-                  className="w-32 bg-transparent text-[11px] text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
+                  className="w-28 bg-transparent text-[11px] text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
                 />
               </div>
               <div className="flex items-center gap-1 rounded-lg border border-slate-300 p-0.5 dark:border-slate-700">
@@ -292,6 +394,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
               colorMode={colorMode}
               selectedFaultId={selectedFaultId}
               focusedPairingLabel={focusedPairingLabel}
+              userLocation={userLocation}
               onSelectFault={handleSelectFault}
               onSelectPairing={handleSelectPairing}
             />
@@ -345,7 +448,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
                   {STARTER_PROMPTS.map((item) => (
                     <button
                       key={item.tag}
-                      onClick={() => sendMessage(item.prompt)}
+                      onClick={() => handleStarterClick(item)}
                       className="group flex w-full flex-col gap-1 rounded-lg border border-slate-200 p-2.5 text-left transition hover:border-cyan-500/40 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
                     >
                       <div className="flex items-center justify-between">
@@ -374,13 +477,22 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
               className="border-t border-slate-200 p-3 dark:border-slate-800"
             >
               <div className="flex items-center space-x-2 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 transition focus-within:border-cyan-500/60 dark:border-slate-800 dark:bg-slate-900/80">
+                <button
+                  type="button"
+                  onClick={() => handleRequestLocation()}
+                  disabled={isLocating || isStreaming}
+                  className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-200 hover:text-cyan-500 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-cyan-400"
+                  title="Check seismic hazard at my location"
+                >
+                  <MapPin className={`h-4 w-4 ${isLocating ? "animate-spin text-amber-500" : ""}`} />
+                </button>
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={
                     selectedFault
-                      ? `Ask about ${selectedFault.name} (ID ${selectedFault.fault_id})...`
-                      : "e.g. what is the recurrence of 02+04?"
+                      ? `Ask about ${selectedFault.name} (ID ${selectedFault.fault_id}) or my location...`
+                      : "e.g. how about hazard di lokasi saya?"
                   }
                   className="flex-1 bg-transparent text-[11px] text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
                   disabled={isStreaming}
@@ -405,7 +517,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
                 )}
               </div>
               <p className="mt-1.5 text-[9px] text-slate-400">
-                Answers cite the source record; ask “fault ID N”, “Table 2”, or any paper section.
+                Answers cite the source record; ask “fault ID N”, “Table 2”, or “how about hazard di lokasi saya”.
               </p>
             </form>
           </div>

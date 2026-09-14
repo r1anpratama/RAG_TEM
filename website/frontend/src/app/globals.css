@@ -149,3 +149,28 @@ body {
 .dark .leaflet-control-attribution a {
   color: #38bdf8 !important;
 }
+
+/* User location pulsating radar pin */
+.psha-user-location-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+@keyframes psha-radar-ping {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.psha-radar-pulse {
+  animation: psha-radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

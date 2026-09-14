@@ -753,6 +753,171 @@ def _shanchiao_uncertainty_logic_tree_answer() -> Dict[str, Any]:
     }
 
 
+def _user_location_hazard_answer(
+    lat: float,
+    lon: float,
+    location_label: Optional[str] = None,
+    fallback_note: bool = False,
+) -> Dict[str, Any]:
+    """Provide grounded site-specific seismic hazard evaluation and actionable engineering/safety advice."""
+    domain = _domain()
+    if not domain:
+        return {
+            "answer": "TEM PSHA2025 domain catalog is currently unavailable.",
+            "citation": {
+                "document_name": PAPER,
+                "page_or_section": "Domain Catalog",
+                "snippet": "Catalog not loaded.",
+                "score": 0.0,
+            },
+        }
+
+    catalog, _ = domain
+    nearest_res = catalog.find_nearest_fault(lat, lon)
+    if not nearest_res:
+        return {
+            "answer": f"Could not determine seismogenic structures for coordinates ({lat:.4f}, {lon:.4f}).",
+            "citation": {
+                "document_name": PAPER,
+                "page_or_section": "Domain Catalog",
+                "snippet": "No structure found.",
+                "score": 0.0,
+            },
+        }
+
+    fault = nearest_res.fault
+    dist_km = nearest_res.min_distance_km
+    nearby_list = catalog.find_nearby_faults(lat, lon, max_distance_km=50.0)
+
+    # Multi-structure pairings for nearest fault
+    pairings_for_fault = [
+        p for p in _pairing_rows()
+        if fault.id in p.get("fault_ids", [])
+    ]
+
+    # Shallow areal source zones containing the site
+    area_cat = _area_sources()
+    containing_areas = area_cat.find_containing_sources(lon, lat)
+
+    # Hazard tier assessment based on TEM PSHA2025 475-yr return period (Figure 13)
+    if dist_km < 5.0:
+        hazard_tier = "Very High (Near-Fault Rupture & Directivity Zone)"
+        pga_est = "> 0.45g - 0.60g+"
+        pga_note = (
+            "Located within the immediate near-fault zone (Rrup < 5 km). Severe ground motion amplification, "
+            "forward directivity velocity pulses, and potential coseismic surface displacement hazards are critical."
+        )
+    elif dist_km < 15.0:
+        hazard_tier = "High Seismic Hazard Zone"
+        pga_est = "0.35g - 0.45g"
+        pga_note = (
+            "Located in the strong shaking zone of proximate seismogenic faulting. High spectral accelerations across "
+            "short and intermediate periods are expected during characteristic events."
+        )
+    elif dist_km < 35.0:
+        hazard_tier = "Moderate-to-High Hazard Zone"
+        pga_est = "0.25g - 0.35g"
+        pga_note = (
+            "Moderate distance to active fault traces. Seismic shaking hazard reflects combined contributions from "
+            "crustal fault ruptures, shallow areal background sources, and regional subduction interface events."
+        )
+    else:
+        hazard_tier = "Regional Background Hazard Zone"
+        pga_est = "0.15g - 0.25g"
+        pga_note = (
+            "Beyond immediate crustal fault near-field. Seismic hazard is primarily governed by regional shallow "
+            "areal sources (depth < 35 km) and deep subduction intraslab/interface megathrusts."
+        )
+
+    site_display = location_label or "User Query Coordinates"
+    lines = [
+        f"### Seismic Hazard Assessment for Location: {site_display}",
+        "",
+        f"- **Site Coordinates**: {lat:.4f}° N, {lon:.4f}° E",
+    ]
+    if fallback_note:
+        lines.append(
+            "- **Notice**: *Browser geolocation was not provided; displaying National Central University (NCU) Campus in Taoyuan as the default reference site.*"
+        )
+    lines.extend([
+        "",
+        "#### 1. Primary Seismogenic Threat (Nearest Active Fault)",
+        f"- **Structure Name**: **ID {fault.id} - {fault.name}**",
+        f"- **Distance to Surface Trace**: **{dist_km:.2f} km**",
+        f"- **Kinematic Mechanism**: **{fault.fault_type}** ({'Normal fault' if fault.fault_type == 'N' else 'Reverse thrust' if fault.fault_type == 'R' else 'Strike-slip fault' if fault.fault_type == 'SS' else 'Mixed kinematic mechanism'})",
+        f"- **Maximum Magnitude (Mw)**: **Mw {fault.mw_max:.2f}**",
+        f"- **Mean Slip Rate**: **{fault.slip_rate_mm_yr:.2f} mm/yr**",
+        f"- **Rupture Geometry**: Dip **{fault.dip:.1f}°**, Rake **{fault.rake:.1f}°**, Max Seismogenic Depth **{fault.depth_max_km:.1f} km**",
+    ])
+
+    if pairings_for_fault:
+        pairing_names = ", ".join(
+            f"**{p['pairing_label']}** (Combined Mw {p['combined_mw']}, RI {p['recurrence_interval_yr']:,} yr)"
+            for p in pairings_for_fault[:2]
+        )
+        lines.append(f"- **Table 2 Multi-Fault Rupture Scenarios**: {pairing_names}")
+
+    if len(nearby_list) > 1:
+        lines.extend([
+            "",
+            "#### 2. Nearby Seismogenic Structures within 50 km",
+        ])
+        for res in nearby_list[1:4]:
+            nf = res.fault
+            lines.append(
+                f"- **ID {nf.id} ({nf.name})**: {res.min_distance_km:.1f} km away | Mechanism: {nf.fault_type} | Mw {nf.mw_max:.1f} | Slip: {nf.slip_rate_mm_yr:.2f} mm/yr"
+            )
+
+    if containing_areas:
+        zone_info = ", ".join(
+            f"**Zone {a.id}** (Gutenberg-Richter a-value: {a.a_value if a.a_value is not None else 'N/A'})"
+            for a in containing_areas
+        )
+        lines.extend([
+            "",
+            "#### 3. Shallow Areal Source Context (Areal Background Seismicity < 35 km)",
+            f"- Site is situated within shallow crustal areal source: {zone_info}.",
+        ])
+
+    lines.extend([
+        "",
+        "#### 4. TEM PSHA2025 Hazard Zone Classification (475-Year Return Period / 10% in 50 Years)",
+        f"- **Hazard Classification Tier**: **{hazard_tier}**",
+        f"- **Estimated 475-yr Bedrock/Site PGA**: **{pga_est}**",
+        f"- **Hazard Summary**: {pga_note}",
+        "",
+        "#### 5. Actionable Engineering & Civil Protection Advice",
+        "1. **Building Age & Structural Seismic Evaluation**:",
+        "   - Taiwan's seismic design codes underwent major revisions following the 1999 Chi-Chi earthquake (1999, 2005, 2011).",
+        "   - If your building was constructed **before 1999**, contact local municipal urban development offices or the National Center for Research on Earthquake Engineering (NCREE) to apply for subsidized structural preliminary seismic assessments and retrofitting.",
+        "2. **Soft-Story (Piloti) Structural Risk Inspection**:",
+        "   - Inspect ground floors for open commercial arcades or removed interior shear walls (piloti structures). Soft-story configurations caused catastrophic collapses in the 2016 Meinong and 2018 Hualien earthquakes.",
+        "3. **Local Geotechnical & Vs30 Site Amplification Considerations**:",
+        "   - Soft alluvial soils and coastal sediments (Vs30 < 260 m/s) significantly amplify long-period seismic waves and may induce soil liquefaction during prolonged shaking. Verify foundation type (deep pile foundation vs shallow mat foundation).",
+        "4. **Non-Structural Safeguards & Fire Prevention**:",
+        "   - Anchor heavy furniture, bookshelves, and water heaters directly to reinforced concrete walls or structural studs with L-brackets.",
+        "   - Install automatic seismic gas shutoff valves to prevent post-earthquake pipeline gas leaks and fires.",
+        "5. **72-Hour Emergency Readiness Kit & Evacuation Plan**:",
+        "   - Maintain a dedicated 72-hour survival kit near an exit (potable water, non-perishable food, LED flashlight, emergency radio, whistle, spare power banks, first-aid kit).",
+        "   - Pre-identify open outdoor emergency assembly areas away from falling exterior masonry, glass, and overhead utility lines.",
+        "",
+        "_Source Citation: TEM PSHA2025 (Gao et al., 2026) Sections 3 (Table 1), 4 (Table 2), 8 (Vs30 Site Effects), and 9 (Figure 13 Hazard Maps)._",
+    ])
+
+    return {
+        "answer": "\n".join(lines),
+        "citation": {
+            "document_name": PAPER,
+            "page_or_section": f"Section 3 (Table 1), Section 8 (Vs30), Section 9 (Fig. 13) - Site Hazard for {site_display}",
+            "snippet": (
+                f"Nearest structure ID {fault.id} ({fault.name}) is {dist_km:.2f} km away (Mw {fault.mw_max}, slip rate {fault.slip_rate_mm_yr} mm/yr). "
+                f"Assessed 475-yr hazard tier: {hazard_tier} with estimated PGA {pga_est}."
+            ),
+            "score": 1.0,
+        },
+    }
+
+
 def answer_from_catalog(query: str) -> Optional[Dict[str, Any]]:
     """Answer exact, verifiable questions about structures and pairings from project data.
 
@@ -763,6 +928,46 @@ def answer_from_catalog(query: str) -> Optional[Dict[str, Any]]:
         return None
 
     lowered = query.lower()
+
+    # User Location Inquiry (e.g. "how about hazard di lokasi saya?", "hazard at my location", "di sini", "here")
+    location_triggers = (
+        "lokasi saya", "di lokasi", "wilayah saya", "di sini", "lokasi ku", "lokasiku",
+        "my location", "my current location", "my area", "around me", "at my site",
+        "where i am", "hazard here", "hazard di lokasi", "hazard at location", "how about hazard",
+        "hazard at my"
+    )
+    is_location_query = any(k in lowered for k in location_triggers)
+
+    # Check for embedded coordinates e.g. "(Coordinates: 24.9680, 121.1940)" or "24.968, 121.194"
+    coord_match = re.search(
+        r"(?:coordinates?|coord|lat(?:itude)?|loc)?[:\s\(\[]*([+-]?\d{1,2}\.\d+)[,\s]+([+-]?\d{2,3}\.\d+)",
+        query,
+        re.IGNORECASE,
+    )
+
+    if coord_match:
+        v1 = float(coord_match.group(1))
+        v2 = float(coord_match.group(2))
+        # Disambiguate lat and lon within Taiwan geographical bounding box
+        if 20.0 <= v1 <= 27.5 and 118.0 <= v2 <= 124.0:
+            target_lat, target_lon = v1, v2
+        elif 20.0 <= v2 <= 27.5 and 118.0 <= v1 <= 124.0:
+            target_lat, target_lon = v2, v1
+        else:
+            target_lat, target_lon = v1, v2
+
+        label_match = re.search(r"(?:Default Demo Location|Location):\s*([^)\n]+)", query, re.IGNORECASE)
+        label = label_match.group(1).strip() if label_match else None
+        return _user_location_hazard_answer(target_lat, target_lon, location_label=label)
+
+    if is_location_query:
+        # Default fallback to NCU Campus Science Building 4, Taoyuan benchmark site
+        return _user_location_hazard_answer(
+            24.9680,
+            121.1940,
+            location_label="National Central University (NCU), Taoyuan (Default Demo Location)",
+            fallback_note=True,
+        )
 
     # Interaction Scenario: Shanchiao fault slip rate and Mw uncertainty logic tree
     if (

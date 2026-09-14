@@ -25,6 +25,7 @@ interface PshaHazardMapProps {
   colorMode: PshaColorMode;
   selectedFaultId: number | null;
   focusedPairingLabel: string | null;
+  userLocation?: { lat: number; lon: number; label?: string } | null;
   onSelectFault: (fault: FaultTrace) => void;
   onSelectPairing: (pairing: PshaPairing) => void;
 }
@@ -79,6 +80,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   colorMode,
   selectedFaultId,
   focusedPairingLabel,
+  userLocation,
   onSelectFault,
   onSelectPairing,
 }) => {
@@ -166,6 +168,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         layersRef.current = {
           areaSources: L.layerGroup().addTo(map),
           faults: L.layerGroup().addTo(map),
+          userLocation: L.layerGroup().addTo(map),
         };
         mapRef.current = map;
         setMapReady(true);
@@ -289,6 +292,57 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
       containerRef.current.classList.remove("psha-hazard-canvas");
     }
   }, [isHazardMode]);
+
+  // --- User location pin & fly-to lifecycle ---------------------------------
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!mapReady || !L || !map || !layersRef.current?.userLocation) return;
+
+    const userLayer = layersRef.current.userLocation;
+    userLayer.clearLayers();
+
+    if (!userLocation) return;
+
+    const { lat, lon, label } = userLocation;
+
+    // Custom pulsing radar pin icon
+    const pingIcon = L.divIcon({
+      className: "psha-user-location-pin",
+      html: `
+        <div style="position:relative;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">
+          <span class="psha-radar-pulse" style="position:absolute;width:30px;height:30px;border-radius:50%;background:#06b6d4;opacity:0.6;"></span>
+          <span style="position:relative;width:22px;height:22px;border-radius:50%;background:#0891b2;border:2px solid #ffffff;box-shadow:0 0 12px #06b6d4, 0 4px 6px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:12px;">📍</span>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    });
+
+    const marker = L.marker([lat, lon], {
+      icon: pingIcon,
+      zIndexOffset: 1000,
+    });
+
+    marker.bindPopup(
+      `<div style="font-family:sans-serif;font-size:11px;background:#0f172a;color:#f8fafc;padding:9px 12px;border-radius:8px;border:1px solid #06b6d4;box-shadow:0 4px 14px rgba(0,0,0,0.6);min-width:180px">
+         <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
+           <span style="font-size:13px">📍</span>
+           <strong style="color:#38bdf8;font-size:12px">${label || "Your Location"}</strong>
+         </div>
+         <div style="color:#cbd5e1;font-size:11px;line-height:1.4">
+           <b>${lat.toFixed(4)}° N, ${lon.toFixed(4)}° E</b><br/>
+           <span style="color:#94a3b8;font-size:10px">TEM PSHA2025 ground motion &amp; site hazard assessment</span>
+         </div>
+       </div>`,
+      { offset: [0, -10] }
+    );
+
+    marker.addTo(userLayer);
+    marker.openPopup();
+
+    map.flyTo([lat, lon], 11, { duration: 1.4 });
+  }, [mapReady, userLocation]);
 
   // --- Basemap layer lifecycle ----------------------------------------------
   // In Hazard mode, completely hide/detach the basemap so focus is 100% on the seismic hazard raster.

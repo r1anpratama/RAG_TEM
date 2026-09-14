@@ -158,3 +158,44 @@ def test_shanchiao_uncertainty_logic_tree():
     assert "Wells & Coppersmith" in dispatched_en["answer"]
     assert "1.56" in dispatched_en["answer"]
 
+
+def test_user_location_hazard_scenario():
+    """Verify user location hazard inquiry with coordinate extraction, nearest fault calculation, and safety advice."""
+    from website.backend.app.rag.psha_knowledge import _user_location_hazard_answer
+
+    # 1. Direct call for NCU Campus benchmark coordinates (24.9680 N, 121.1940 E)
+    res = _user_location_hazard_answer(24.9680, 121.1940, location_label="NCU Campus, Taoyuan")
+    assert "answer" in res
+    assert "citation" in res
+    ans = res["answer"]
+
+    # Site and nearest structure
+    assert "24.9680" in ans and "121.1940" in ans
+    assert "ID 2" in ans or "ID 3" in ans  # Shuanglienpo or Yangmei fault
+    assert "475-Year Return Period" in ans
+    assert "Engineering & Civil Protection Advice" in ans
+    assert "1999" in ans  # Chi-Chi code revision
+    assert "Soft-Story" in ans
+    assert "Vs30" in ans
+    assert "72-Hour" in ans
+    # Assert NO LaTeX math delimiters
+    assert "$" not in ans
+
+    # 2. Dispatch via Indonesian user query without coordinates (fallback to NCU)
+    query_id = "how about hazard di lokasi saya ?"
+    dispatched_id = answer_from_catalog(query_id)
+    assert dispatched_id is not None
+    assert "NCU" in dispatched_id["answer"]
+    assert "Seismic Hazard Assessment" in dispatched_id["answer"]
+    assert "$" not in dispatched_id["answer"]
+
+    # 3. Dispatch via English query with embedded coordinates (Taipei 101 area: 25.0330 N, 121.5654 E)
+    query_taipei = "How is the seismic hazard at my location? (Coordinates: 25.0330, 121.5654)"
+    dispatched_taipei = answer_from_catalog(query_taipei)
+    assert dispatched_taipei is not None
+    # Nearest structure to central Taipei should be Shanchiao Fault (ID 1)
+    assert "Shanchiao" in dispatched_taipei["answer"] or "ID 1" in dispatched_taipei["answer"]
+    assert "25.0330" in dispatched_taipei["answer"]
+    assert "Actionable Engineering" in dispatched_taipei["answer"]
+    assert "$" not in dispatched_taipei["answer"]
+
