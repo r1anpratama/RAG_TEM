@@ -10,15 +10,18 @@ import requests
 
 try:
     from ..core.config import settings
+    from .psha_knowledge import answer_from_catalog
     from .vector_store import BaseVectorStore, SearchHit, get_vector_store
     from ..schemas.chat import ChatMessage, SourceCitation, StreamChunk
 except (ImportError, ValueError):
     try:
         from app.core.config import settings
+        from app.rag.psha_knowledge import answer_from_catalog
         from app.rag.vector_store import BaseVectorStore, SearchHit, get_vector_store
         from app.schemas.chat import ChatMessage, SourceCitation, StreamChunk
     except ImportError:
         from website.backend.app.core.config import settings
+        from website.backend.app.rag.psha_knowledge import answer_from_catalog
         from website.backend.app.rag.vector_store import BaseVectorStore, SearchHit, get_vector_store
         from website.backend.app.schemas.chat import ChatMessage, SourceCitation, StreamChunk
 
@@ -42,6 +45,17 @@ class RAGEngine:
         top_k: int = 3
     ) -> AsyncGenerator[str, None]:
         """Asynchronously stream tokens and grounding citations as Server-Sent Events (SSE)."""
+        # 0. Exact structured lookup over the authoritative catalog/table data.
+        #    Bypasses the LLM so parameter values can never be paraphrased wrongly.
+        structured = answer_from_catalog(query)
+        if structured:
+            citation = SourceCitation(**structured["citation"])
+            async for chunk in self._stream_text(structured["answer"]):
+                yield f"data: {chunk.model_dump_json()}\n\n"
+            yield f"data: {StreamChunk(event='citations', citations=[citation]).model_dump_json()}\n\n"
+            yield f"data: {StreamChunk(event='done').model_dump_json()}\n\n"
+            return
+
         # 1. Retrieve grounding chunks
         hits = self.retrieve(query, top_k=top_k)
         citations = [
@@ -131,6 +145,13 @@ class RAGEngine:
                     except json.JSONDecodeError:
                         continue
 
+    async def _stream_text(self, text: str) -> AsyncGenerator[StreamChunk, None]:
+        """Stream plain text token-by-token with a realistic cadence."""
+        words = text.split(" ")
+        for i, word in enumerate(words):
+            yield StreamChunk(event="token", token=word + (" " if i < len(words) - 1 else ""))
+            await asyncio.sleep(0.012)
+
     async def _stream_deterministic(
         self,
         query: str,
@@ -150,9 +171,5 @@ class RAGEngine:
                 f"in the currently indexed documents. Please upload relevant PDF or TXT files to expand the knowledge base."
             )
 
-        # Break into words and stream realistically
-        words = response_text.split(" ")
-        for i, word in enumerate(words):
-            token = word + (" " if i < len(words) - 1 else "")
-            yield StreamChunk(event="token", token=token)
-            await asyncio.sleep(0.02)
+        async for chunk in self._stream_text(response_text):
+            yield chunk

@@ -119,25 +119,22 @@ def get_vector_store() -> BaseVectorStore:
 
 
 def _seed_initial_data(store: BaseVectorStore) -> None:
-    """Seed with initial knowledge base chunks."""
-    seed_chunks = [
-        DocumentChunk(
-            chunk_id="TEM-SEED-01",
-            document_name="TEM_PSHA_2025_Overview.pdf",
-            section="Executive Summary",
-            text="The Taiwan Earthquake Model (TEM PSHA 2025) provides updated probabilistic seismic hazard assessment parameters for 38 active seismogenic structures across Taiwan.",
-        ),
-        DocumentChunk(
-            chunk_id="TEM-SEED-02",
-            document_name="TEM_PSHA_2025_Overview.pdf",
-            section="Table 2: Cascading Ruptures",
-            text="Table 2 of TEM PSHA 2025 accounts for multi-structure coseismic ruptures. Shuanglienpo Fault (ID 2) pairs with Yangmei (ID 3, combined Mw 6.56) and Hukou (ID 4, combined Mw 6.91).",
-        ),
-        DocumentChunk(
-            chunk_id="TEM-SEED-03",
-            document_name="Seismic_Building_Code_Taiwan.txt",
-            section="Pre-1999 Fragility",
-            text="Buildings constructed prior to the 1999 Chi-Chi earthquake often lack modern ductile detailing and transverse confinement, showing high collapse vulnerability during CWA Intensity 6+ shaking.",
-        ),
-    ]
-    store.add_chunks(seed_chunks)
+    """Seed the knowledge base with the authoritative TEM PSHA2025 records.
+
+    Chunks are generated from the real project sources (38-structure catalog,
+    Table 2 pairings, paper facts) rather than hand-written summaries, so a
+    retrieved chunk is always a verifiable statement about the actual data.
+    """
+    from .psha_knowledge import build_psha_chunks
+
+    store.add_chunks(
+        [
+            DocumentChunk(
+                chunk_id=c["id"],
+                document_name=c["document"],
+                section=c["section"],
+                text=c["text"],
+            )
+            for c in build_psha_chunks()
+        ]
+    )

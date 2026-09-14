@@ -34,6 +34,8 @@ Built upon ground-truth data from the **Taiwan Earthquake Model (TEM PSHA 2025)*
    - **Top KPI Summary Metric Cards**: 4 executive analytical cards displaying Track A Reflex Latency ($0.009\text{ ms}$ / $99.8\%$ optimal), Track B Deliberation ($0.87\text{ ms}$ / 4-Agent swarm), Seismogenic Faults ($38$ structures / TEM PSHA 2025), and Campus Facility Health ($2.14\%$ drift / RED TAG alert).
    - **Mission Control Top Bar**: Interactive scenario selector dropdown, "Trigger Wave" button, FastAPI online health pill, notification alert bell, and native **Tailwind CSS Light/Dark Mode switch** (☀️ / 🌙).
    - **100% Free GIS Basemaps**: Seamlessly switches between Esri Dark Gray Canvas, Carto Dark Matter, Carto Voyager (Light), and OpenStreetMap—**no external API keys required**.
+   - **TEM PSHA2025 Hazard Console (`?tab=psha`)**: A full-island Leaflet source map of the 38 on-land seismogenic structures with TEM PSHA2025 Table 2 coseismic rupture links, published Δ-hazard halos versus TEM PSHA2020, an opt-in layer of the 28 shallow areal source zones, three colour modes (kinematics / max $M_w$ / slip rate), kinematic filtering, and a **docked grounded assistant** that answers structure, pairing, GMPE logic-tree, hazard-map and areal-zone questions from the authoritative catalog — with source citations and no invented values.
+   - **Hazard Raster Viewer (floating glass panel)**: Four TEM PSHA2025 Fig. 13 hazard maps as radio-selected XYZ overlays — Mean (RP 475 yr), Median (RP 475 yr), Mean − Median anomaly (RP 475 yr) and Median (RP 2475 yr) — stacked above a free Esri hillshade, with an independent "Seismogenic structures" toggle, a 0–100% raster opacity slider, and a **dynamic colorbar** that switches between the $0.0$–$1.6\ \text{g}$ seismic ramp and the diverging $-0.5$–$+0.5\ \text{g}$ anomaly ramp. Tiles are served from `website/frontend/public/tiles/<layer_id>/{z}/{x}/{y}.png`; see `public/tiles/README.md`.
 
 ---
 
@@ -114,7 +116,7 @@ RAG_TEM/
 │   │   │   │   │   ├── kpi-metrics.tsx           # 4 Top summary KPI metric cards
 │   │   │   │   │   ├── rag-architecture-view.tsx # Dual-track pipeline visualizer
 │   │   │   │   │   ├── eews-view.tsx             # S-wave countdown clock, GIS & SCADA
-│   │   │   │   │   ├── psha-view.tsx             # 38 faults, cascading graph & GMPE curve
+│   │   │   │   │   ├── psha-view.tsx             # TEM PSHA2025 hazard console: interactive map + grounded assistant
 │   │   │   │   │   └── copilot-view.tsx          # Domain geotechnical AI copilot with SSE
 │   │   │   │   ├── theme-toggle.tsx    # Native Tailwind Light/Dark mode switcher (☀️/🌙)
 │   │   │   │   └── mission-control/    # Interactive GIS, GMPE & digital twins primitives
@@ -125,11 +127,11 @@ RAG_TEM/
 │   │   └── tailwind.config.ts          # Custom enterprise palette configuration
 │   └── backend/                        # FastAPI High-Performance Application Server
 │       ├── app/
-│       │   ├── api/routers/            # /api/chat (SSE), /api/triage, /api/health
+│       │   ├── api/routers/            # /api/chat (SSE), /api/triage, /api/psha/dataset, /api/graph
 │       │   ├── core/                   # Server config & environment bindings
-│       │   ├── rag/                    # In-memory vector store & token streaming
+│       │   ├── rag/                    # Grounded TEM PSHA2025 knowledge base & token streaming
 │       │   └── schemas/                # Pydantic v2 data models
-│       ├── tests/                      # FastAPI endpoint test suite (8 tests)
+│       ├── tests/                      # FastAPI endpoint test suite (19 tests)
 │       └── requirements.txt            # Backend dependencies
 ├── .agents/                            # Agent operational guidelines & rules
 ├── 00_Index/                           # Obsidian Second Brain: Maps of Content (MOC)
@@ -207,12 +209,13 @@ npm run dev
 The repository maintains **100% test pass rate** across all core scientific modules and backend web endpoints:
 
 ```bash
-# Run the complete test suite (28 tests)
+# Run the complete test suite (46 tests)
 python -m pytest tests/ website/backend/tests/
 ```
 
 Test coverage includes:
 - Active fault catalog Excel ingestion and multi-rupture graph validation.
+- TEM PSHA2025 shallow areal source asset parsing (28 closed zones, optional a-values, malformed-line rejection).
 - Lin & Lee (2008) Taiwan crustal GMPE attenuation and $\pm 2.5\sigma$ confidence limits.
 - Sub-millisecond Track A reflex interlocks and multi-agent Track B deliberation.
 - FastAPI SSE streaming, scenario dispatch, and rate limiting.
@@ -226,7 +229,7 @@ Test coverage includes:
 | **Track A Reflex Latency** | $< 5.0\ \text{ms}$ | **$0.009\ \text{ms}$** |
 | **Track B Deliberative Latency** | $\le 2.0\ \text{s}$ | **$0.87\ \text{ms}$** |
 | **Hallucination Rate** | $0.0\%$ | **$0.0\%$** (Safety Critic Verified) |
-| **Test Suite Coverage** | $100\%$ pass | **28 / 28 passing** |
+| **Test Suite Coverage** | $100\%$ pass | **46 / 46 passing** |
 | **Frontend Architecture** | Modern Reactive Web | **Next.js 15 (App Router) + React 19** |
 | **GIS Basemap Dependency** | Public & Unrestricted | **100% Free (No API Keys Required)** |
 

@@ -918,7 +918,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
           : true;
 
       if (b.id === "FAC_NCU_SCIENCE_B4") {
-        group.traverse((child) => {
+        group.traverse((child: THREE.Object3D) => {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             const mat = mesh.material as THREE.MeshStandardMaterial;
@@ -975,7 +975,7 @@ export const NCU3DCampus: React.FC<NCU3DCampusProps> = ({
       }
 
       if (floorLinesGroup) {
-        floorLinesGroup.children.forEach((child) => {
+        floorLinesGroup.children.forEach((child: THREE.Object3D) => {
           const line = child as THREE.Line;
           if (line.material) {
             const lMat = line.material as THREE.LineBasicMaterial;

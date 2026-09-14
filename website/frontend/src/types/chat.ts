@@ -6,6 +6,17 @@ export interface SourceCitation {
   source_type?: string;
 }
 
+/** Citation as serialized by the FastAPI backend (SourceCitation pydantic model). */
+export interface WireCitation {
+  document_name?: string;
+  page_or_section?: string;
+  snippet?: string;
+  score?: number;
+  source_id?: string;
+  title?: string;
+  source_type?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant" | "system";
@@ -15,12 +26,12 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
-export type StreamEventType = "token" | "citation" | "done" | "error";
+export type StreamEventType = "token" | "citation" | "citations" | "done" | "error";
 
 export interface StreamEventData {
   event: StreamEventType;
   token?: string;
-  citations?: SourceCitation[];
+  citations?: WireCitation[];
   error?: string;
 }
 

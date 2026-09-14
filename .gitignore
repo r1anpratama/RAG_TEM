@@ -44,6 +44,8 @@ node_modules/
 out/
 build/
 .turbo/
+next-env.d.ts
+*.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

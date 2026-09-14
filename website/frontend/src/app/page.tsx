@@ -224,8 +224,10 @@ function DashboardContent() {
 
         {/* Page Content Container - Full screen width utilization */}
         <main className="flex-1 p-3 sm:p-5 lg:p-6 w-full">
-          {/* Top 4 KPI Summary Metric Cards - Hidden on RAG Architecture page */}
-          {activeTab !== "rag_arch" && <KpiMetrics scenario={selectedScenario} />}
+          {/* Top 4 KPI Summary Metric Cards - RAG Architecture and PSHA carry their own metrics */}
+          {activeTab !== "rag_arch" && activeTab !== "psha" && (
+            <KpiMetrics scenario={selectedScenario} />
+          )}
 
           {/* Active Visualization Tab View */}
           {activeTab === "rag_arch" && <RagArchitectureView />}
@@ -236,12 +238,7 @@ function DashboardContent() {
               isSimulating={isSimulating}
             />
           )}
-          {activeTab === "psha" && (
-            <PSHAView
-              scenario={selectedScenario}
-              faults={faults}
-            />
-          )}
+          {activeTab === "psha" && <PSHAView faults={faults} />}
           {activeTab === "copilot" && <CopilotView />}
         </main>
       </div>

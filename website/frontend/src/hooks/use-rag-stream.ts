@@ -145,8 +145,18 @@ export function useRagStream(initialMessages: ChatMessage[] = []): UseRagStreamR
                       : m
                   )
                 );
-              } else if (event.event === "citation" && event.citations) {
-                collectedCitations = event.citations;
+              } else if (
+                (event.event === "citation" || event.event === "citations") &&
+                event.citations
+              ) {
+                // Backend emits `citations` with SourceCitation fields; normalize for the UI.
+                collectedCitations = event.citations.map((cite, idx) => ({
+                  source_id: cite.source_id ?? `${cite.document_name ?? "source"}-${idx}`,
+                  title: cite.title ?? cite.document_name ?? "Grounding source",
+                  snippet: cite.snippet ?? "",
+                  score: cite.score ?? 0,
+                  source_type: cite.source_type ?? cite.page_or_section,
+                }));
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsgId

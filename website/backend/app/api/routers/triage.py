@@ -20,6 +20,11 @@ from src.domain.gmpe import compute_taiwan_crustal_gmpe_pgv
 from src.pipelines.tts_stream import TTSAMAlertPacket, Epicenter, StationPrediction
 from src.agents.orchestrator import DualTrackOrchestrator
 
+try:
+    from ...rag.psha_knowledge import dataset as psha_dataset
+except (ImportError, ValueError):
+    from website.backend.app.rag.psha_knowledge import dataset as psha_dataset
+
 router = APIRouter(prefix="/api", tags=["Triage & GIS"])
 
 # Lazy singletons
@@ -105,6 +110,12 @@ async def list_faults(
     }
 
 
+@router.get("/psha/dataset", summary="TEM PSHA2025 Map Dataset")
+async def get_psha_dataset() -> Dict[str, Any]:
+    """Return the PSHA map payload: dataset counts, Table 2 pairings, and digital-twin facilities."""
+    return psha_dataset()
+
+
 @router.get("/graph", summary="Geo-GraphRAG Topology")
 async def get_graph_topology() -> Dict[str, Any]:
     """Return serialized nodes and edges of the Taiwan spatial-seismic knowledge graph."""
@@ -112,30 +123,43 @@ async def get_graph_topology() -> Dict[str, Any]:
     nodes = []
     edges = []
 
-    for n_id, data in graph.graph.nodes(data=True):
-        n_type = data.get("type", "UNKNOWN")
-        label = data.get("name", n_id)
-        color = "#ef4444" if n_type == "FAULT" else ("#06b6d4" if n_type == "FACILITY" else "#f59e0b")
+    type_colors = {
+        "FAULT": "#ef4444",
+        "MULTI_RUPTURE_PAIR": "#f59e0b",
+        "FACILITY": "#06b6d4",
+        "LIFELINE": "#10b981",
+    }
+
+    for node in graph.nodes.values():
+        node_type = node.node_type.value if hasattr(node.node_type, "value") else str(node.node_type)
         nodes.append({
-            "id": n_id,
-            "label": label,
-            "type": n_type,
-            "color": color,
-            "attributes": {k: v for k, v in data.items() if k not in ["name", "type"]},
+            "id": node.id,
+            "label": node.name,
+            "type": node_type,
+            "color": type_colors.get(node_type, "#94a3b8"),
+            "properties": node.properties,
         })
 
-    for u, v, data in graph.graph.edges(data=True):
-        edges.append({
-            "from": u,
-            "to": v,
-            "relation": data.get("relation", "CONNECTED_TO"),
-            "weight": data.get("weight", 1.0),
-        })
+    for edge_list in graph.edges_out.values():
+        for edge in edge_list:
+            edges.append({
+                "from": edge.source_id,
+                "to": edge.target_id,
+                "relation": edge.edge_type.value if hasattr(edge.edge_type, "value") else str(edge.edge_type),
+                "properties": edge.properties,
+            })
 
     return {
         "nodes": nodes,
         "edges": edges,
-        "summary": graph.get_topology_summary(),
+        "summary": {
+            "total_nodes": len(nodes),
+            "total_edges": len(edges),
+            "faults": sum(1 for n in nodes if n["type"] == "FAULT"),
+            "multi_rupture_pairings": sum(
+                1 for e in edges if e["relation"] == "RUPTURES_WITH"
+            ) // 2,
+        },
     }
 
 

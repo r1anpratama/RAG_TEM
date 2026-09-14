@@ -116,10 +116,44 @@ export interface GMPEPoint {
   upper_2sigma: number;
   lower_2sigma: number;
 }
-
 export interface GMPEResponse {
   model: string;
   magnitude: number;
   vs30_m_s: number;
   curve: GMPEPoint[];
 }
+
+/** TEM PSHA2025 Table 2 multiple-structure rupture pairing, rebuilt from the GeoGraph. */
+export interface PshaPairing {
+  pairing_label: string;
+  fault_ids: number[];
+  fault_names: string[];
+  combined_mw: number;
+  recurrence_interval_yr: number;
+}
+
+/** TEM PSHA2025 shallow areal source zone from `assets/Coordinates-area_source.txt`. */
+export interface PshaAreaSource {
+  id: string;
+  coordinates: [number, number][]; // [lat, lon] ring
+  centroid: [number, number]; // [lat, lon]
+  vertex_count: number;
+  a_value: number | null; // Gutenberg-Richter a-value, null until the asset carries it
+}
+
+export interface PshaDataset {
+  summary: {
+    total_faults: number;
+    fault_types: Record<string, number>;
+    multi_rupture_pairings: number;
+    area_sources: number;
+    paper_facts: number;
+    max_mw: number | null;
+    max_slip_rate_mm_yr: number | null;
+  };
+  pairings: PshaPairing[];
+  area_sources: PshaAreaSource[];
+}
+
+/** Fault-trace colouring strategy for the hazard map. */
+export type PshaColorMode = "kinematics" | "mw_max" | "slip_rate" | "structures";

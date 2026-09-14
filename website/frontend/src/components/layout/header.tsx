@@ -32,6 +32,10 @@ export const Header: React.FC<HeaderProps> = ({
   isSimulating,
   backendHealth,
 }) => {
+  // Scenario picker and wave trigger belong to the early-warning flow, not to the
+  // PSHA catalogue view, which is driven by the fault source data instead.
+  const showScenarioControls = activeTab !== "rag_arch" && activeTab !== "psha";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0b0f19]/90 px-4 sm:px-6 backdrop-blur-xl transition-colors duration-200">
       {/* Left: Sidebar Hamburger Toggle + Breadcrumbs */}
@@ -58,42 +62,46 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center space-x-2 sm:space-x-3">
         {activeTab !== "rag_arch" && (
           <>
-            {/* Scenario Selector Dropdown */}
-            <div className="hidden sm:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-1">
-              <span className="text-[11px] text-slate-600 dark:text-slate-400 pl-2 font-medium">
-                Scenario:
-              </span>
-              <select
-                value={selectedScenario?.id || ""}
-                onChange={(e) => {
-                  const sc = scenarios.find((s) => s.id === e.target.value);
-                  if (sc) onSelectScenario(sc);
-                }}
-                className="bg-white dark:bg-[#111c2e] text-xs text-slate-800 dark:text-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-cyan-500 border border-slate-200 dark:border-slate-700/60 cursor-pointer shadow-sm"
-              >
-                {scenarios.map((sc) => (
-                  <option
-                    key={sc.id}
-                    value={sc.id}
-                    className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+            {showScenarioControls && (
+              <>
+                {/* Scenario Selector Dropdown */}
+                <div className="hidden sm:flex items-center space-x-2 bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 rounded-lg p-1">
+                  <span className="text-[11px] text-slate-600 dark:text-slate-400 pl-2 font-medium">
+                    Scenario:
+                  </span>
+                  <select
+                    value={selectedScenario?.id || ""}
+                    onChange={(e) => {
+                      const sc = scenarios.find((s) => s.id === e.target.value);
+                      if (sc) onSelectScenario(sc);
+                    }}
+                    className="bg-white dark:bg-[#111c2e] text-xs text-slate-800 dark:text-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-cyan-500 border border-slate-200 dark:border-slate-700/60 cursor-pointer shadow-sm"
                   >
-                    {sc.title} (Mw {sc.magnitude})
-                  </option>
-                ))}
-              </select>
-            </div>
+                    {scenarios.map((sc) => (
+                      <option
+                        key={sc.id}
+                        value={sc.id}
+                        className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                      >
+                        {sc.title} (Mw {sc.magnitude})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* Trigger Wave Action Button */}
-            <button
-              onClick={onTriggerSimulation}
-              disabled={isSimulating}
-              className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-md shadow-amber-500/20 border border-amber-400/40 disabled:opacity-50"
-            >
-              <Play className="h-3 w-3 fill-current" />
-              <span className="hidden sm:inline">
-                {isSimulating ? "Simulating..." : "Trigger Wave"}
-              </span>
-            </button>
+                {/* Trigger Wave Action Button */}
+                <button
+                  onClick={onTriggerSimulation}
+                  disabled={isSimulating}
+                  className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-md shadow-amber-500/20 border border-amber-400/40 disabled:opacity-50"
+                >
+                  <Play className="h-3 w-3 fill-current" />
+                  <span className="hidden sm:inline">
+                    {isSimulating ? "Simulating..." : "Trigger Wave"}
+                  </span>
+                </button>
+              </>
+            )}
 
             {/* FastAPI Status Pill */}
             <div className="flex items-center space-x-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111c2e] px-2.5 py-1 text-[11px] font-mono text-slate-600 dark:text-slate-400 shadow-sm">
