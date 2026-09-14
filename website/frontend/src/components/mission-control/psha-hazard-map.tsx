@@ -8,9 +8,6 @@ import {
   ChevronDown,
   ChevronUp,
   Hexagon,
-  Link2,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import { FaultTrace, PshaAreaSource, PshaColorMode, PshaPairing } from "@/types/triage";
 import {
@@ -20,21 +17,6 @@ import {
   hazardTileUrl,
 } from "@/components/mission-control/psha-hazard-controls";
 
-/**
- * Hazard changes published in TEM PSHA2025 Section 4 for the structures whose hazard moved
- * relative to TEM PSHA2020. Values are quoted, not interpolated: `label` is the published
- * statement, `sign` only drives the halo colour.
- *
- * The paper also reports changes for IDs 39 and 45-48 and for the Kouhsiaoli fault (ID 47);
- * those structures sit outside this project's 38-structure catalog, so those entries simply
- * never render instead of being approximated.
- */
-const PSHA2020_DELTA: Record<number, { sign: 1 | -1; label: string }> = {
-  29: { sign: 1, label: "Hazard increased ~0.1 g (higher geodetic slip rate)" },
-  34: { sign: -1, label: "Hazard decreased 0.1 g" },
-  47: { sign: -1, label: "Hazard decreased 0.1–0.2 g" },
-  5: { sign: -1, label: "Hazard decreased 0.05 g" },
-};
 
 interface PshaHazardMapProps {
   faults: FaultTrace[];
@@ -90,12 +72,6 @@ function traceColor(fault: FaultTrace, mode: PshaColorMode): string {
   return typeColor(fault.fault_type);
 }
 
-function centroidOf(coordinates: [number, number][]): [number, number] {
-  const lat = coordinates.reduce((sum, c) => sum + c[0], 0) / coordinates.length;
-  const lon = coordinates.reduce((sum, c) => sum + c[1], 0) / coordinates.length;
-  return [lat, lon];
-}
-
 export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   faults,
   pairings,
@@ -119,9 +95,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
   const [basemap, setBasemap] = useState<string>("dark");
   const [mapReady, setMapReady] = useState<boolean>(false);
-  const [showPairings, setShowPairings] = useState<boolean>(true);
   const [showAreaSources, setShowAreaSources] = useState<boolean>(false);
-  const [showDeltas, setShowDeltas] = useState<boolean>(true);
   const [legendOpen, setLegendOpen] = useState<boolean>(true);
 
   // Hazard raster controls
@@ -136,11 +110,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     faults.forEach((f) => map.set(f.fault_id, f));
     return map;
   }, [faults]);
-
-  const activePairings = useMemo(
-    () => pairings.filter((p) => p.fault_ids.every((id) => faultsById.has(id))),
-    [pairings, faultsById]
-  );
 
   // --- Leaflet lifecycle -----------------------------------------------------
   useEffect(() => {
@@ -196,8 +165,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
         layersRef.current = {
           areaSources: L.layerGroup().addTo(map),
-          deltas: L.layerGroup().addTo(map),
-          pairings: L.layerGroup().addTo(map),
           faults: L.layerGroup().addTo(map),
         };
         mapRef.current = map;
@@ -207,8 +174,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
       const map = mapRef.current;
       const {
         areaSources: areaSourceLayer,
-        deltas,
-        pairings: pairingLayer,
         faults: faultLayer,
       } = layersRef.current;
       map.invalidateSize();
@@ -257,69 +222,13 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         });
       }
 
-      // 1. Published hazard change halos (TEM PSHA2025 Section 4).
-      deltas.clearLayers();
-      if (showDeltas) {
-        faults.forEach((f) => {
-          const delta = PSHA2020_DELTA[f.fault_id];
-          if (!delta || f.coordinates.length < 2) return;
-          L.polyline(f.coordinates, {
-            color: delta.sign > 0 ? "#f43f5e" : "#10b981",
-            weight: 11,
-            opacity: 0.28,
-            lineCap: "round",
-          })
-            .bindTooltip(
-              `<div style="font-family:monospace;font-size:11px;background:#0f172a;color:#e2e8f0;border:1px solid ${
-                delta.sign > 0 ? "#f43f5e" : "#10b981"
-              };padding:6px 9px;border-radius:6px">
-                 <strong>ID ${f.fault_id} ${f.name}</strong><br/>
-                 ${delta.sign > 0 ? "▲" : "▼"} ${delta.label}<br/>
-                 <span style="color:#94a3b8">TEM PSHA2025 vs TEM PSHA2020 (§4)</span>
-               </div>`,
-              { sticky: true }
-            )
-            .addTo(deltas);
-        });
-      }
-
-      // 2. Table 2 multiple-structure rupture links.
-      pairingLayer.clearLayers();
-      if (showPairings) {
-        activePairings.forEach((pairing) => {
-          const [a, b] = pairing.fault_ids.map((id) => faultsById.get(id)!);
-          if (!a?.coordinates.length || !b?.coordinates.length) return;
-
-          const isFocused = pairing.pairing_label === focusedPairingLabel;
-          L.polyline([centroidOf(a.coordinates), centroidOf(b.coordinates)], {
-            color: pairing.combined_mw >= 7.1 ? "#f43f5e" : "#f59e0b",
-            weight: isFocused ? 4.5 : Math.max(1.2, (pairing.combined_mw - 6.3) * 3),
-            opacity: isFocused ? 1 : focusedPairingLabel ? 0.5 : 0.8,
-            dashArray: "7, 5",
-          })
-            .bindTooltip(
-              `<div style="font-family:sans-serif;font-size:11px;background:#111c2e;color:#f8fafc;border:1px solid #f59e0b;padding:7px 10px;border-radius:8px">
-                 <strong style="color:#fbbf24">Table 2 · ${pairing.pairing_label}</strong><br/>
-                 ${pairing.fault_names[0]} + ${pairing.fault_names[1]}<br/>
-                 Combined magnitude <b>Mw ${pairing.combined_mw}</b><br/>
-                 Recurrence interval <b>${pairing.recurrence_interval_yr.toLocaleString()} yr</b><br/>
-                 <span style="color:#94a3b8">Click to frame both structures</span>
-               </div>`,
-              { sticky: true }
-            )
-            .on("click", () => onSelectPairing(pairing))
-            .addTo(pairingLayer);
-        });
-      }
-
-      // 3. Fault traces (the "Seismogenic structures" overlay).
+      // 1. Fault traces (the "Seismogenic structures" overlay).
       faultLayer.clearLayers();
       const drawTraces = !isHazardMode || showStructures;
       if (drawTraces) {
         faults.forEach((f) => {
           if (f.coordinates.length < 2) return;
           const isSelected = selectedFaultId === f.fault_id;
-          const delta = PSHA2020_DELTA[f.fault_id];
           const neutral = isHazardMode;
 
           const polyline = L.polyline(f.coordinates, {
@@ -329,7 +238,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             dashArray: neutral ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
           });
 
-          const pairingCount = activePairings.filter((p) => p.fault_ids.includes(f.fault_id)).length;
           polyline.bindTooltip(
             `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;border:1px solid ${
               isSelected ? "#38bdf8" : "#1e293b"
@@ -338,10 +246,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
                Type <b style="color:#f59e0b">${f.fault_type}</b> · Max <b>Mw ${f.mw_max}</b><br/>
                Slip rate <b>${f.slip_rate_mm_yr} mm/yr</b> · Dip <b>${f.dip_deg}°</b><br/>
                Rake <b>${f.rake_deg ?? "—"}°</b> · Max depth <b>${f.depth_max_km ?? "—"} km</b><br/>
-               ${pairingCount > 0 ? `Table 2 pairings: <b style="color:#fbbf24">${pairingCount}</b><br/>` : ""}
-               ${delta ? `<span style="color:${delta.sign > 0 ? "#fb7185" : "#34d399"}">${
-                 delta.sign > 0 ? "▲" : "▼"
-               } ${delta.label}</span><br/>` : ""}
                <span style="color:#94a3b8">Click for the full structure dossier</span>
              </div>`,
             { sticky: true }
@@ -351,7 +255,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         });
       }
 
-      // 4. Frame the island once, on first render with data.
+      // 2. Frame the island once, on first render with data.
       if (!didFitRef.current && faults.length > 0) {
         const points: [number, number][] = faults.flatMap((f) => f.coordinates);
         if (points.length > 0) {
@@ -366,19 +270,14 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     };
   }, [
     faults,
-    activePairings,
     areaSources,
     faultsById,
     colorMode,
     isHazardMode,
     selectedFaultId,
-    focusedPairingLabel,
-    showPairings,
     showAreaSources,
-    showDeltas,
     showStructures,
     onSelectFault,
-    onSelectPairing,
   ]);
 
   // Set dark canvas background on the Leaflet container in Hazard mode
@@ -543,32 +442,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           </button>
 
           <button
-            onClick={() => setShowPairings((v) => !v)}
-            className={`flex items-center gap-1 rounded border px-2 py-1 text-[10px] font-bold transition ${
-              showPairings
-                ? "border-amber-500/40 bg-amber-500/15 text-amber-600 dark:text-amber-300"
-                : "border-slate-300 text-slate-400 dark:border-slate-700"
-            }`}
-            title="Toggle TEM PSHA2025 Table 2 multiple-structure rupture links"
-          >
-            <Link2 className="h-3 w-3" />
-            <span>Table 2 links</span>
-          </button>
-
-          <button
-            onClick={() => setShowDeltas((v) => !v)}
-            className={`flex items-center gap-1 rounded border px-2 py-1 text-[10px] font-bold transition ${
-              showDeltas
-                ? "border-rose-500/40 bg-rose-500/15 text-rose-600 dark:text-rose-300"
-                : "border-slate-300 text-slate-400 dark:border-slate-700"
-            }`}
-            title="Toggle published hazard change versus TEM PSHA2020"
-          >
-            <TrendingUp className="h-3 w-3" />
-            <span>Δ vs 2020</span>
-          </button>
-
-          <button
             onClick={() => flyTo(23.7, 120.95, 7.4)}
             className="flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-[10px] font-medium text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
@@ -661,37 +534,13 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
                   </span>
                 </div>
               )}
-              {showPairings && (
-                <div className="flex items-center space-x-2">
-                  <span className="h-0.5 w-4 rounded border-t-2 border-dashed border-amber-400" />
-                  <span className="text-amber-600 dark:text-amber-300">Table 2 rupture link</span>
-                </div>
-              )}
-              {showDeltas && (
-                <div className="flex items-center space-x-2">
-                  <span className="h-1.5 w-4 rounded bg-rose-500/40" />
-                  <span className="text-slate-600 dark:text-slate-300">
-                    Published Δ hazard vs PSHA2020
-                  </span>
-                </div>
-              )}
-              {showDeltas && (
-                <div className="flex items-center gap-2 pt-0.5 text-[9px] text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-rose-400" /> increase
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <TrendingDown className="h-3 w-3 text-emerald-400" /> decrease
-                  </span>
-                </div>
-              )}
             </div>
           )}
         </div>
 
         <div className="pointer-events-none absolute left-3 top-3 z-[1000] rounded-md border border-slate-300 bg-white/90 px-2.5 py-1 font-mono text-[10px] text-slate-600 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-300">
           <Layers className="mr-1 inline h-3 w-3 text-cyan-500" />
-          {pairings.length} Table 2 pairings · study radius 320 km
+          TEM PSHA2025 · study radius 320 km
         </div>
       </div>
     </div>

@@ -84,10 +84,21 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
   - Displays the basemap switcher button group (`Dark`, `Carto`, `Sat`, `OSM`) in the top toolbar.
   - Guarantees fault traces and Table 2 links remain visible and interactable.
 
+### 7. Removal of "Table 2 links" and "Δ vs 2020" Overlays
+- **Menu Buttons Removed**: Removed the `Table 2 links` and `Δ vs 2020` buttons from the `PshaHazardMap` toolbar.
+- **Map Overlays Removed**:
+  - Removed the `pairings` layer (dashed lines linking paired rupture structures across Taiwan).
+  - Removed the `deltas` layer (thick colored halo polylines indicating hazard increase/decrease vs TEM PSHA2020).
+- **Legend & UI Cleanup**:
+  - Removed Table 2 rupture links and Δ vs 2020 indicators from the map legend.
+  - Updated the study radius badge to `TEM PSHA2025 · study radius 320 km`.
+  - Cleaned up dead code and unused variables (`activePairings`, `centroidOf`, `PSHA2020_DELTA`).
+
 ## Verification
 1. Tile generation confirmed across all 4 layers for Zooms 6–11 with zero black lines and zero white halos.
 2. Verified visual smoothness: zero pixelation, silky smooth gradient transitions, and seamless coastal anti-aliasing against dark canvas.
 3. Southern tip (Hengchun/Eluanbi) verified completely intact on both `mean_475` and `median_475`.
 4. Basemap detachment in Hazard mode verified: zero tile clash or coastline mismatch.
 5. In Kinematics, Max Mw, and Slip rate modes: basemap correctly visible, hazard raster completely hidden.
-6. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.
+6. Table 2 links and Δ vs 2020 buttons, overlays, and lines verified completely removed from the map.
+7. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.
