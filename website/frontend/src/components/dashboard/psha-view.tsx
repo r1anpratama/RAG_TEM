@@ -39,31 +39,37 @@ interface StarterPrompt {
 
 const STARTER_PROMPTS: StarterPrompt[] = [
   {
-    tag: "Skenario A",
-    title: "Generator XML OpenQuake Sesar Shanchiao (ID 1-1)",
+    tag: "Logic Tree",
+    title: "Shanchiao Fault Slip Rate & Mw Uncertainty Treatment",
     prompt:
-      "Buatkan potongan XML source model OpenQuake untuk Sesar Shanchiao (ID 1-1) dengan model rupture tunggal dan rupture gabungan sesuai TEM PSHA2025.",
+      "How are slip rate and maximum magnitude uncertainties treated for the Shanchiao fault in the TEM PSHA2025 logic tree?",
   },
   {
-    tag: "Skenario B",
-    title: "Audit & Justifikasi Bobot GMM Shallow Crustal",
+    tag: "Scenario A",
+    title: "OpenQuake Source Model XML Generator (Shanchiao Fault)",
     prompt:
-      "GMM apa saja yang dipakai untuk shallow crustal di Taiwan beserta bobotnya, dan apa dasar pemilihannya?",
+      "Generate OpenQuake source model XML snippet for Shanchiao Fault (ID 1-1) with single and multi-rupture models according to TEM PSHA2025.",
   },
   {
-    tag: "Skenario C",
-    title: "Analisis Kenaikan Hazard PGA 475-th Hsinchu & Miaoli",
+    tag: "Scenario B",
+    title: "Audit & Justification of Shallow Crustal GMM Weights",
     prompt:
-      "Mengapa estimasi hazard PGA 475 tahun di wilayah Hsinchu dan Miaoli mengalami kenaikan dibanding versi TEM PSHA2020?",
+      "Which GMMs are used for shallow crustal sources in Taiwan, what are their weights, and what is the basis for their selection?",
   },
   {
-    tag: "Tabel 2",
-    title: "Daftar Rupture Bersama (Multi-Structure Pairings)",
+    tag: "Scenario C",
+    title: "475-yr PGA Hazard Increase in Hsinchu & Miaoli",
+    prompt:
+      "Why did the 475-year PGA hazard estimate in Hsinchu and Miaoli increase compared to TEM PSHA2020?",
+  },
+  {
+    tag: "Table 2",
+    title: "Multiple-Structure Ruptures (Coseismic Pairings)",
     prompt: "Which structures pair in TEM PSHA2025 Table 2?",
   },
   {
-    tag: "Parameter",
-    title: "Kartu Parameter Deterministik Sesar ID 2",
+    tag: "Parameters",
+    title: "Deterministic Parameter Card for Fault ID 2",
     prompt: "Give me the full parameter card for fault ID 2.",
   },
 ];

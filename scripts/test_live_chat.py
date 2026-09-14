@@ -4,7 +4,8 @@ import requests
 queries = [
     ("Scenario A", "Buatkan potongan XML source model OpenQuake untuk Sesar Shanchiao (ID 1-1) dengan model rupture tunggal dan rupture gabungan sesuai TEM PSHA2025."),
     ("Scenario B", "GMM apa saja yang dipakai untuk shallow crustal di Taiwan beserta bobotnya, dan apa dasar pemilihannya?"),
-    ("Scenario C", "Mengapa estimasi hazard PGA 475 tahun di wilayah Hsinchu dan Miaoli mengalami kenaikan dibanding versi TEM PSHA2020?")
+    ("Scenario C", "Mengapa estimasi hazard PGA 475 tahun di wilayah Hsinchu dan Miaoli mengalami kenaikan dibanding versi TEM PSHA2020?"),
+    ("Logic Tree", "Bagaimana perlakuan ketidakpastian laju slip (slip rate) dan magnitudo maksimum pada Sesar Shanchiao di logic tree TEM PSHA2025?")
 ]
 
 for label, q in queries:

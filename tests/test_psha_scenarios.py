@@ -107,10 +107,54 @@ def test_scenario_c_hsinchu_miaoli_hazard():
     assert "06+O52" in ans or "O52" in ans
     assert "08+O53" in ans or "O53" in ans
 
-    # Test dispatch via query
+    # Test dispatch via query (Indonesian & English)
     user_query = "Mengapa estimasi hazard PGA 475 tahun di wilayah Hsinchu dan Miaoli mengalami kenaikan dibanding versi TEM PSHA2020?"
     dispatched = answer_from_catalog(user_query)
     assert dispatched is not None
     assert "Hukou" in dispatched["answer"]
     assert "Touhuanping" in dispatched["answer"]
     assert "Miaoli" in dispatched["answer"]
+
+    en_query = "Why did the 475-year PGA hazard estimate in Hsinchu and Miaoli increase compared to TEM PSHA2020?"
+    dispatched_en = answer_from_catalog(en_query)
+    assert dispatched_en is not None
+    assert "Hukou" in dispatched_en["answer"]
+
+
+def test_shanchiao_uncertainty_logic_tree():
+    """Verify detailed logic tree uncertainty treatment for Shanchiao Fault Mw and slip rate."""
+    from website.backend.app.rag.psha_knowledge import _shanchiao_uncertainty_logic_tree_answer
+
+    res = _shanchiao_uncertainty_logic_tree_answer()
+    assert "answer" in res
+    assert "citation" in res
+    ans = res["answer"]
+
+    # Mw logic tree assertions
+    assert "Wells & Coppersmith" in ans or "W&C" in ans
+    assert "7.01" in ans
+    assert "Yen & Ma" in ans or "Y&M" in ans
+    assert "7.02" in ans
+    assert "0.5 : 0.5" in ans or "0.50" in ans
+    assert "0.60" in ans  # Mean weight
+    assert "0.20" in ans  # Upper and lower bound weights
+
+    # Slip rate logic tree assertions
+    assert "1.66" in ans  # Geologic rate
+    assert "1.56" in ans  # Geodetic rate
+    assert "0.05" in ans and "0.90" in ans  # Max-Mean-Min distribution
+
+    # Test dispatch via Indonesian query
+    id_query = "Bagaimana perlakuan ketidakpastian laju slip (slip rate) dan magnitudo maksimum pada Sesar Shanchiao di logic tree TEM PSHA2025?"
+    dispatched_id = answer_from_catalog(id_query)
+    assert dispatched_id is not None
+    assert "Wells & Coppersmith" in dispatched_id["answer"]
+    assert "1.66" in dispatched_id["answer"]
+
+    # Test dispatch via English query
+    en_query = "How are slip rate and maximum magnitude uncertainties treated for the Shanchiao fault in the TEM PSHA2025 logic tree?"
+    dispatched_en = answer_from_catalog(en_query)
+    assert dispatched_en is not None
+    assert "Wells & Coppersmith" in dispatched_en["answer"]
+    assert "1.56" in dispatched_en["answer"]
+
