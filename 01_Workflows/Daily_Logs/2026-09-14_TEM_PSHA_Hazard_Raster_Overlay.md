@@ -65,20 +65,29 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
   - Extended tile pyramid up to Zoom 11 for crisp, high-resolution rendering on modern displays.
   - Updated `maxNativeZoom: 11` in `psha-hazard-map.tsx`.
 
-### 5. Basemap Masking & UI Layout Alignment
-- **"Structures" Mode Renamed to "Hazard"**:
-  - In `PSHAView`, renamed the 4th color mode tab from `"Structures"` to `"Hazard"`.
-  - In `PshaHazardMap`, updated the legend heading to `Legend · Hazard`.
-  - In `HazardControlPanel`, renamed overlay label to `Fault traces / structures`.
-- **Automatic Basemap Masking in Taiwan Area**:
-  - Added dedicated `basemapMaskPane` at z-index 220 (between basemap tilePane at 200 and hazardPane at 260).
-  - When the hazard layer is active, an SVG polygon/rectangle automatically covers the Taiwan geographic domain (`[21.60, 119.70]` to `[25.60, 122.35]`) with the active basemap's ocean color (`#15181a` for Dark Gray, `#090909` for Carto).
-  - This completely obscures the underlying basemap's grey landmass, roads, and English city labels ("Taipei", "Taichung", "Tainan", "Kaohsiung"), eliminating any visual coastline misalignments between the basemap and the hazard raster.
-  - Added a toggle `[x] Cover Taiwan basemap` in `HazardControlPanel` so users can easily toggle this on or off.
+### 5. "Structures" Mode Renamed to "Hazard"
+- In `PSHAView`, renamed the 4th color mode tab from `"Structures"` to `"Hazard"`.
+- In `PshaHazardMap`, updated the legend heading to `Legend · Hazard`.
+- In `HazardControlPanel`, renamed overlay label to `Fault traces / structures`.
+
+### 6. Pure Hazard Focus & Mode-Specific Basemap Separation
+- **Hazard Mode (`colorMode === "structures"` / `"hazard"`)**:
+  - Detaches all basemap tile layers (`tilesRef.current`) completely from the map.
+  - Adds `.psha-hazard-canvas` styling to ensure a clean, deep slate background (`#0b0f19`) matching the map aesthetics.
+  - Attaches the hazard raster (`hazardRasterRef.current`) and optional hillshade (`hillshadeRef.current`).
+  - Renders the floating `HazardControlPanel` with full PGA gradient colorbar and layer controls.
+  - Hides the basemap switcher button group in the top toolbar to focus 100% on the seismic hazard field.
+- **Kinematics, Max Mw, & Slip Rate Modes (`colorMode !== "structures"`)**:
+  - Attaches the active basemap (`tilesRef.current[basemap]`) to provide geospatial context for fault structures.
+  - Completely detaches the hazard raster and hillshade layers from the map.
+  - Hides the floating `HazardControlPanel` so the user interface focuses purely on fault kinematics, magnitude ramps, and slip rates.
+  - Displays the basemap switcher button group (`Dark`, `Carto`, `Sat`, `OSM`) in the top toolbar.
+  - Guarantees fault traces and Table 2 links remain visible and interactable.
 
 ## Verification
 1. Tile generation confirmed across all 4 layers for Zooms 6–11 with zero black lines and zero white halos.
-2. Verified visual smoothness: zero pixelation, silky smooth gradient transitions, and seamless coastal anti-aliasing against dark basemaps.
+2. Verified visual smoothness: zero pixelation, silky smooth gradient transitions, and seamless coastal anti-aliasing against dark canvas.
 3. Southern tip (Hengchun/Eluanbi) verified completely intact on both `mean_475` and `median_475`.
-4. Basemap mask verified in Leaflet: completely conceals underlying basemap land and city labels under Taiwan.
-5. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.
+4. Basemap detachment in Hazard mode verified: zero tile clash or coastline mismatch.
+5. In Kinematics, Max Mw, and Slip rate modes: basemap correctly visible, hazard raster completely hidden.
+6. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.

@@ -106,6 +106,8 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   onSelectFault,
   onSelectPairing,
 }) => {
+  const isHazardMode = colorMode === "structures" || (colorMode as string) === "hazard";
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const leafletRef = useRef<any>(null);
@@ -114,11 +116,9 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   const didFitRef = useRef<boolean>(false);
   const hillshadeRef = useRef<any>(null);
   const hazardRasterRef = useRef<any>(null);
-  const basemapMaskRef = useRef<any>(null);
 
   const [basemap, setBasemap] = useState<string>("dark");
   const [mapReady, setMapReady] = useState<boolean>(false);
-  const [coverBasemap, setCoverBasemap] = useState<boolean>(true);
   const [showPairings, setShowPairings] = useState<boolean>(true);
   const [showAreaSources, setShowAreaSources] = useState<boolean>(false);
   const [showDeltas, setShowDeltas] = useState<boolean>(true);
@@ -162,8 +162,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         });
         L.control.zoom({ position: "topright" }).addTo(map);
 
-        // Stacking: basemap (tilePane 200) -> basemap mask (220) -> hillshade (250) -> hazard raster (260) -> vector overlays (400).
-        map.createPane("basemapMaskPane").style.zIndex = "220";
+        // Stacking: basemap (tilePane 200) -> hillshade (250) -> hazard raster (260) -> vector overlays (400).
         map.createPane("hillshadePane").style.zIndex = "250";
         map.createPane("hazardPane").style.zIndex = "260";
 
@@ -194,7 +193,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           ]),
           osm: L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }),
         };
-        tilesRef.current.dark.addTo(map);
 
         layersRef.current = {
           areaSources: L.layerGroup().addTo(map),
@@ -316,39 +314,42 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
       // 3. Fault traces (the "Seismogenic structures" overlay).
       faultLayer.clearLayers();
-      faults.forEach((f) => {
-        if (!showStructures || f.coordinates.length < 2) return;
-        const isSelected = selectedFaultId === f.fault_id;
-        const delta = PSHA2020_DELTA[f.fault_id];
-        const neutral = colorMode === "structures";
+      const drawTraces = !isHazardMode || showStructures;
+      if (drawTraces) {
+        faults.forEach((f) => {
+          if (f.coordinates.length < 2) return;
+          const isSelected = selectedFaultId === f.fault_id;
+          const delta = PSHA2020_DELTA[f.fault_id];
+          const neutral = isHazardMode;
 
-        const polyline = L.polyline(f.coordinates, {
-          color: isSelected ? "#38bdf8" : traceColor(f, colorMode),
-          weight: isSelected ? 3 : neutral ? 1.5 : 2.6,
-          opacity: isSelected ? 1 : 0.9,
-          dashArray: neutral ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
+          const polyline = L.polyline(f.coordinates, {
+            color: isSelected ? "#38bdf8" : traceColor(f, colorMode),
+            weight: isSelected ? 3 : neutral ? 1.5 : 2.6,
+            opacity: isSelected ? 1 : 0.9,
+            dashArray: neutral ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
+          });
+
+          const pairingCount = activePairings.filter((p) => p.fault_ids.includes(f.fault_id)).length;
+          polyline.bindTooltip(
+            `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;border:1px solid ${
+              isSelected ? "#38bdf8" : "#1e293b"
+            };padding:8px 11px;border-radius:8px;font-size:11px;box-shadow:0 4px 14px rgba(0,0,0,0.6)">
+               <strong style="color:#38bdf8;font-size:12px">ID ${f.fault_id} · ${f.name}</strong><br/>
+               Type <b style="color:#f59e0b">${f.fault_type}</b> · Max <b>Mw ${f.mw_max}</b><br/>
+               Slip rate <b>${f.slip_rate_mm_yr} mm/yr</b> · Dip <b>${f.dip_deg}°</b><br/>
+               Rake <b>${f.rake_deg ?? "—"}°</b> · Max depth <b>${f.depth_max_km ?? "—"} km</b><br/>
+               ${pairingCount > 0 ? `Table 2 pairings: <b style="color:#fbbf24">${pairingCount}</b><br/>` : ""}
+               ${delta ? `<span style="color:${delta.sign > 0 ? "#fb7185" : "#34d399"}">${
+                 delta.sign > 0 ? "▲" : "▼"
+               } ${delta.label}</span><br/>` : ""}
+               <span style="color:#94a3b8">Click for the full structure dossier</span>
+             </div>`,
+            { sticky: true }
+          );
+          polyline.on("click", () => onSelectFault(f));
+          polyline.addTo(faultLayer);
         });
-
-        const pairingCount = activePairings.filter((p) => p.fault_ids.includes(f.fault_id)).length;
-        polyline.bindTooltip(
-          `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;border:1px solid ${
-            isSelected ? "#38bdf8" : "#1e293b"
-          };padding:8px 11px;border-radius:8px;font-size:11px;box-shadow:0 4px 14px rgba(0,0,0,0.6)">
-             <strong style="color:#38bdf8;font-size:12px">ID ${f.fault_id} · ${f.name}</strong><br/>
-             Type <b style="color:#f59e0b">${f.fault_type}</b> · Max <b>Mw ${f.mw_max}</b><br/>
-             Slip rate <b>${f.slip_rate_mm_yr} mm/yr</b> · Dip <b>${f.dip_deg}°</b><br/>
-             Rake <b>${f.rake_deg ?? "—"}°</b> · Max depth <b>${f.depth_max_km ?? "—"} km</b><br/>
-             ${pairingCount > 0 ? `Table 2 pairings: <b style="color:#fbbf24">${pairingCount}</b><br/>` : ""}
-             ${delta ? `<span style="color:${delta.sign > 0 ? "#fb7185" : "#34d399"}">${
-               delta.sign > 0 ? "▲" : "▼"
-             } ${delta.label}</span><br/>` : ""}
-             <span style="color:#94a3b8">Click for the full structure dossier</span>
-           </div>`,
-          { sticky: true }
-        );
-        polyline.on("click", () => onSelectFault(f));
-        polyline.addTo(faultLayer);
-      });
+      }
 
       // 4. Frame the island once, on first render with data.
       if (!didFitRef.current && faults.length > 0) {
@@ -369,6 +370,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     areaSources,
     faultsById,
     colorMode,
+    isHazardMode,
     selectedFaultId,
     focusedPairingLabel,
     showPairings,
@@ -378,6 +380,32 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     onSelectFault,
     onSelectPairing,
   ]);
+
+  // Set dark canvas background on the Leaflet container in Hazard mode
+  useEffect(() => {
+    if (!containerRef.current) return;
+    if (isHazardMode) {
+      containerRef.current.classList.add("psha-hazard-canvas");
+    } else {
+      containerRef.current.classList.remove("psha-hazard-canvas");
+    }
+  }, [isHazardMode]);
+
+  // --- Basemap layer lifecycle ----------------------------------------------
+  // In Hazard mode, completely hide/detach the basemap so focus is 100% on the seismic hazard raster.
+  // In Kinematics / Max Mw / Slip rate modes, attach the active basemap.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapReady || !map) return;
+
+    Object.values(tilesRef.current).forEach((layer) => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    });
+
+    if (!isHazardMode && tilesRef.current[basemap]) {
+      tilesRef.current[basemap].addTo(map);
+    }
+  }, [mapReady, basemap, isHazardMode]);
 
   // --- Hazard raster + hillshade tile layers ---------------------------------
   // Kept in their own effects so dragging the opacity slider never rebuilds the vector layers.
@@ -411,49 +439,14 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
       if (wanted && !map.hasLayer(layer)) layer.addTo(map);
       if (!wanted && map.hasLayer(layer)) map.removeLayer(layer);
     };
-    attach(hillshadeRef.current, showHillshade);
-    attach(hazardRasterRef.current, true);
-  }, [mapReady, hazardLayer, hazardOpacity, showHillshade]);
+    attach(hillshadeRef.current, isHazardMode && showHillshade);
+    attach(hazardRasterRef.current, isHazardMode);
+  }, [mapReady, hazardLayer, hazardOpacity, showHillshade, isHazardMode]);
 
   // Opacity is applied in its own effect: no URL or layer churn while dragging.
   useEffect(() => {
     hazardRasterRef.current?.setOpacity(hazardOpacity / 100);
   }, [hazardOpacity]);
-
-  // Mask Taiwan basemap under the hazard raster so no gray basemap land or labels clash with the hazard raster:
-  useEffect(() => {
-    const L = leafletRef.current;
-    const map = mapRef.current;
-    if (!mapReady || !L || !map) return;
-
-    const oceanColor =
-      basemap === "carto" ? "#090909" : basemap === "dark" ? "#15181a" : "#0b0f19";
-
-    const TAIWAN_COVER_BOUNDS: [[number, number], [number, number]] = [
-      [21.60, 119.70],
-      [25.60, 122.35],
-    ];
-
-    if (!basemapMaskRef.current) {
-      basemapMaskRef.current = L.rectangle(TAIWAN_COVER_BOUNDS, {
-        pane: "basemapMaskPane",
-        stroke: false,
-        fillColor: oceanColor,
-        fillOpacity: 1.0,
-        interactive: false,
-      });
-    } else {
-      basemapMaskRef.current.setStyle({ fillColor: oceanColor });
-    }
-
-    const wantMask = coverBasemap && hazardOpacity > 0;
-    if (wantMask && !map.hasLayer(basemapMaskRef.current)) {
-      basemapMaskRef.current.addTo(map);
-    }
-    if (!wantMask && map.hasLayer(basemapMaskRef.current)) {
-      map.removeLayer(basemapMaskRef.current);
-    }
-  }, [mapReady, basemap, coverBasemap, hazardOpacity]);
 
   // Report whether the raster for the active layer actually exists on disk.
   useEffect(() => {
@@ -468,12 +461,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   }, [hazardLayer]);
 
   const switchBasemap = (key: string) => {
-    const map = mapRef.current;
-    if (!map) return;
-    Object.values(tilesRef.current).forEach((layer) => {
-      if (map.hasLayer(layer)) map.removeLayer(layer);
-    });
-    tilesRef.current[key]?.addTo(map);
     setBasemap(key);
   };
 
@@ -589,48 +576,50 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             <span>Taiwan</span>
           </button>
 
-          <div className="ml-1 flex items-center space-x-0.5 rounded-lg border border-slate-300 p-0.5 dark:border-slate-800 dark:bg-slate-900/80">
-            {[
-              { key: "dark", label: "Dark" },
-              { key: "carto", label: "Carto" },
-              { key: "satellite", label: "Sat" },
-              { key: "osm", label: "OSM" },
-            ].map((b) => (
-              <button
-                key={b.key}
-                onClick={() => switchBasemap(b.key)}
-                className={`rounded px-1.5 py-0.5 text-[9px] font-medium transition ${
-                  basemap === b.key
-                    ? "bg-cyan-500 font-bold text-slate-950"
-                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                }`}
-              >
-                {b.label}
-              </button>
-            ))}
-          </div>
+          {!isHazardMode && (
+            <div className="ml-1 flex items-center space-x-0.5 rounded-lg border border-slate-300 p-0.5 dark:border-slate-800 dark:bg-slate-900/80">
+              {[
+                { key: "dark", label: "Dark" },
+                { key: "carto", label: "Carto" },
+                { key: "satellite", label: "Sat" },
+                { key: "osm", label: "OSM" },
+              ].map((b) => (
+                <button
+                  key={b.key}
+                  onClick={() => switchBasemap(b.key)}
+                  className={`rounded px-1.5 py-0.5 text-[9px] font-medium transition ${
+                    basemap === b.key
+                      ? "bg-cyan-500 font-bold text-slate-950"
+                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                  }`}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="relative flex-1 overflow-hidden">
         <div ref={containerRef} className="h-full w-full" />
 
-        {/* Floating hazard-raster control panel with integrated color scale */}
-        <div className="absolute right-3 top-20 z-[1000] flex justify-end">
-          <HazardControlPanel
-            activeLayer={hazardLayer}
-            onSelectLayer={setHazardLayer}
-            opacity={hazardOpacity}
-            onOpacityChange={setHazardOpacity}
-            showStructures={showStructures}
-            onToggleStructures={() => setShowStructures((v) => !v)}
-            showHillshade={showHillshade}
-            onToggleHillshade={() => setShowHillshade((v) => !v)}
-            coverBasemap={coverBasemap}
-            onToggleCoverBasemap={() => setCoverBasemap((v) => !v)}
-            tilesAvailable={tilesAvailable}
-          />
-        </div>
+        {/* Floating hazard-raster control panel with integrated color scale (Hazard mode only) */}
+        {isHazardMode && (
+          <div className="absolute right-3 top-20 z-[1000] flex justify-end">
+            <HazardControlPanel
+              activeLayer={hazardLayer}
+              onSelectLayer={setHazardLayer}
+              opacity={hazardOpacity}
+              onOpacityChange={setHazardOpacity}
+              showStructures={showStructures}
+              onToggleStructures={() => setShowStructures((v) => !v)}
+              showHillshade={showHillshade}
+              onToggleHillshade={() => setShowHillshade((v) => !v)}
+              tilesAvailable={tilesAvailable}
+            />
+          </div>
+        )}
 
         {/* Dynamic legend, follows the active colour mode */}
         <div className="pointer-events-auto absolute bottom-3 left-3 z-[1000] max-w-[260px] rounded-lg border border-slate-300 bg-white/95 p-2 text-[10px] shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate_obsidian-card/95 dark:text-slate-300">
@@ -640,7 +629,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           >
             <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">
               <Info className="h-3 w-3 text-cyan-500" />
-              <span>Legend · {colorMode === "structures" ? "Hazard" : colorMode.replace("_", " ")}</span>
+              <span>Legend · {isHazardMode ? "Hazard" : colorMode.replace("_", " ")}</span>
             </div>
             {legendOpen ? (
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
@@ -651,15 +640,16 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
           {legendOpen && (
             <div className="mt-1.5 space-y-1 border-t border-slate-200 pt-1.5 dark:border-slate-800">
-              {legendEntries.map((entry) => (
-                <div key={entry.label} className="flex items-center space-x-2">
-                  <span
-                    className="h-1.5 w-4 rounded"
-                    style={{ background: entry.color, boxShadow: `0 0 6px ${entry.color}` }}
-                  />
-                  <span className="text-slate-600 dark:text-slate-300">{entry.label}</span>
-                </div>
-              ))}
+              {(!isHazardMode || showStructures) &&
+                legendEntries.map((entry) => (
+                  <div key={entry.label} className="flex items-center space-x-2">
+                    <span
+                      className="h-1.5 w-4 rounded"
+                      style={{ background: entry.color, boxShadow: `0 0 6px ${entry.color}` }}
+                    />
+                    <span className="text-slate-600 dark:text-slate-300">{entry.label}</span>
+                  </div>
+                ))}
               {showAreaSources && (
                 <div className="flex items-center space-x-2">
                   <span

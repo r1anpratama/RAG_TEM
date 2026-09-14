@@ -240,7 +240,7 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
           {/* Independent overlays */}
           <fieldset className="space-y-1 border-t border-slate-200/80 pt-2 dark:border-slate-800">
             <legend className="mb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Overlays & Basemap
+              Overlays
             </legend>
             <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-[11px] text-slate-700 transition hover:bg-slate-500/10 dark:text-slate-200">
               <input

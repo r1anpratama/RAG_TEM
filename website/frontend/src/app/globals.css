@@ -86,7 +86,8 @@ body {
   z-index: 10 !important;
 }
 
-.dark .leaflet-container {
+.dark .leaflet-container,
+.leaflet-container.psha-hazard-canvas {
   background-color: #0b0f19 !important;
 }
 
