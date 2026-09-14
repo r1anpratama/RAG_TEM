@@ -42,14 +42,29 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
 - **Northwest Ocean Title & RP Mask**: Smoothly traces the diagonal coastline from Fugui Cape to Taichung, eliminating "(a) Mean Hazard Map...", "RP = 475 yr", and similar headings.
 - **Legend Mask (Panel B)**: Masked `(lon > 120.95) & (lat < 22.05)` in the ocean southeast of Eluanbi.
 
-### 4. XYZ Tile Pyramid Generation
-- Created `generate_hazard_tiles.py` to generate standard Web Mercator (EPSG:3857) XYZ tiles at 256×256 px PNG with full alpha transparency.
-- Rendered pyramids across Zoom 6 through Zoom 10 for all 4 layers:
-  - `mean_475`: 83 non-empty tiles.
-  - `median_475`: 117 non-empty tiles.
-  - `mean_minus_median_475`: 83 non-empty tiles.
-  - `median_2475`: 113 non-empty tiles.
+### 4. Tile Pyramid Generation & Cross-Panel Containment
+- Created `scripts/generate_hazard_tiles.py` to generate standard Web Mercator (EPSG:3857) XYZ tiles at 256×256 px PNG with full alpha transparency.
+- **Cross-Panel Containment**: Enforced strict quadrant boundaries:
+  $xa \in [0, 577], ya \in [0, h_{\text{panel}}-1]$. Pixels falling outside the panel's bounding box are discarded ($A = 0$), completely preventing adjacent panels (such as Panel C in the Taiwan Strait for Panel D) from leaking into ocean waters.
+- **Refined Masking Geometry**:
+  - Title & RP Text: `((ya < 50) & (xa < 415)) | ((ya >= 50) & (ya < 86) & (xa < 385)) | ((ya >= 86) & (ya < 210) & (xa < 255))` removes all panel headers without stepping into Taiwan's coastline.
+  - Colorbars: `(xa >= 475) & (ya >= 580)` eliminates colorbars, numbers, and the bottom "0.0" arrow tip, while keeping Orchid Island ($xa \le 470$) and Green Island ($xa \approx 440$) 100% intact.
+  - Legend Box (Panel B): `((ya >= 958) & (xa >= 175) & (xa < 430)) | ((ya >= 985) & (xa >= 430))` cleanly removes the paper legend box.
+- Generated clean tile pyramids across Zoom 6 through 10:
+  - `mean_475`: 87 non-empty tiles.
+  - `median_475`: 78 non-empty tiles.
+  - `mean_minus_median_475`: 87 non-empty tiles.
+  - `median_2475`: 88 non-empty tiles.
 - Updated `maxNativeZoom: 10` in `psha-hazard-map.tsx`.
+
+### 5. UI Layout Deconfliction & Color Scale Integration
+- **Zero-Overlap Card Architecture**:
+  - Identified collision where floating `HazardColorbar` at `bottom-3 right-3` overlapped the checkboxes and opacity slider of `HazardControlPanel` at `right-3 top-24`.
+  - Integrated the color scale (legend) directly into `HazardControlPanel` right below the active layer radio options.
+  - Re-anchored `HazardControlPanel` at `right-3 top-20` (just below the Leaflet zoom control).
+  - Left the bottom-right map viewport completely open for clean topography and attribution.
+- **Color Scale Direction Correction**:
+  - Corrected gradient CSS interpolation: low hazard (0.0 g / -0.5 g) maps to dark purple/blue, high hazard (1.6 g / +0.5 g) maps to dark red, matching Fig. 13 verbatim.
 
 ## Verification
 1. Probed all layers at Zoom 7:
@@ -58,4 +73,5 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
    - `/tiles/mean_minus_median_475/7/107/55.png` -> 200 OK.
    - `/tiles/median_2475/7/107/55.png` -> 200 OK.
 2. Verified that the missing tile warning in `HazardControlPanel` is automatically resolved (`tilesAvailable: true`).
-3. Running `npx tsc --noEmit` confirmed 0 TypeScript errors.
+3. Verified visual cleanliness: zero leaks in Taiwan Strait, zero stray colorbar tips in Pacific, seamless non-overlapping UI layout.
+4. Test suite: 46 of 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.

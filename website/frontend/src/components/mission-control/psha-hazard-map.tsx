@@ -15,7 +15,6 @@ import {
 import { FaultTrace, PshaAreaSource, PshaColorMode, PshaPairing } from "@/types/triage";
 import {
   HAZARD_PROBE_TILE,
-  HazardColorbar,
   HazardControlPanel,
   HazardLayerId,
   hazardTileUrl,
@@ -578,8 +577,8 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
       <div className="relative flex-1 overflow-hidden">
         <div ref={containerRef} className="h-full w-full" />
 
-        {/* Floating hazard-raster control panel (glassmorphism), under the zoom control */}
-        <div className="absolute right-3 top-24 z-[1000] flex justify-end">
+        {/* Floating hazard-raster control panel with integrated color scale */}
+        <div className="absolute right-3 top-20 z-[1000] flex justify-end">
           <HazardControlPanel
             activeLayer={hazardLayer}
             onSelectLayer={setHazardLayer}
@@ -591,11 +590,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             onToggleHillshade={() => setShowHillshade((v) => !v)}
             tilesAvailable={tilesAvailable}
           />
-        </div>
-
-        {/* Dynamic colorbar: gradient and labels follow the active hazard layer */}
-        <div className="absolute bottom-3 right-3 z-[1000]">
-          <HazardColorbar layer={hazardLayer} />
         </div>
 
         {/* Dynamic legend, follows the active colour mode */}

@@ -66,29 +66,36 @@ export const hazardTileUrl = (id: HazardLayerId) => `/tiles/${id}/{z}/{x}/{y}.pn
 /** Tile that covers the NCU / northern Taiwan area at zoom 7 - used to probe availability. */
 export const HAZARD_PROBE_TILE = (id: HazardLayerId) => `/tiles/${id}/7/107/55.png`;
 
-const SEISMIC_GRADIENT = [
-  "#7f0f24", "#a81e33", "#c62f3a", "#dd4f3a", "#eb7a3a", "#f2a13c", "#f7c93f",
-  "#f2e34c", "#d9e35c", "#a8d874", "#6cc98a", "#35b8a0", "#2c9fb8", "#2a6fb0",
-  "#253494", "#2c1e7a", "#3b0a5a",
-];
-const DIVERGING_GRADIENT = [
-  "#a81e33", "#d95f5f", "#f0a8a8", "#f7dede", "#ffffff", "#eef2f7", "#a8c4e0", "#4a7fbf", "#253494",
+// Lowest to highest: 0.0 g (dark purple) -> 0.8 g (lime green) -> 1.6 g (dark red)
+export const SEISMIC_GRADIENT = [
+  "#3b0a5a", "#2c1e7a", "#253494", "#2a6fb0", "#2c9fb8", "#35b8a0", "#6cc98a",
+  "#a8d874", "#d9e35c", "#f2e34c", "#f7c93f", "#f2a13c", "#eb7a3a", "#dd4f3a",
+  "#c62f3a", "#a81e33", "#7f0f24",
 ];
 
-const gradientCss = (scale: HazardLayer["scale"]) =>
+// Lowest to highest: -0.5 g (blue) -> 0.0 g (white) -> +0.5 g (red)
+export const DIVERGING_GRADIENT = [
+  "#253494", "#4a7fbf", "#a8c4e0", "#eef2f7", "#ffffff", "#f7dede", "#f0a8a8",
+  "#d95f5f", "#a81e33",
+];
+
+const verticalGradientCss = (scale: HazardLayer["scale"]) =>
   `linear-gradient(to top, ${(scale === "diverging" ? DIVERGING_GRADIENT : SEISMIC_GRADIENT).join(", ")})`;
+
+const horizontalGradientCss = (scale: HazardLayer["scale"]) =>
+  `linear-gradient(to right, ${(scale === "diverging" ? DIVERGING_GRADIENT : SEISMIC_GRADIENT).join(", ")})`;
 
 const ticksFor = (scale: HazardLayer["scale"]): number[] =>
   scale === "diverging"
-    ? [-0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5]
-    : [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6];
+    ? [-0.5, -0.25, 0, 0.25, 0.5]
+    : [0, 0.4, 0.8, 1.2, 1.6];
 
 export const HazardColorbar: React.FC<{ layer: HazardLayerId }> = ({ layer }) => {
   const def = hazardLayerById(layer);
   const ticks = ticksFor(def.scale);
 
   return (
-    <div className="pointer-events-none rounded-lg border border-white/25 bg-white/75 p-2 shadow-xl backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/75">
+    <div className="pointer-events-auto rounded-lg border border-slate-200/80 bg-white/90 p-2 shadow-xl backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/85">
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
           {def.unitTitle}
@@ -97,10 +104,10 @@ export const HazardColorbar: React.FC<{ layer: HazardLayerId }> = ({ layer }) =>
       </div>
       <div className="flex items-stretch gap-1.5">
         <div
-          className="w-3 rounded-sm border border-black/20 dark:border-white/20"
-          style={{ height: 150, background: gradientCss(def.scale) }}
+          className="w-3 rounded-sm border border-black/20 dark:border-white/20 shadow-inner"
+          style={{ height: 140, background: verticalGradientCss(def.scale) }}
         />
-        <div className="flex flex-col justify-between" style={{ height: 150 }}>
+        <div className="flex flex-col justify-between" style={{ height: 140 }}>
           {ticks
             .slice()
             .reverse()
@@ -143,27 +150,34 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
   tilesAvailable,
 }) => {
   const [open, setOpen] = useState<boolean>(true);
+  const activeDef = hazardLayerById(activeLayer);
+  const ticks = ticksFor(activeDef.scale);
 
   return (
-    <div className="pointer-events-auto w-[248px] overflow-hidden rounded-xl border border-white/25 bg-white/75 shadow-2xl backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/70">
+    <div className="pointer-events-auto w-[256px] overflow-hidden rounded-xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/90">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-3 py-2 text-left"
+        className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-100/50 dark:hover:bg-slate-800/50"
       >
         <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">
           <Layers className="h-3.5 w-3.5 text-cyan-500" />
           Hazard raster layers
         </span>
-        {open ? (
-          <ChevronDown className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
-        ) : (
-          <ChevronUp className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
-        )}
+        <div className="flex items-center gap-1">
+          <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-cyan-600 dark:text-cyan-400">
+            {activeDef.short}
+          </span>
+          {open ? (
+            <ChevronDown className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+          ) : (
+            <ChevronUp className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />
+          )}
+        </div>
       </button>
 
       {open && (
-        <div className="space-y-2.5 border-t border-white/25 px-3 py-2.5 dark:border-slate-700/60">
+        <div className="space-y-2.5 border-t border-slate-200/80 px-3 py-2.5 dark:border-slate-800">
           {/* Radio group: exactly one hazard raster at a time */}
           <fieldset className="space-y-1">
             <legend className="mb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -198,8 +212,29 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
             ))}
           </fieldset>
 
+          {/* Integrated Color Scale for the active layer */}
+          <div className="rounded-lg border border-slate-200/90 bg-slate-50/90 p-2 dark:border-slate-800 dark:bg-slate-950/70">
+            <div className="mb-1 flex items-center justify-between text-[9px]">
+              <span className="font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                {activeDef.unitTitle}
+              </span>
+              <span className="font-mono font-semibold text-cyan-600 dark:text-cyan-400">
+                {activeDef.returnPeriod}
+              </span>
+            </div>
+            <div
+              className="h-2.5 w-full rounded-sm border border-black/15 shadow-inner dark:border-white/20"
+              style={{ background: horizontalGradientCss(activeDef.scale) }}
+            />
+            <div className="mt-1 flex justify-between font-mono text-[8px] text-slate-500 dark:text-slate-400">
+              {ticks.map((t) => (
+                <span key={t}>{t > 0 ? `+${t.toFixed(1)}` : t.toFixed(1)}</span>
+              ))}
+            </div>
+          </div>
+
           {/* Independent overlays */}
-          <fieldset className="space-y-1 border-t border-white/25 pt-2 dark:border-slate-700/60">
+          <fieldset className="space-y-1 border-t border-slate-200/80 pt-2 dark:border-slate-800">
             <legend className="mb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Overlays
             </legend>
@@ -224,7 +259,7 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
           </fieldset>
 
           {/* Raster transparency */}
-          <div className="border-t border-white/25 pt-2 dark:border-slate-700/60">
+          <div className="border-t border-slate-200/80 pt-2 dark:border-slate-800">
             <div className="mb-1 flex items-center justify-between">
               <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 <Sliders className="h-3 w-3" />
