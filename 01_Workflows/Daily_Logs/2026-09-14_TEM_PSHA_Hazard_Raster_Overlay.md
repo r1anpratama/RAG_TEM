@@ -94,6 +94,18 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
   - Updated the study radius badge to `TEM PSHA2025 · study radius 320 km`.
   - Cleaned up dead code and unused variables (`activePairings`, `centroidOf`, `PSHA2020_DELTA`).
 
+### 8. Streamlined Layout: Pure Focus on Map and LLM Assistant
+- **Removed Peripheral Cards**:
+  - Removed `Structure Dossier` card.
+  - Removed `Table 2 · Coseismic Pairings` card.
+  - Removed `Physics GMPE Attenuation Curve (Lin & Lee 2008)` graph.
+  - Removed `Paper Results - TEM PSHA2025` card.
+- **Expanded Map & Chat Viewport**:
+  - Expanded the Leaflet Map container to `h-[720px]`.
+  - Docked the `PSHA Hazard Assistant` side-by-side with `min-h-[720px]` and scrolling message list.
+  - Added focused structure chip in the Assistant header (`ID {selectedFault.fault_id} · {selectedFault.name}`) and dynamic input placeholder when a fault is selected on the map.
+  - Removed unused components, imports, and state helpers (`GmpeCurve`, `FileText`, `PAPER_RESULTS`, `selectedPairings`, `askAboutFault`).
+
 ## Verification
 1. Tile generation confirmed across all 4 layers for Zooms 6–11 with zero black lines and zero white halos.
 2. Verified visual smoothness: zero pixelation, silky smooth gradient transitions, and seamless coastal anti-aliasing against dark canvas.
@@ -101,4 +113,5 @@ To ensure no paper annotations (titles, return period labels, colorbars, legends
 4. Basemap detachment in Hazard mode verified: zero tile clash or coastline mismatch.
 5. In Kinematics, Max Mw, and Slip rate modes: basemap correctly visible, hazard raster completely hidden.
 6. Table 2 links and Δ vs 2020 buttons, overlays, and lines verified completely removed from the map.
-7. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.
+7. Streamlined PSHA page verified: pure side-by-side layout of Map (`h-[720px]`) and LLM Chat Assistant (`h-[720px]`).
+8. Test suite: all 46 pytest unit tests passing; frontend TypeScript build passing with 0 errors.
