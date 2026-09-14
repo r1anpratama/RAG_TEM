@@ -79,7 +79,7 @@ const STARTER_PROMPTS = [
 ];
 
 const COLOR_MODES: { id: PshaColorMode; label: string }[] = [
-  { id: "structures", label: "Structures" },
+  { id: "structures", label: "Hazard" },
   { id: "kinematics", label: "Kinematics" },
   { id: "mw_max", label: "Max Mw" },
   { id: "slip_rate", label: "Slip rate" },

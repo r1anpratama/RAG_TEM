@@ -134,6 +134,8 @@ interface HazardControlPanelProps {
   onToggleStructures: () => void;
   showHillshade: boolean;
   onToggleHillshade: () => void;
+  coverBasemap?: boolean;
+  onToggleCoverBasemap?: () => void;
   /** null while probing, false when no tile answered. */
   tilesAvailable: boolean | null;
 }
@@ -147,6 +149,8 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
   onToggleStructures,
   showHillshade,
   onToggleHillshade,
+  coverBasemap,
+  onToggleCoverBasemap,
   tilesAvailable,
 }) => {
   const [open, setOpen] = useState<boolean>(true);
@@ -236,7 +240,7 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
           {/* Independent overlays */}
           <fieldset className="space-y-1 border-t border-slate-200/80 pt-2 dark:border-slate-800">
             <legend className="mb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Overlays
+              Overlays & Basemap
             </legend>
             <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-[11px] text-slate-700 transition hover:bg-slate-500/10 dark:text-slate-200">
               <input
@@ -245,7 +249,7 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
                 onChange={onToggleStructures}
                 className="h-3 w-3 accent-cyan-500"
               />
-              Seismogenic structures
+              Fault traces / structures
             </label>
             <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-[11px] text-slate-700 transition hover:bg-slate-500/10 dark:text-slate-200">
               <input
@@ -256,6 +260,17 @@ export const HazardControlPanel: React.FC<HazardControlPanelProps> = ({
               />
               Hillshade topography
             </label>
+            {onToggleCoverBasemap && (
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-[11px] text-slate-700 transition hover:bg-slate-500/10 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={coverBasemap ?? true}
+                  onChange={onToggleCoverBasemap}
+                  className="h-3 w-3 accent-cyan-500"
+                />
+                Cover Taiwan basemap
+              </label>
+            )}
           </fieldset>
 
           {/* Raster transparency */}

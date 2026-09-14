@@ -114,9 +114,11 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   const didFitRef = useRef<boolean>(false);
   const hillshadeRef = useRef<any>(null);
   const hazardRasterRef = useRef<any>(null);
+  const basemapMaskRef = useRef<any>(null);
 
   const [basemap, setBasemap] = useState<string>("dark");
   const [mapReady, setMapReady] = useState<boolean>(false);
+  const [coverBasemap, setCoverBasemap] = useState<boolean>(true);
   const [showPairings, setShowPairings] = useState<boolean>(true);
   const [showAreaSources, setShowAreaSources] = useState<boolean>(false);
   const [showDeltas, setShowDeltas] = useState<boolean>(true);
@@ -160,7 +162,8 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
         });
         L.control.zoom({ position: "topright" }).addTo(map);
 
-        // Stacking: basemap (tilePane 200) -> hillshade -> hazard raster -> vector overlays (400).
+        // Stacking: basemap (tilePane 200) -> basemap mask (220) -> hillshade (250) -> hazard raster (260) -> vector overlays (400).
+        map.createPane("basemapMaskPane").style.zIndex = "220";
         map.createPane("hillshadePane").style.zIndex = "250";
         map.createPane("hazardPane").style.zIndex = "260";
 
@@ -417,6 +420,41 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     hazardRasterRef.current?.setOpacity(hazardOpacity / 100);
   }, [hazardOpacity]);
 
+  // Mask Taiwan basemap under the hazard raster so no gray basemap land or labels clash with the hazard raster:
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!mapReady || !L || !map) return;
+
+    const oceanColor =
+      basemap === "carto" ? "#090909" : basemap === "dark" ? "#15181a" : "#0b0f19";
+
+    const TAIWAN_COVER_BOUNDS: [[number, number], [number, number]] = [
+      [21.60, 119.70],
+      [25.60, 122.35],
+    ];
+
+    if (!basemapMaskRef.current) {
+      basemapMaskRef.current = L.rectangle(TAIWAN_COVER_BOUNDS, {
+        pane: "basemapMaskPane",
+        stroke: false,
+        fillColor: oceanColor,
+        fillOpacity: 1.0,
+        interactive: false,
+      });
+    } else {
+      basemapMaskRef.current.setStyle({ fillColor: oceanColor });
+    }
+
+    const wantMask = coverBasemap && hazardOpacity > 0;
+    if (wantMask && !map.hasLayer(basemapMaskRef.current)) {
+      basemapMaskRef.current.addTo(map);
+    }
+    if (!wantMask && map.hasLayer(basemapMaskRef.current)) {
+      map.removeLayer(basemapMaskRef.current);
+    }
+  }, [mapReady, basemap, coverBasemap, hazardOpacity]);
+
   // Report whether the raster for the active layer actually exists on disk.
   useEffect(() => {
     let cancelled = false;
@@ -588,6 +626,8 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             onToggleStructures={() => setShowStructures((v) => !v)}
             showHillshade={showHillshade}
             onToggleHillshade={() => setShowHillshade((v) => !v)}
+            coverBasemap={coverBasemap}
+            onToggleCoverBasemap={() => setCoverBasemap((v) => !v)}
             tilesAvailable={tilesAvailable}
           />
         </div>
@@ -600,7 +640,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           >
             <div className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-100">
               <Info className="h-3 w-3 text-cyan-500" />
-              <span>Legend · {colorMode.replace("_", " ")}</span>
+              <span>Legend · {colorMode === "structures" ? "Hazard" : colorMode.replace("_", " ")}</span>
             </div>
             {legendOpen ? (
               <ChevronDown className="h-3.5 w-3.5 text-slate-400" />

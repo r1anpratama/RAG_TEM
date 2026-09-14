@@ -2,7 +2,10 @@ import os
 import math
 import numpy as np
 from PIL import Image
-from scipy.ndimage import map_coordinates, gaussian_filter, binary_fill_holes
+from scipy.ndimage import (
+    map_coordinates, gaussian_filter, binary_fill_holes, 
+    binary_dilation, binary_erosion, distance_transform_edt, label
+)
 
 SRC_IMG_PATH = 'data/fig13_full.png'
 im_src = Image.open(SRC_IMG_PATH)
@@ -21,17 +24,15 @@ panel_d_rgb = arr_src[1066:2129, 578:1156].copy()
 # Mean 475 and Median 475 in Hengchun Peninsula are identical (Mean-Median is 0.00 g).
 panel_b_rgb[945:1045, 160:275] = panel_a_rgb[945:1045, 160:275]
 
-def build_master_rgba(rgb, has_cb, has_legend):
+def build_master_rgba(rgb, has_cb, has_legend, is_diverging=False):
     h, w, _ = rgb.shape
     ya_grid, xa_grid = np.meshgrid(np.arange(h), np.arange(w), indexing='ij')
     
-    # 1. Base land mask from luminance:
+    # 1. Base luminance
     lum = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
-    alpha_raw = np.clip((249.0 - lum) / (249.0 - 240.0), 0.0, 1.0)
-    is_land_binary = lum < 246.0
     
     # 2. Exclude paper annotations from land:
-    # Northwest title & RP text (curved along the coastline without step notches):
+    # Northwest title & RP text:
     is_nw_title = (
         ((ya_grid < 50) & (xa_grid < 390)) |
         ((ya_grid >= 50) & (ya_grid < 76) & (xa_grid < 380)) |
@@ -39,7 +40,7 @@ def build_master_rgba(rgb, has_cb, has_legend):
         ((ya_grid >= 82) & (ya_grid < 140) & (xa_grid < 265)) |
         ((ya_grid >= 140) & (ya_grid < 210) & (xa_grid < 255))
     )
-    # Colorbar in the Pacific Ocean (xa >= 475 masks colorbar, numbers, and 0.0 arrow):
+    # Colorbar in the Pacific Ocean:
     is_cb = has_cb & (xa_grid >= 475) & (ya_grid >= 580)
     # Legend in Panel B (ocean southeast of Hengchun):
     is_leg = has_legend & (
@@ -49,35 +50,66 @@ def build_master_rgba(rgb, has_cb, has_legend):
     # Outer image margins:
     is_margin = (xa_grid < 15) | (xa_grid >= w - 10) | (ya_grid < 15) | (ya_grid >= h - 10)
     
-    is_excluded = is_nw_title | is_cb | is_leg | is_margin
-    is_land_clean = is_land_binary & (~is_excluded)
+    is_nonwhite = (lum < 246.0) & (~(is_nw_title | is_cb | is_leg | is_margin))
     
-    # Fill internal white gaps/fault contours inside the landmass:
-    is_land_filled = binary_fill_holes(is_land_clean)
+    # Bridge coastal fault cuts using morphological closing:
+    closed = binary_erosion(binary_dilation(is_nonwhite, iterations=3), iterations=3)
+    is_land_solid = binary_fill_holes(closed)
+    
+    # Clean offshore whisker lines, preserving mainland, Green Island, and Orchid Island:
+    lbl, num = label(is_land_solid)
+    sizes = np.bincount(lbl.ravel())
+    mainland_raw = (lbl == np.argmax(sizes[1:]) + 1)
+    mainland_opened = binary_dilation(binary_erosion(mainland_raw, iterations=2), iterations=2)
+    dist_to_opened = distance_transform_edt(~mainland_opened)
+    clean_mainland = mainland_raw & (dist_to_opened <= 3.5)
+    clean_mainland = binary_fill_holes(clean_mainland)
+    
+    islands = np.zeros_like(is_land_solid)
+    for i in range(1, num + 1):
+        if 15 < sizes[i] < 2000:
+            islands |= (lbl == i)
+    is_land_final = binary_fill_holes(clean_mainland | islands)
+    
+    # Inpainting: remove black fault lines and white borders, seamlessly matching surrounding hazard colors
+    if is_diverging:
+        is_defect = is_land_final & (lum < 75.0)
+    else:
+        is_defect = is_land_final & ((lum < 75.0) | (lum > 240.0))
+        
+    is_defect_dil = binary_dilation(is_defect, iterations=1) & is_land_final
+    is_valid = is_land_final & (~is_defect_dil)
+    
+    indices = distance_transform_edt(~is_valid, return_distances=False, return_indices=True)
+    rgb_clean = rgb.copy()
+    for c in range(3):
+        chan = rgb[:, :, c]
+        rgb_clean[:, :, c] = chan[tuple(indices)]
+        chan_sm = gaussian_filter(rgb_clean[:, :, c], sigma=0.8)
+        rgb_clean[is_defect_dil, c] = chan_sm[is_defect_dil]
     
     # Smooth alpha feathering at boundary:
-    alpha = np.where(is_land_filled, np.maximum(alpha_raw, 0.2), 0.0)
+    alpha = np.where(is_land_final, 1.0, 0.0)
     alpha_smooth = gaussian_filter(alpha, sigma=0.8)
     alpha_final = np.clip((alpha_smooth - 0.1) / 0.8, 0.0, 1.0)
     
     # De-matte white background from coastal edge pixels:
-    rgb_clean = rgb.copy()
     mask_blend = (alpha_final > 0) & (alpha_final < 1.0)
     a_val = alpha_final[mask_blend, None]
     rgb_clean[mask_blend] = np.clip(
-        (rgb[mask_blend] - (1.0 - a_val) * 255.0) / np.maximum(a_val, 0.1),
+        (rgb_clean[mask_blend] - (1.0 - a_val) * 255.0) / np.maximum(a_val, 0.1),
         0.0,
         255.0
     )
     
     return np.dstack([rgb_clean, alpha_final * 255.0]).astype(np.float32)
 
-print('Building master anti-aliased RGBA layers...')
+print('Building master anti-aliased, line-free RGBA layers...')
 MASTER_LAYERS = {
-    'mean_475': build_master_rgba(panel_a_rgb, True, False),
-    'median_475': build_master_rgba(panel_b_rgb, False, True),
-    'mean_minus_median_475': build_master_rgba(panel_c_rgb, True, False),
-    'median_2475': build_master_rgba(panel_d_rgb, True, False),
+    'mean_475': build_master_rgba(panel_a_rgb, True, False, False),
+    'median_475': build_master_rgba(panel_b_rgb, False, True, False),
+    'mean_minus_median_475': build_master_rgba(panel_c_rgb, True, False, True),
+    'median_2475': build_master_rgba(panel_d_rgb, True, False, False),
 }
 print('Master layers built successfully.')
 
