@@ -40,11 +40,6 @@ interface StarterPrompt {
 
 const STARTER_PROMPTS: StarterPrompt[] = [
   {
-    tag: "My Location",
-    title: "Seismic Hazard at My Current Location",
-    prompt: "How about the seismic hazard at my location?",
-  },
-  {
     tag: "Logic Tree",
     title: "Shanchiao Fault Slip Rate & Mw Uncertainty Treatment",
     prompt:
