@@ -31,12 +31,41 @@ const PshaHazardMap = dynamic(
   }
 );
 
-const STARTER_PROMPTS = [
-  "Which structures pair in TEM PSHA2025 Table 2?",
-  "Give me the full parameter card for fault ID 2.",
-  "What are the final hazard map results of TEM PSHA2025?",
-  "What are the GMPE logic tree weights for shallow crustal sources?",
-  "Which structures changed hazard compared with TEM PSHA2020?",
+interface StarterPrompt {
+  tag: string;
+  title: string;
+  prompt: string;
+}
+
+const STARTER_PROMPTS: StarterPrompt[] = [
+  {
+    tag: "Skenario A",
+    title: "Generator XML OpenQuake Sesar Shanchiao (ID 1-1)",
+    prompt:
+      "Buatkan potongan XML source model OpenQuake untuk Sesar Shanchiao (ID 1-1) dengan model rupture tunggal dan rupture gabungan sesuai TEM PSHA2025.",
+  },
+  {
+    tag: "Skenario B",
+    title: "Audit & Justifikasi Bobot GMM Shallow Crustal",
+    prompt:
+      "GMM apa saja yang dipakai untuk shallow crustal di Taiwan beserta bobotnya, dan apa dasar pemilihannya?",
+  },
+  {
+    tag: "Skenario C",
+    title: "Analisis Kenaikan Hazard PGA 475-th Hsinchu & Miaoli",
+    prompt:
+      "Mengapa estimasi hazard PGA 475 tahun di wilayah Hsinchu dan Miaoli mengalami kenaikan dibanding versi TEM PSHA2020?",
+  },
+  {
+    tag: "Tabel 2",
+    title: "Daftar Rupture Bersama (Multi-Structure Pairings)",
+    prompt: "Which structures pair in TEM PSHA2025 Table 2?",
+  },
+  {
+    tag: "Parameter",
+    title: "Kartu Parameter Deterministik Sesar ID 2",
+    prompt: "Give me the full parameter card for fault ID 2.",
+  },
 ];
 
 const COLOR_MODES: { id: PshaColorMode; label: string }[] = [
@@ -307,14 +336,21 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>Ask about the map</span>
                   </div>
-                  {STARTER_PROMPTS.map((prompt) => (
+                  {STARTER_PROMPTS.map((item) => (
                     <button
-                      key={prompt}
-                      onClick={() => sendMessage(prompt)}
-                      className="group flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 px-2.5 py-2 text-left text-[11px] text-slate-600 transition hover:border-cyan-500/40 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900"
+                      key={item.tag}
+                      onClick={() => sendMessage(item.prompt)}
+                      className="group flex w-full flex-col gap-1 rounded-lg border border-slate-200 p-2.5 text-left transition hover:border-cyan-500/40 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
                     >
-                      <span>{prompt}</span>
-                      <ArrowRight className="h-3 w-3 shrink-0 text-slate-400 transition group-hover:text-cyan-500" />
+                      <div className="flex items-center justify-between">
+                        <span className="rounded bg-cyan-500/10 px-1.5 py-0.5 text-[9px] font-bold text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400">
+                          {item.tag}
+                        </span>
+                        <ArrowRight className="h-3 w-3 shrink-0 text-slate-400 transition group-hover:text-cyan-500" />
+                      </div>
+                      <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200">
+                        {item.title}
+                      </span>
                     </button>
                   ))}
                 </div>
