@@ -197,8 +197,8 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             fillOpacity: 0,
           })
             .bindTooltip(
-              `<div style="font-family:sans-serif;font-size:11px;background:#111c2e;color:#f8fafc;border:1px solid ${AREA_SOURCE_COLOR};padding:7px 10px;border-radius:8px">
-                 <strong style="color:${AREA_SOURCE_COLOR}">Areal source zone ${source.id}</strong><br/>
+              `<div style="font-family:sans-serif;font-size:11px;background:#111c2e;color:#f8fafc;border:1px solid #38bdf8;padding:7px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.5)">
+                 <strong style="color:#38bdf8">Areal source zone ${source.id}</strong><br/>
                  ${
                    source.a_value === null || source.a_value === undefined
                      ? '<span style="color:#94a3b8">a-value not in the asset</span><br/>'
@@ -593,7 +593,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
         <div className="pointer-events-none absolute left-3 top-3 z-[1000] rounded-md border border-slate-300 bg-white/90 px-2.5 py-1 font-mono text-[10px] text-slate-600 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90 dark:text-slate-300">
           <Layers className="mr-1 inline h-3 w-3 text-cyan-500" />
-          TEM PSHA2025 · study radius 320 km
+          TEM PSHA2025
         </div>
       </div>
     </div>
