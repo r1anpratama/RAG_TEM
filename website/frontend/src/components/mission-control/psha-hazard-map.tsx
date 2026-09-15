@@ -444,7 +444,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
 
   const legendEntries =
     colorMode === "structures"
-      ? [{ color: STRUCTURE_COLOR, label: "Seismogenic structure (neutral)" }]
+      ? [{ color: STRUCTURE_COLOR, label: "Seismogenic structure" }]
       : colorMode === "kinematics"
       ? [
           { color: "#06b6d4", label: "Normal fault (N)" },

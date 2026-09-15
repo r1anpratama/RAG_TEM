@@ -272,9 +272,6 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
-          <span className="rounded border border-slate-300 px-2.5 py-1 text-slate-600 dark:border-slate-800 dark:text-slate-300">
-            320 km study radius
-          </span>
           <span className="rounded border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 font-bold text-cyan-600 dark:text-cyan-300">
             ε = 2 GMPE
           </span>
@@ -510,9 +507,6 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
                   </button>
                 )}
               </div>
-              <p className="mt-1.5 text-[9px] text-slate-400">
-                Answers cite the source record; ask “fault ID N”, “Table 2”, or “how about hazard di lokasi saya”.
-              </p>
             </form>
           </div>
         </div>
