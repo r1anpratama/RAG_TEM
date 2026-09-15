@@ -98,7 +98,7 @@ export const ControlHeader: React.FC<ControlHeaderProps> = ({
           }`}
         >
           <Bot className="h-3.5 w-3.5 text-cyan-400" />
-          <span>AI Copilot</span>
+          <span>AI Consultant</span>
           <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
         </button>
       </div>

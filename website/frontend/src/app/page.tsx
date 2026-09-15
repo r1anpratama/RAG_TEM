@@ -184,9 +184,9 @@ function DashboardContent() {
       case "eews":
         return "2. Earthquake Early Warning";
       case "psha":
-        return "3. TEM PSHA Hazard Evaluation";
+        return "3. TEM PSHA";
       case "copilot":
-        return "4. AI Geotechnical Copilot";
+        return "4. AI Consultant";
       default:
         return "RAG Dashboard";
     }

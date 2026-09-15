@@ -32,29 +32,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: "rag_arch",
       label: "RAG Architecture",
       icon: Cpu,
-      badge: "0.009ms",
       desc: "Dual-track reflex and deliberative pipeline",
+      notificationColor: "bg-cyan-500",
     },
     {
       id: "eews",
       label: "Earthquake Early Warning",
       icon: Activity,
-      badge: "Live",
       desc: "S-wave countdown and SCADA interlocks",
+      notificationColor: "bg-emerald-500",
     },
     {
       id: "psha",
-      label: "TEM PSHA Hazard",
+      label: "TEM PSHA",
       icon: Map,
-      badge: "38 Faults",
       desc: "38 fault GIS and GMPE attenuation",
+      notificationColor: "bg-amber-500",
     },
     {
       id: "copilot",
-      label: "AI Geotech Copilot",
+      label: "AI Consultant",
       icon: Bot,
-      badge: "SSE RAG",
-      desc: "Domain geotechnical copilot with citations",
+      desc: "Domain geotechnical consultant with citations",
+      notificationColor: "bg-cyan-500",
     },
   ];
 
@@ -120,25 +120,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }`}
                   >
                     <div className="flex items-center space-x-3 truncate">
-                      <Icon
-                        className={`h-4 w-4 shrink-0 ${
-                          isActive
-                            ? "text-cyan-600 dark:text-cyan-400"
-                            : "text-slate-400 dark:text-slate-400"
-                        }`}
-                      />
+                      <div className="relative">
+                        <Icon
+                          className={`h-4 w-4 shrink-0 ${
+                            isActive
+                              ? "text-cyan-600 dark:text-cyan-400"
+                              : "text-slate-400 dark:text-slate-400"
+                          }`}
+                        />
+                        {isCollapsed && (
+                          <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                            <span
+                              className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                isActive ? "bg-cyan-400" : item.notificationColor
+                              }`}
+                            />
+                            <span
+                              className={`relative inline-flex rounded-full h-2 w-2 ${
+                                isActive ? "bg-cyan-500" : item.notificationColor
+                              }`}
+                            />
+                          </span>
+                        )}
+                      </div>
                       {!isCollapsed && <span className="truncate">{item.label}</span>}
                     </div>
 
                     {!isCollapsed && (
-                      <span
-                        className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                          isActive
-                            ? "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30"
-                            : "bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800"
-                        }`}
-                      >
-                        {item.badge}
+                      <span className="relative flex h-2 w-2 shrink-0 mr-1" title="Notification alert">
+                        <span
+                          className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                            isActive ? "bg-cyan-400" : item.notificationColor
+                          }`}
+                        />
+                        <span
+                          className={`relative inline-flex rounded-full h-2 w-2 ${
+                            isActive ? "bg-cyan-500" : item.notificationColor
+                          }`}
+                        />
                       </span>
                     )}
                   </button>
