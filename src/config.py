@@ -9,7 +9,7 @@ DATA_DIR = BASE_DIR / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 WEBSITE_DIR = BASE_DIR / "website"
-ASSETS_DIR = BASE_DIR / "assets"
+ASSETS_DIR = RAW_DATA_DIR  # Canonical location for raw data assets
 
 # Ensure runtime directories exist
 PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)

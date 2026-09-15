@@ -20,6 +20,7 @@ Welcome to the central intelligence hub for the **RAG_TEM** project (Retrieval-A
 - Core user rules, Ponytail clean code methodology, and code hygiene principles.
 
 ### 2. [[2026-09-09_Project_Kickoff|01. Workflows & Daily Logs]]
+- **[[2026-09-15_Repository_Cleanup_and_Structure_Consolidation|2026-09-15: Repository Cleanup & Folder Structure Consolidation — Unified docs/ Second Brain]]**
 - **[[2026-09-14_TEM_PSHA_Hazard_Raster_Overlay|2026-09-14: TEM PSHA2025 Hazard Raster Overlay — High-Precision Georeferencing & XYZ Tile Pyramid]]**
 - **[[2026-09-14_Frontend_Typecheck_and_Build_Verification|2026-09-14: Frontend Typecheck, Dependencies, and Build Verification]]**
 - **[[2026-09-14_TEM_PSHA_Hazard_Console|2026-09-14: TEM PSHA2025 Hazard Console — Interactive Source Map + Docked Grounded Assistant]]**

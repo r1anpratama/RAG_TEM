@@ -3,7 +3,7 @@
 ## 1. Operating Rules & Core Principles
 1. **Obsidian Documentation**: All processes, architectural decisions, and experiments must be logged neatly in Obsidian. No unstructured or messy files.
 2. **Second Brain Alignment**: Treat Obsidian as the primary second brain. Read existing notes and designs before beginning any task.
-3. **Strict Hierarchy**: Adhere to structured folders (`00_Index/`, `01_Workflows/`, `02_Architecture/`, `src/`, `data/`, `tests/`).
+3. **Strict Hierarchy**: Adhere to clean standard folders (`docs/` for Obsidian Second Brain, `src/`, `data/`, `tests/`, `website/`). Zero clutter or loose files at root.
 4. **Ponytail Clean Code**: Write minimal, clean, safe, and efficient code following the Ponytail ladder.
 5. **English Standard**: 100% English for code, files, documentation, notes, and commit messages. Bahasa Indonesia is only for chat conversation.
 6. **Git Discipline**: Keep repository `https://github.com/r1anpratama/RAG_TEM.git` clean, follow Conventional Commits, ignore temporary and cache files.

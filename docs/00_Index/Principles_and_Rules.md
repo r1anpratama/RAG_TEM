@@ -17,7 +17,7 @@ This document defines the strict governance rules and clean code standards for *
 ## 1. Fundamental Project Rules
 1. **Document Every Process in Obsidian**: Every step, command outcome, and design change must be logged neatly here in Obsidian. No disorganized work.
 2. **Obsidian as Second Brain**: Always review these notes before undertaking any action or coding task.
-3. **Strict Hierarchy**: Zero clutter in directories. All code goes to `src/`, all tests to `tests/`, and all datasets to `data/`.
+3. **Strict Hierarchy**: Zero clutter in directories. All code goes to `src/`, all tests to `tests/`, all datasets to `data/`, and all second brain documentation to `docs/`.
 4. **Ponytail Clean Code**: The best code is the code that never had to be written. Eliminate over-engineering and premature abstraction.
 5. **100% English**: All code, docs, notes, commit messages, and PRs must be in English.
 6. **Git Discipline**: Atomic, clear commits following Conventional Commits format. Sync with [r1anpratama/RAG_TEM](https://github.com/r1anpratama/RAG_TEM.git).

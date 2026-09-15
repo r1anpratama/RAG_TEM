@@ -1,7 +1,7 @@
 """TEM PSHA2025 shallow areal source zones (area sources) for Taiwan.
 
 The source geometry lives in a plain coordinate asset
-(`assets/Coordinates-area_source.txt`) with one block per zone:
+(`data/raw/Coordinates-area_source.txt`) with one block per zone:
 
     > S01 [a-value]
     <longitude><TAB><latitude>
@@ -21,9 +21,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from src.config import ASSETS_DIR
+from src.config import RAW_DATA_DIR
 
-DEFAULT_AREA_SOURCE_PATH = ASSETS_DIR / "Coordinates-area_source.txt"
+DEFAULT_AREA_SOURCE_PATH = RAW_DATA_DIR / "Coordinates-area_source.txt"
 
 _LON_RANGE = (-180.0, 180.0)
 _LAT_RANGE = (-90.0, 90.0)

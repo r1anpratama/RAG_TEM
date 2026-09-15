@@ -7,7 +7,7 @@ from scipy.ndimage import (
     binary_dilation, binary_erosion, distance_transform_edt, label
 )
 
-SRC_IMG_PATH = 'data/fig13_full.png'
+SRC_IMG_PATH = 'data/raw/fig13_full.png'
 im_src = Image.open(SRC_IMG_PATH)
 arr_src = np.array(im_src, dtype=np.float32)
 H_SRC, W_SRC, _ = arr_src.shape

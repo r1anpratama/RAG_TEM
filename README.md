@@ -154,25 +154,26 @@ RAG_TEM/
 │       │   └── schemas/                # Pydantic v2 data models
 │       ├── tests/                      # FastAPI endpoint test suite (19 tests)
 │       └── requirements.txt            # Backend dependencies
-├── .agents/                            # Agent operational guidelines & rules
-├── 00_Index/                           # Obsidian Second Brain: Maps of Content (MOC)
-├── 01_Workflows/                       # Obsidian Second Brain: Daily engineering logs
-├── 02_Architecture/                    # Obsidian Second Brain: System designs & ADRs
-├── 03_Literature_and_Domain/           # Obsidian Second Brain: TEM PSHA & fault catalogs
-├── 04_Decisions_ADR/                   # Obsidian Second Brain: Architectural Decision Records
-├── data/
-│   ├── raw/                            # 38 Active Faults Excel, TEM PSHA 2025 PDF
-│   └── processed/                      # Extracted embeddings & JSON graph data
-├── docs/                               # Project specifications & documentation
+├── data/                               # Unified project data directory
+│   ├── raw/                            # 38 Active Faults, Area Source Coordinates, PSHA2025 PDF
+│   ├── processed/                      # Extracted simulation HDF5s & geo-alignments
+│   └── literature_search/              # ArXiv survey datasets & search utilities
+├── docs/                               # Project Documentation & Obsidian Second Brain
+│   ├── 00_Index/                       # Maps of Content (MOC) & Governance Rules
+│   ├── 01_Workflows/                   # Daily engineering logs & procedures
+│   ├── 02_Architecture/                # System designs & PRD
+│   ├── 03_Literature_Domain/           # TEM PSHA & fault catalogs domain notes
+│   ├── 04_Decisions_ADR/               # Architectural Decision Records (ADRs)
 │   ├── assets/qr_code_live.png         # Generated 300x300 QR code for live deployment
-│   └── PRD_SeismoAgent_TW.md           # Product Requirement Document
+│   └── licenses/                       # Literature search license attribution
+├── scripts/                            # Developer utility scripts (tile generation, chat tests)
 ├── src/                                # Python Core Simulation & ML Package
 │   ├── agents/                         # Seismic, Geotech, Structural, Safety Critic
 │   ├── api/                            # Core API endpoints & WebSocket triage
-│   ├── domain/                         # FaultCatalog, GeoGraph, GMPE logic trees
-│   ├── pipelines/                      # Ingestion, hybrid retrieval & simulation
-│   └── utils/                          # Geotechnical math & logging utilities
+│   ├── domain/                         # FaultCatalog, AreaSource, GeoGraph, GMPE logic trees
+│   └── pipelines/                      # Ingestion, hybrid retrieval & simulation
 ├── tests/                              # Core engine test suite (32 tests)
+├── .agents/                            # Agent operational guidelines & skills
 ├── AGENTS.md                           # AI Agent operating principles
 ├── README.md                           # Project documentation & public link
 └── requirements.txt                    # Root environment dependencies
@@ -184,8 +185,8 @@ RAG_TEM/
 
 This repository doubles as a fully linked **Obsidian Vault**. To explore the geotechnical second brain:
 1. Open the **Obsidian** desktop application.
-2. Select **Open folder as vault** and choose the `RAG_TEM` directory.
-3. Open `00_Index/Dashboard.md` to access the Map of Content (MOC) and research notes.
+2. Select **Open folder as vault** and choose either the `RAG_TEM` repository root or the `docs/` directory.
+3. Open `docs/00_Index/Dashboard.md` to access the Map of Content (MOC) and research notes.
 
 ---
 
