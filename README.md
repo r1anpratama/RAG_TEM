@@ -1,7 +1,6 @@
 # SeismoAgent-TW (RAG_TEM)
 
-> **Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency Triage in Taiwan**  
-> *National Central University (NCU Geophysics / E-DREaM Lab) × NVIDIA AI Technology Center (NVAITC)*
+> **Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency**  
 
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.136%2B-009688.svg)](https://fastapi.tiangolo.com/)
