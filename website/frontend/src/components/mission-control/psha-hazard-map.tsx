@@ -31,7 +31,7 @@ interface PshaHazardMapProps {
 }
 
 /** Areal source zones are an opt-in overlay; the map opens on the seismogenic structures. */
-const AREA_SOURCE_COLOR = "#84cc16";
+const AREA_SOURCE_COLOR = "#000000";
 
 /** Neutral structure traces, matching the hazard-map figures in the paper. */
 const STRUCTURE_COLOR = "#6b7280";
@@ -216,7 +216,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
               interactive: false,
               icon: L.divIcon({
                 className: "psha-area-a-label",
-                html: `<div style="font-family:monospace;font-size:11px;font-weight:800;color:${AREA_SOURCE_COLOR};text-shadow:0 0 3px #0b0f19,0 0 6px #0b0f19;pointer-events:none">${source.a_value}</div>`,
+                html: `<div style="font-family:monospace;font-size:11px;font-weight:800;color:${AREA_SOURCE_COLOR};text-shadow:0 0 3px #ffffff,0 0 6px #ffffff;pointer-events:none">${source.a_value}</div>`,
                 iconSize: [0, 0],
                 iconAnchor: [0, 0],
               }),
@@ -580,10 +580,9 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
               {showAreaSources && (
                 <div className="flex items-center space-x-2">
                   <span
-                    className="h-1.5 w-4 rounded border border-dashed"
-                    style={{ borderColor: AREA_SOURCE_COLOR }}
+                    className="h-1.5 w-4 rounded border border-dashed border-black bg-black dark:border-slate-400 dark:bg-black"
                   />
-                  <span className="text-lime-600 dark:text-lime-300">
+                  <span className="text-slate-900 dark:text-slate-200">
                     Areal source zone{areaSources.some((s) => s.a_value !== null) ? " (a-value)" : ""}
                   </span>
                 </div>
