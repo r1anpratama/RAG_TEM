@@ -1,7 +1,6 @@
-# SeismoAgent-TW (RAG_TEM)
+# RAG_TEM V0.1
 
 > **Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency Triage in Taiwan**  
-> *National Central University (NCU Geophysics / E-DREaM Lab) × Taiwan Earthquake Model (TEM PSHA2025)*
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-000000.svg?logo=vercel&logoColor=white)](https://rag-tem.vercel.app)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
