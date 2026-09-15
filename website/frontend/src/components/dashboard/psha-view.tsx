@@ -264,12 +264,11 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
             Probabilistic Seismic Hazard Analysis
           </span>
           <h2 className="text-base font-bold text-slate-900 dark:text-white">
-            TEM PSHA2025 Hazard Console — 38 on-land seismogenic structures
+            TEM PSHA2025 Hazard Console
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Gao et al. (2026), <em>Probabilistic Seismic Hazard Assessment for Taiwan: Updates and
-            Improvements in TEM PSHA2025</em> — sources, Table 2 coseismic pairings, and GMPE logic
-            tree, each trace clickable and every figure answerable in the assistant beside the map.
+            Improvements in TEM PSHA2025</em>
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
