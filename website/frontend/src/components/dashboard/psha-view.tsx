@@ -108,7 +108,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
 
     const content = lastMsg.content;
     const match =
-      content.match(/(?:Structure Name|Primary Seismogenic Threat|Nearest (?:Active|active) (?:Fault|fault|structure)|Nearest structure|Structure Profile|Structure ID|Fault ID)\s*[:*#\-]*\s*(?:ID\s*)?(\d{1,2})\b/i) ||
+      content.match(/(?:Structure Name|Primary Seismogenic Threat|Nearest (?:Active|active) (?:Fault|fault|structure)|Nearest structure|Structure Profile|Structure ID|Fault ID)[\s:*#\-_]*(?:ID\s*)?(\d{1,2})\b/i) ||
       content.match(/\bID\s*(\d{1,2})\s*-\s*[A-Z]/i) ||
       content.match(/\bfault ID\s*(\d{1,2})\b/i);
 
