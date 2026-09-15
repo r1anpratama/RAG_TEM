@@ -224,8 +224,8 @@ function DashboardContent() {
 
         {/* Page Content Container - Full screen width utilization */}
         <main className="flex-1 p-3 sm:p-5 lg:p-6 w-full">
-          {/* Top 4 KPI Summary Metric Cards - RAG Architecture and PSHA carry their own metrics */}
-          {activeTab !== "rag_arch" && activeTab !== "psha" && (
+          {/* Top 4 KPI Summary Metric Cards - only for Earthquake Early Warning simulation */}
+          {activeTab === "eews" && (
             <KpiMetrics scenario={selectedScenario} />
           )}
 

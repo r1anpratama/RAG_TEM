@@ -32,9 +32,8 @@ export const Header: React.FC<HeaderProps> = ({
   isSimulating,
   backendHealth,
 }) => {
-  // Scenario picker and wave trigger belong to the early-warning flow, not to the
-  // PSHA catalogue view, which is driven by the fault source data instead.
-  const showScenarioControls = activeTab !== "rag_arch" && activeTab !== "psha";
+  // Scenario picker and wave trigger belong exclusively to the early-warning simulation tab.
+  const showScenarioControls = activeTab === "eews";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0b0f19]/90 px-4 sm:px-6 backdrop-blur-xl transition-colors duration-200">
