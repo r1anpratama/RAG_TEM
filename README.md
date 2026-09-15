@@ -27,7 +27,7 @@ The platform is continuously built and deployed on Vercel with edge route handle
 
 ## 📌 Overview
 
-**SeismoAgent-TW** is a domain-specialized, physics-informed agentic system engineered for rapid probabilistic seismic hazard assessment (PSHA), active crustal fault cascading rupture prediction, and automated real-time emergency triage across Taiwan.
+**RAG_TEM V0.1** is a domain-specialized, physics-informed agentic system engineered for rapid probabilistic seismic hazard assessment (PSHA), active crustal fault cascading rupture prediction, and automated real-time emergency triage across Taiwan.
 
 Built upon authoritative ground-truth datasets from the **Taiwan Earthquake Model (TEM PSHA2025; Gao et al., 2026)**, the **38 Active On-Land Fault Catalogs**, and the **TT-SAM (Taiwan Transformer Shaking Alert Model)**, the system features:
 
