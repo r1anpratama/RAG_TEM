@@ -38,9 +38,8 @@ Built upon authoritative ground-truth datasets from the **Taiwan Earthquake Mode
    - **4 TEM PSHA2025 Hazard Rasters**: Fig. 13 rasters as radio-selected XYZ tiles — Mean ($475$-yr), Median ($475$-yr), Mean $-$ Median anomaly, and Median ($2475$-yr) — stacked over free Esri World Hillshade relief with a dynamic colorbar and opacity control.
    - **100% Free GIS Basemaps**: Seamless switching between Esri Dark Gray, Carto Dark Matter, Carto Voyager, and OpenStreetMap without external API keys.
 
-2. **AI-Pointed Structure Blinking Strobe & Radar Beacon**:
-   - **Hardware-Accelerated Strobe (`@keyframes psha-fault-strobe`)**: When a user inquires about hazard at a location or asks about a specific structure, the AI assistant identifies the primary threat, triggering a dynamic blinking effect on the map that pulses between Cyber Cyan (`#06b6d4`) and Coral Rose (`#f43f5e`) with glowing drop-shadows.
-   - **Radar Beacon Pointer**: Spawns an animated radar ping badge (`⚡ Target: ID {N} · {Name}`) at the midpoint of the fault trace.
+2. **AI-Pointed Structure Blinking Strobe & Camera Framing**:
+   - **Hardware-Accelerated Strobe (`@keyframes psha-fault-strobe`)**: When a user inquires about hazard at a location or asks about a specific structure, the AI assistant identifies the primary threat, triggering a dynamic blinking strobe on the active fault trace that pulses between Cyber Cyan (`#06b6d4`) and Coral Rose (`#f43f5e`) with glowing drop-shadows.
    - **Smart Camera Auto-Framing**: The map camera automatically executes smooth `flyToBounds` framing both the user's location pin and the target fault trace simultaneously.
 
 3. **Location-Aware Seismic Hazard Assessment**:

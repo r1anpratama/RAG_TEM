@@ -246,27 +246,6 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
             dashArray: neutral && !isBlinking ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
           });
 
-          // Beacon pointer for AI-targeted structure
-          if (isBlinking && f.coordinates.length > 0) {
-            const midIdx = Math.floor(f.coordinates.length / 2);
-            const midPt = f.coordinates[midIdx];
-            const beaconIcon = L.divIcon({
-              className: "psha-fault-beacon-wrapper",
-              html: `
-                <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);pointer-events:none;">
-                  <span class="psha-fault-beacon-ring" style="position:absolute;width:44px;height:44px;border-radius:50%;background:#f43f5e;opacity:0.85;"></span>
-                  <div style="display:flex;align-items:center;gap:6px;background:rgba(15,23,42,0.95);backdrop-filter:blur(6px);border:1.5px solid #f43f5e;box-shadow:0 0 18px rgba(244,63,94,0.75);padding:4px 9px;border-radius:9999px;white-space:nowrap;">
-                    <span style="width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 8px #ffffff;animation:pulse 1s infinite;"></span>
-                    <span style="color:#ffffff;font-family:monospace;font-size:10px;font-weight:700;">⚡ Target: ID ${f.fault_id} · ${f.name}</span>
-                  </div>
-                </div>
-              `,
-              iconSize: [0, 0],
-              iconAnchor: [0, 0],
-            });
-            L.marker(midPt, { icon: beaconIcon, zIndexOffset: 2500 }).addTo(faultLayer);
-          }
-
           polyline.bindTooltip(
             `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;border:1px solid ${
               isSelected ? "#38bdf8" : "#1e293b"
