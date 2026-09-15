@@ -1,6 +1,6 @@
 # RAG_TEM V0.1
 
-> **Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency Triage in Taiwan**  
+> **Multimodal Agentic RAG for Seismic Hazard & Real-Time Emergency**  
 
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Demo-000000.svg?logo=vercel&logoColor=white)](https://rag-tem.vercel.app)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
