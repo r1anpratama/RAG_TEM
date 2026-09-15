@@ -10,6 +10,7 @@ import { EEWSView } from "@/components/dashboard/eews-view";
 import { PSHAView } from "@/components/dashboard/psha-view";
 import { CopilotView } from "@/components/dashboard/copilot-view";
 import { Scenario, FaultTrace } from "@/types/triage";
+import { API_BASE_URL } from "@/lib/api";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -31,7 +32,7 @@ function DashboardContent() {
 
   // Load scenarios from FastAPI backend
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/triage/scenarios")
+    fetch(`${API_BASE_URL}/api/triage/scenarios`)
       .then((res) => res.json())
       .then((data) => {
         const scenarioList = Array.isArray(data) ? data : (data.scenarios || []);
@@ -142,7 +143,7 @@ function DashboardContent() {
 
   // Load 38 Fault Traces
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/triage/faults")
+    fetch(`${API_BASE_URL}/api/triage/faults`)
       .then((res) => res.json())
       .then((data) => {
         const faultList = Array.isArray(data) ? data : (data.faults || []);

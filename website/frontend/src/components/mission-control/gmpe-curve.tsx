@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { TrendingDown, ShieldCheck } from "lucide-react";
 import { GMPEPoint, GMPEResponse } from "@/types/triage";
+import { API_BASE_URL } from "@/lib/api";
 
 interface GmpeCurveProps {
   magnitude?: number;
@@ -18,7 +19,7 @@ export const GmpeCurve: React.FC<GmpeCurveProps> = ({
   const [data, setData] = useState<GMPEResponse | null>(null);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/gmpe?magnitude=${magnitude}`)
+    fetch(`${API_BASE_URL}/api/gmpe?magnitude=${magnitude}`)
       .then((res) => res.json())
       .then((d) => setData(d))
       .catch((err) => console.error("Failed to load GMPE data", err));
