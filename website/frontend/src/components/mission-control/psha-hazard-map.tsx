@@ -24,6 +24,7 @@ interface PshaHazardMapProps {
   areaSources: PshaAreaSource[];
   colorMode: PshaColorMode;
   selectedFaultId: number | null;
+  blinkingFaultId?: number | null;
   focusedPairingLabel: string | null;
   userLocation?: { lat: number; lon: number; label?: string } | null;
   onSelectFault: (fault: FaultTrace) => void;
@@ -79,6 +80,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
   areaSources,
   colorMode,
   selectedFaultId,
+  blinkingFaultId = null,
   focusedPairingLabel,
   userLocation,
   onSelectFault,
@@ -129,7 +131,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           minZoom: 6,
           maxZoom: 15,
           zoomControl: false,
-          preferCanvas: true,
+          preferCanvas: false,
         });
         L.control.zoom({ position: "topright" }).addTo(map);
 
@@ -228,18 +230,42 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
       // 1. Fault traces (the "Seismogenic structures" overlay).
       faultLayer.clearLayers();
       const drawTraces = !isHazardMode || showStructures;
-      if (drawTraces) {
+      if (drawTraces || blinkingFaultId) {
         faults.forEach((f) => {
           if (f.coordinates.length < 2) return;
           const isSelected = selectedFaultId === f.fault_id;
+          const isBlinking = blinkingFaultId === f.fault_id;
+          if (!drawTraces && !isBlinking) return;
           const neutral = isHazardMode;
 
           const polyline = L.polyline(f.coordinates, {
-            color: isSelected ? "#38bdf8" : traceColor(f, colorMode),
-            weight: isSelected ? 3 : neutral ? 1.5 : 2.6,
-            opacity: isSelected ? 1 : 0.9,
-            dashArray: neutral ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
+            color: isBlinking ? "#f43f5e" : isSelected ? "#38bdf8" : traceColor(f, colorMode),
+            weight: isBlinking ? 6 : isSelected ? 3.5 : neutral ? 1.5 : 2.6,
+            opacity: isBlinking ? 1 : isSelected ? 1 : 0.9,
+            className: isBlinking ? "psha-fault-blinking" : undefined,
+            dashArray: neutral && !isBlinking ? undefined : f.fault_type === "N" ? "5, 5" : undefined,
           });
+
+          // Beacon pointer for AI-targeted structure
+          if (isBlinking && f.coordinates.length > 0) {
+            const midIdx = Math.floor(f.coordinates.length / 2);
+            const midPt = f.coordinates[midIdx];
+            const beaconIcon = L.divIcon({
+              className: "psha-fault-beacon-wrapper",
+              html: `
+                <div style="position:relative;display:flex;align-items:center;justify-content:center;transform:translate(-50%,-50%);pointer-events:none;">
+                  <span class="psha-fault-beacon-ring" style="position:absolute;width:44px;height:44px;border-radius:50%;background:#f43f5e;opacity:0.85;"></span>
+                  <div style="display:flex;align-items:center;gap:6px;background:rgba(15,23,42,0.95);backdrop-filter:blur(6px);border:1.5px solid #f43f5e;box-shadow:0 0 18px rgba(244,63,94,0.75);padding:4px 9px;border-radius:9999px;white-space:nowrap;">
+                    <span style="width:8px;height:8px;border-radius:50%;background:#f43f5e;box-shadow:0 0 8px #ffffff;animation:pulse 1s infinite;"></span>
+                    <span style="color:#ffffff;font-family:monospace;font-size:10px;font-weight:700;">⚡ Target: ID ${f.fault_id} · ${f.name}</span>
+                  </div>
+                </div>
+              `,
+              iconSize: [0, 0],
+              iconAnchor: [0, 0],
+            });
+            L.marker(midPt, { icon: beaconIcon, zIndexOffset: 2500 }).addTo(faultLayer);
+          }
 
           polyline.bindTooltip(
             `<div style="font-family:sans-serif;color:#f8fafc;background:#111c2e;border:1px solid ${
@@ -255,6 +281,9 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
           );
           polyline.on("click", () => onSelectFault(f));
           polyline.addTo(faultLayer);
+          if (isBlinking) {
+            polyline.bringToFront();
+          }
         });
       }
 
@@ -278,6 +307,7 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     colorMode,
     isHazardMode,
     selectedFaultId,
+    blinkingFaultId,
     showAreaSources,
     showStructures,
     onSelectFault,
@@ -341,8 +371,38 @@ export const PshaHazardMap: React.FC<PshaHazardMapProps> = ({
     marker.addTo(userLayer);
     marker.openPopup();
 
-    map.flyTo([lat, lon], 11, { duration: 1.4 });
-  }, [mapReady, userLocation]);
+    if (!blinkingFaultId) {
+      map.flyTo([lat, lon], 11, { duration: 1.4 });
+    }
+  }, [mapReady, userLocation, blinkingFaultId]);
+
+  // --- Frame both user location and AI-pointed blinking structure -----------
+  useEffect(() => {
+    const L = leafletRef.current;
+    const map = mapRef.current;
+    if (!mapReady || !L || !map || !blinkingFaultId) return;
+
+    const targetFault = faults.find((f) => f.fault_id === blinkingFaultId);
+    if (!targetFault || targetFault.coordinates.length === 0) return;
+
+    if (userLocation) {
+      const allPts: [number, number][] = [
+        [userLocation.lat, userLocation.lon],
+        ...targetFault.coordinates,
+      ];
+      map.flyToBounds(L.latLngBounds(allPts), {
+        padding: [60, 60],
+        maxZoom: 13,
+        duration: 1.3,
+      });
+    } else {
+      map.flyToBounds(L.latLngBounds(targetFault.coordinates), {
+        padding: [50, 50],
+        maxZoom: 12,
+        duration: 1.3,
+      });
+    }
+  }, [mapReady, blinkingFaultId, userLocation, faults]);
 
   // --- Basemap layer lifecycle ----------------------------------------------
   // In Hazard mode, completely hide/detach the basemap so focus is 100% on the seismic hazard raster.

@@ -90,6 +90,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
   const [dataset, setDataset] = useState<PshaDataset | null>(null);
   const [colorMode, setColorMode] = useState<PshaColorMode>("structures");
   const [selectedFaultId, setSelectedFaultId] = useState<number | null>(2);
+  const [blinkingFaultId, setBlinkingFaultId] = useState<number | null>(null);
   const [focusedPairingLabel, setFocusedPairingLabel] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [query, setQuery] = useState<string>("");
@@ -98,6 +99,27 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
   const [isLocating, setIsLocating] = useState<boolean>(false);
 
   const { messages, isStreaming, error, sendMessage, stopStreaming, clearMessages } = useRagStream();
+
+  // Watch assistant messages to highlight and blink the target seismogenic structure
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.role !== "assistant" || !lastMsg.content) return;
+
+    const content = lastMsg.content;
+    const match =
+      content.match(/(?:Structure Name|Primary Seismogenic Threat|Nearest (?:Active|active) (?:Fault|fault|structure)|Nearest structure|Structure Profile|Structure ID|Fault ID)\s*[:*#\-]*\s*(?:ID\s*)?(\d{1,2})\b/i) ||
+      content.match(/\bID\s*(\d{1,2})\s*-\s*[A-Z]/i) ||
+      content.match(/\bfault ID\s*(\d{1,2})\b/i);
+
+    if (match) {
+      const id = parseInt(match[1], 10);
+      if (id >= 1 && id <= 38) {
+        setSelectedFaultId(id);
+        setBlinkingFaultId(id);
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/psha/dataset`)
@@ -131,12 +153,14 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
 
   const handleSelectFault = useCallback((fault: FaultTrace) => {
     setSelectedFaultId(fault.fault_id);
+    setBlinkingFaultId(null);
     setFocusedPairingLabel(null);
   }, []);
 
   const handleSelectPairing = useCallback((pairing: PshaPairing) => {
     setFocusedPairingLabel(pairing.pairing_label);
     setSelectedFaultId(pairing.fault_ids[0]);
+    setBlinkingFaultId(null);
   }, []);
 
   const handleRequestLocation = useCallback(
@@ -207,6 +231,28 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
       lowered.includes("around me") ||
       lowered.includes("my site") ||
       lowered.includes("where i am");
+
+    // If user provided coordinates in input, parse them and place user pin
+    const coordMatch = trimmed.match(
+      /(?:Coordinates:\s*|\(\s*)?([+-]?\d{1,2}(?:\.\d+)?)\s*,\s*([+-]?\d{1,3}(?:\.\d+)?)/i
+    );
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lon = parseFloat(coordMatch[2]);
+      if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+        setUserLocation({ lat, lon, label: "Your Query Location" });
+      }
+    }
+
+    // If query directly mentions a specific fault ID, highlight it immediately
+    const directFaultMatch = trimmed.match(/(?:fault|structure)\s+(?:id\s*)?(\d{1,2})\b/i);
+    if (directFaultMatch) {
+      const fid = parseInt(directFaultMatch[1], 10);
+      if (fid >= 1 && fid <= 38) {
+        setSelectedFaultId(fid);
+        setBlinkingFaultId(fid);
+      }
+    }
 
     // If asking about location without coordinates attached, trigger geolocation
     if (isLocationAsk && !trimmed.includes("Coordinates:") && !/\d{2}\.\d+/.test(trimmed)) {
@@ -384,6 +430,7 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
               areaSources={areaSources}
               colorMode={colorMode}
               selectedFaultId={selectedFaultId}
+              blinkingFaultId={blinkingFaultId}
               focusedPairingLabel={focusedPairingLabel}
               userLocation={userLocation}
               onSelectFault={handleSelectFault}
@@ -415,7 +462,10 @@ export const PSHAView: React.FC<PSHAViewProps> = ({ faults }) => {
                 </div>
               </div>
               <button
-                onClick={clearMessages}
+                onClick={() => {
+                  clearMessages();
+                  setBlinkingFaultId(null);
+                }}
                 className="rounded-lg border border-slate-200 p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:border-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
                 title="Clear conversation"
               >
